@@ -1,0 +1,5 @@
+# Keep LF everywhere (Docker images and shell entrypoints break on CRLF); binaries untouched.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

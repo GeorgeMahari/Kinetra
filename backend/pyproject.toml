@@ -1,0 +1,62 @@
+[project]
+name = "kinetra-api"
+version = "0.1.0"
+description = "Kinetra physical wellness assessment platform â€” API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.162,<1.0",
+    "uvicorn[standard]>=0.54,<1.0",
+    "pydantic>=2.14,<3.0",
+    "pydantic-settings>=2.16,<3.0",
+    "sqlalchemy>=2.1,<2.2",
+    "alembic>=1.20,<2.0",
+    "psycopg[binary]>=3.3,<4.0",
+    "argon2-cffi>=25.1,<26",
+    "pyjwt>=2.15,<3",
+    "email-validator>=2.3,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.2,<10",
+    "httpx2>=2.16,<3.0",
+    "ruff>=0.14",
+    "mypy>=1.18",
+]
+
+[build-system]
+requires = ["setuptools>=84.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["db: tests that need a running PostgreSQL database"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test fixtures use literal passwords/tokens and SQL over fixed table names by design.
+"tests/**" = ["S105", "S106", "S608", "E501"]
+
+[tool.ruff.lint.isort]
+# The local `alembic/` migrations folder must not make the alembic package look first-party.
+known-third-party = ["alembic"]
+known-first-party = ["app", "tests"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.Header"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]

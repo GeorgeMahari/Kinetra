@@ -1,0 +1,43 @@
+# Local development services.
+# The password comes ONLY from the POSTGRES_PASSWORD environment variable — never a file.
+services:
+  db:
+    image: postgres:18.1-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kinetra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set the POSTGRES_PASSWORD environment variable}
+      POSTGRES_DB: ${POSTGRES_DB:-kinetra}
+    ports:
+      # 5433 on the host avoids clashing with any locally installed PostgreSQL.
+      # Bound to 127.0.0.1: not reachable from other machines on the network.
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      # Named volume: data survives container restarts and `docker compose down`
+      # (only `docker compose down -v` deletes it).
+      - kinetra_pgdata:/var/lib/postgresql
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KINETRA_DB_HOST: db
+      KINETRA_DB_PORT: "5432"
+      KINETRA_DB_USER: ${POSTGRES_USER:-kinetra}
+      KINETRA_DB_NAME: ${POSTGRES_DB:-kinetra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set the POSTGRES_PASSWORD environment variable}
+      KINETRA_ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:8000:8000"
+    profiles: ["full"]
+
+volumes:
+  kinetra_pgdata:

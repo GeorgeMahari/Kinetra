@@ -1,0 +1,341 @@
+import logging
+from datetime import UTC, datetime
+from typing import TypedDict
+
+from fastapi import status
+from sqlalchemy import delete, select
+from sqlalchemy.orm import Session
+
+from app.core.errors import AppError
+from app.modules.onboarding import rules
+from app.modules.onboarding.models import (
+    ActivityProfile,
+    ActivityProfileSport,
+    OnboardingState,
+    ReadinessScreening,
+    Sport,
+    UserGoal,
+)
+from app.modules.onboarding.schemas import (
+    ActivityAnswers,
+    DimensionPriorityOut,
+    DraftUpdate,
+    FollowUpQuestionOut,
+    OnboardingAnswers,
+    OnboardingStatus,
+    OnboardingSummary,
+    ReadinessOut,
+    SportOut,
+)
+from app.modules.onboarding.vocab import (
+    ActivityLevel,
+    Goal,
+    IntensityCeiling,
+    MobilityPractice,
+    ReadinessQuestion,
+    ReadinessResult,
+    SportCategory,
+)
+from app.modules.users.models import User
+from app.shared.age import age_on
+
+logger = logging.getLogger(__name__)
+
+
+def list_sports(db: Session) -> list[SportOut]:
+    rows = db.scalars(select(Sport).where(Sport.is_active).order_by(Sport.sort_order)).all()
+    return [SportOut(code=s.code, category=SportCategory(s.category)) for s in rows]
+
+
+def _user_age(user: User) -> int | None:
+    dob = user.profile.date_of_birth if user.profile else None
+    return age_on(dob, datetime.now(UTC).date()) if dob else None
+
+
+def _categories(db: Session, activity: ActivityAnswers) -> frozenset[SportCategory]:
+    codes = [s.code for s in activity.sports]
+    if not codes:
+        return frozenset()
+    rows = db.execute(select(Sport.code, Sport.category).where(Sport.code.in_(codes), Sport.is_active)).all()
+    found = {code: cat for code, cat in rows}
+    unknown = sorted(set(codes) - set(found))
+    if unknown:
+        raise AppError(
+            "validation_error",
+            "Unknown sport.",
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            [{"field": "activity.sports", "type": "unknown_sport", "message": ", ".join(unknown)}],
+        )
+    # Sports practised 0 times a week don't count as current practice.
+    active = {s.code for s in activity.sports if s.sessions_per_week > 0}
+    return frozenset(SportCategory(found[c]) for c in active)
+
+
+def _facts(db: Session, user: User, activity: ActivityAnswers) -> rules.ActivityFacts:
+    return rules.ActivityFacts(
+        activity_level=activity.activity_level,
+        exercise_sessions_per_week=activity.exercise_sessions_per_week,
+        sport_categories=_categories(db, activity),
+        age=_user_age(user),
+    )
+
+
+def follow_up_questions(db: Session, user: User, activity: ActivityAnswers) -> list[FollowUpQuestionOut]:
+    return [
+        FollowUpQuestionOut(code=q.code, reason=q.reason)
+        for q in rules.follow_up_questions(_facts(db, user, activity))
+    ]
+
+
+def get_status(db: Session, user: User) -> OnboardingStatus:
+    state = db.get(OnboardingState, user.id)
+    if state is None:
+        return OnboardingStatus(status="not_started", step=0, draft={}, completed_at=None)
+    return OnboardingStatus(
+        status="completed" if state.completed_at else "in_progress",
+        step=state.step,
+        draft=state.draft,
+        completed_at=state.completed_at,
+    )
+
+
+def save_draft(db: Session, user: User, data: DraftUpdate) -> OnboardingStatus:
+    state = db.get(OnboardingState, user.id)
+    if state is None:
+        state = OnboardingState(user_id=user.id, step=data.step, draft=data.answers)
+        db.add(state)
+    else:
+        state.step = data.step
+        state.draft = data.answers
+    db.flush()
+    return get_status(db, user)
+
+
+def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingSummary:
+    """Writes one consistent snapshot: goals, activity profile, readiness screening, completion."""
+    _categories(db, answers.activity)  # rejects unknown or inactive sport codes before writing
+    outcome = rules.screen_readiness(
+        answers.readiness, answers.activity.activity_level, answers.activity.exercise_sessions_per_week
+    )
+    fu = answers.follow_ups
+    a = answers.activity
+
+    db.execute(delete(UserGoal).where(UserGoal.user_id == user.id))
+    db.add_all(UserGoal(user_id=user.id, goal=g.value) for g in answers.goals)
+
+    profile = ActivityProfile(
+        user_id=user.id,
+        source="onboarding",
+        activity_level=a.activity_level.value,
+        exercise_sessions_per_week=a.exercise_sessions_per_week,
+        typical_session_minutes=a.typical_session_minutes,
+        training_experience=a.training_experience.value,
+        strength_sessions_per_week=fu.strength_sessions_per_week,
+        cardio_sessions_per_week=fu.cardio_sessions_per_week,
+        mobility_practice=fu.mobility_practice.value if fu.mobility_practice else None,
+        stairs_tolerance=fu.stairs_tolerance.value if fu.stairs_tolerance else None,
+        floor_rise=fu.floor_rise.value if fu.floor_rise else None,
+        sleep_hours=fu.sleep_hours,
+        sleep_quality=fu.sleep_quality.value if fu.sleep_quality else None,
+        rules_version=rules.RULES_VERSION,
+        sports=[
+            ActivityProfileSport(sport_code=s.code, sessions_per_week=s.sessions_per_week) for s in a.sports
+        ],
+    )
+    db.add(profile)
+    db.add(
+        ReadinessScreening(
+            user_id=user.id,
+            version=rules.SCREENING_VERSION,
+            answers={q.value: v for q, v in answers.readiness.items()},
+            result=outcome.result.value,
+            intensity_ceiling=outcome.intensity_ceiling.value,
+        )
+    )
+
+    state = db.get(OnboardingState, user.id)
+    now = datetime.now(UTC)
+    if state is None:
+        state = OnboardingState(user_id=user.id, step=0, draft={})
+        db.add(state)
+    state.completed_at = state.completed_at or now
+    state.draft = {}
+    db.flush()
+    logger.info("Onboarding completed user=%s readiness=%s", user.id, outcome.result)
+    return get_summary(db, user)
+
+
+def _latest_profile(db: Session, user: User) -> ActivityProfile | None:
+    return db.scalars(
+        select(ActivityProfile)
+        .where(ActivityProfile.user_id == user.id)
+        .order_by(ActivityProfile.recorded_at.desc(), ActivityProfile.id.desc())
+        .limit(1)
+    ).first()
+
+
+def _latest_screening(db: Session, user: User) -> ReadinessScreening | None:
+    return db.scalars(
+        select(ReadinessScreening)
+        .where(ReadinessScreening.user_id == user.id)
+        .order_by(ReadinessScreening.answered_at.desc(), ReadinessScreening.id.desc())
+        .limit(1)
+    ).first()
+
+
+def get_summary(db: Session, user: User) -> OnboardingSummary:
+    state = db.get(OnboardingState, user.id)
+    if state is None or state.completed_at is None:
+        raise AppError(
+            "onboarding_incomplete", "Onboarding has not been completed.", status.HTTP_404_NOT_FOUND
+        )
+
+    goals = [Goal(g) for g in db.scalars(select(UserGoal.goal).where(UserGoal.user_id == user.id)).all()]
+    profile = _latest_profile(db, user)
+    screening = _latest_screening(db, user)
+
+    priorities: list[DimensionPriorityOut] = []
+    if profile is not None:
+        cats = frozenset(
+            SportCategory(c)
+            for c in db.scalars(
+                select(Sport.category)
+                .join(ActivityProfileSport, ActivityProfileSport.sport_code == Sport.code)
+                .where(
+                    ActivityProfileSport.profile_id == profile.id, ActivityProfileSport.sessions_per_week > 0
+                )
+            ).all()
+        )
+        facts = rules.ActivityFacts(
+            activity_level=ActivityLevel(profile.activity_level),
+            exercise_sessions_per_week=profile.exercise_sessions_per_week,
+            sport_categories=cats,
+            age=_user_age(user),
+            strength_sessions_per_week=profile.strength_sessions_per_week,
+            cardio_sessions_per_week=profile.cardio_sessions_per_week,
+            mobility_practice=MobilityPractice(profile.mobility_practice)
+            if profile.mobility_practice
+            else None,
+        )
+        priorities = [
+            DimensionPriorityOut(dimension=p.dimension, score=p.score, reasons=list(p.reasons))
+            for p in rules.dimension_priorities(goals, facts)
+        ]
+
+    readiness = None
+    if screening is not None and profile is not None:
+        outcome = rules.screen_readiness(
+            {ReadinessQuestion(k): v for k, v in screening.answers.items()},
+            ActivityLevel(profile.activity_level),
+            profile.exercise_sessions_per_week,
+        )
+        readiness = ReadinessOut(
+            result=ReadinessResult(screening.result),
+            intensity_ceiling=IntensityCeiling(screening.intensity_ceiling),
+            reasons=list(outcome.reasons),
+            answered_at=screening.answered_at,
+        )
+
+    return OnboardingSummary(
+        completed_at=state.completed_at,
+        goals=goals,
+        readiness=readiness,
+        priorities=priorities,
+        rules_version=rules.RULES_VERSION,
+    )
+
+
+def export_data(db: Session, user: User) -> dict[str, object]:
+    profiles = db.scalars(
+        select(ActivityProfile)
+        .where(ActivityProfile.user_id == user.id)
+        .order_by(ActivityProfile.recorded_at)
+    ).all()
+    screenings = db.scalars(
+        select(ReadinessScreening)
+        .where(ReadinessScreening.user_id == user.id)
+        .order_by(ReadinessScreening.answered_at)
+    ).all()
+    goals = db.scalars(select(UserGoal.goal).where(UserGoal.user_id == user.id)).all()
+    state = db.get(OnboardingState, user.id)
+    return {
+        "goals": list(goals),
+        "activity_profiles": [
+            {
+                "recorded_at": p.recorded_at.isoformat(),
+                "activity_level": p.activity_level,
+                "exercise_sessions_per_week": p.exercise_sessions_per_week,
+                "typical_session_minutes": p.typical_session_minutes,
+                "training_experience": p.training_experience,
+                "sports": [
+                    {"code": s.sport_code, "sessions_per_week": s.sessions_per_week} for s in p.sports
+                ],
+                "strength_sessions_per_week": p.strength_sessions_per_week,
+                "cardio_sessions_per_week": p.cardio_sessions_per_week,
+                "mobility_practice": p.mobility_practice,
+                "stairs_tolerance": p.stairs_tolerance,
+                "floor_rise": p.floor_rise,
+                "sleep_hours": float(p.sleep_hours) if p.sleep_hours is not None else None,
+                "sleep_quality": p.sleep_quality,
+            }
+            for p in profiles
+        ],
+        "readiness_screenings": [
+            {
+                "answered_at": s.answered_at.isoformat(),
+                "version": s.version,
+                "answers": s.answers,
+                "result": s.result,
+                "intensity_ceiling": s.intensity_ceiling,
+            }
+            for s in screenings
+        ],
+        "onboarding": {
+            "step": state.step,
+            "completed_at": state.completed_at.isoformat() if state.completed_at else None,
+            "draft": state.draft,
+        }
+        if state
+        else None,
+    }
+
+
+def latest_intensity_ceiling(db: Session, user: User) -> IntensityCeiling | None:
+    """The test-intensity ceiling from the most recent safety screening; None if never screened."""
+    s = _latest_screening(db, user)
+    return IntensityCeiling(s.intensity_ceiling) if s else None
+
+
+def has_reported_lifestyle(db: Session, user: User) -> bool:
+    """True when the latest activity profile contains self-reported sleep information."""
+    p = _latest_profile(db, user)
+    return bool(p and (p.sleep_hours is not None or p.sleep_quality is not None))
+
+
+class ActivitySnapshot(TypedDict):
+    exercise_sessions_per_week: int
+    typical_session_minutes: int | None
+    strength_sessions_per_week: int | None
+    practises_strength_sport: bool
+    sleep_hours: float | None
+
+
+def latest_activity_snapshot(db: Session, user: User) -> ActivitySnapshot | None:
+    """Self-reported activity facts from the latest profile, for recommendation rules."""
+    p = _latest_profile(db, user)
+    if p is None:
+        return None
+    categories = set(
+        db.scalars(
+            select(Sport.category)
+            .join(ActivityProfileSport, ActivityProfileSport.sport_code == Sport.code)
+            .where(ActivityProfileSport.profile_id == p.id, ActivityProfileSport.sessions_per_week > 0)
+        ).all()
+    )
+    return {
+        "exercise_sessions_per_week": p.exercise_sessions_per_week,
+        "typical_session_minutes": p.typical_session_minutes,
+        "strength_sessions_per_week": p.strength_sessions_per_week,
+        "practises_strength_sport": bool(categories & {"strength", "mixed"}),
+        "sleep_hours": float(p.sleep_hours) if p.sleep_hours is not None else None,
+    }

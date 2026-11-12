@@ -1,0 +1,172 @@
+/**
+ * Single-series line chart (react-native-svg).
+ *
+ * Follows the dataviz rules: one y-axis, recessive hairline grid, 2px line, >=8px markers with a
+ * 2px surface ring, the value labelled only at the latest point, and every value reachable
+ * without hover (tap a point, or use the table view rendered by the caller).
+ * One series → no legend; the card title names what is plotted.
+ */
+import { useMemo, useState } from 'react';
+import { Platform, Pressable, View, type LayoutChangeEvent } from 'react-native';
+import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
+
+import { AppText } from '@/components/AppText';
+import { useTheme } from '@/theme/ThemeProvider';
+
+export interface ChartPoint {
+  id: string;
+  date: Date;
+  value: number;
+}
+
+const HEIGHT = 160;
+const PAD = { top: 26, right: 12, bottom: 22 };
+/** SVG text defaults to a serif face on web; use the same system sans as the rest of the UI. */
+const FONT = Platform.OS === 'web' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : undefined;
+const CHAR_W = 6.5; // approx. width of an 11px digit, for sizing the y-axis gutter
+
+/** Clean tick values spanning [min, max]. Pure, exported for tests. */
+export function niceTicks(min: number, max: number, count = 3): number[] {
+  if (min === max) {
+    const pad = Math.abs(min) * 0.1 || 1;
+    min -= pad;
+    max += pad;
+  }
+  const raw = (max - min) / (count - 1);
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) ?? raw;
+  const start = Math.floor(min / step) * step;
+  const ticks: number[] = [];
+  for (let v = start; v <= max + step * 0.5; v += step) ticks.push(Number(v.toFixed(6)));
+  if (ticks[ticks.length - 1]! < max) ticks.push(ticks[ticks.length - 1]! + step);
+  return ticks;
+}
+
+export function LineChart({
+  points,
+  format,
+  formatTick,
+  formatDate,
+  accessibilityLabel,
+}: {
+  points: ChartPoint[];
+  /** Full value with unit (tooltip, end label). */
+  format: (v: number) => string;
+  /** Axis tick, number only: the unit is in the card title. */
+  formatTick: (v: number) => string;
+  formatDate: (d: Date) => string;
+  accessibilityLabel: string;
+}) {
+  const { colors, spacing, radius } = useTheme();
+  const [width, setWidth] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const geo = useMemo(() => {
+    if (!width || points.length === 0) return null;
+    const values = points.map((p) => p.value);
+    const ticks = niceTicks(Math.min(...values), Math.max(...values));
+    const lo = ticks[0]!;
+    const hi = ticks[ticks.length - 1]!;
+    const left = 8 + Math.max(...ticks.map((tk) => formatTick(tk).length)) * CHAR_W;
+    const t0 = points[0]!.date.getTime();
+    const t1 = points[points.length - 1]!.date.getTime();
+    const plotW = width - left - PAD.right;
+    const plotH = HEIGHT - PAD.top - PAD.bottom;
+    const x = (d: Date) => left + (t1 === t0 ? plotW / 2 : ((d.getTime() - t0) / (t1 - t0)) * plotW);
+    const y = (v: number) => PAD.top + plotH - ((v - lo) / (hi - lo)) * plotH;
+    const xy = points.map((p) => ({ ...p, cx: x(p.date), cy: y(p.value) }));
+    const path = xy.map((p, i) => `${i ? 'L' : 'M'}${p.cx.toFixed(1)},${p.cy.toFixed(1)}`).join(' ');
+    return { ticks, y, xy, path, left };
+  }, [width, points, formatTick]);
+
+  const sel = geo?.xy.find((p) => p.id === selected);
+  const last = geo?.xy[geo.xy.length - 1];
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={accessibilityLabel}
+      onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
+      style={{ width: '100%', height: HEIGHT }}
+      testID="line-chart"
+    >
+      {geo ? (
+        <>
+          <Svg width={width} height={HEIGHT}>
+            {geo.ticks.map((tk) => (
+              <Line key={`g${tk}`} x1={geo.left} x2={width - PAD.right} y1={geo.y(tk)} y2={geo.y(tk)}
+                stroke={colors.border} strokeWidth={1} />
+            ))}
+            {geo.ticks.map((tk) => (
+              <SvgText fontFamily={FONT} key={`t${tk}`} x={geo.left - 6} y={geo.y(tk) + 4} fontSize={11} fill={colors.textMuted}
+                textAnchor="end">
+                {formatTick(tk)}
+              </SvgText>
+            ))}
+            <SvgText fontFamily={FONT} x={geo.left} y={HEIGHT - 4} fontSize={11} fill={colors.textMuted}>
+              {formatDate(points[0]!.date)}
+            </SvgText>
+            {points.length > 1 ? (
+              <SvgText fontFamily={FONT} x={width - PAD.right} y={HEIGHT - 4} fontSize={11} fill={colors.textMuted} textAnchor="end">
+                {formatDate(points[points.length - 1]!.date)}
+              </SvgText>
+            ) : null}
+            {geo.xy.length > 1 ? (
+              <Path d={geo.path} stroke={colors.brand} strokeWidth={2} fill="none" strokeLinejoin="round"
+                strokeLinecap="round" />
+            ) : null}
+            {sel ? (
+              <Line x1={sel.cx} x2={sel.cx} y1={PAD.top} y2={HEIGHT - PAD.bottom} stroke={colors.textMuted}
+                strokeWidth={1} />
+            ) : null}
+            {geo.xy.map((p) => (
+              <Circle key={p.id} cx={p.cx} cy={p.cy} r={p.id === selected ? 6 : 4} fill={colors.brand}
+                stroke={colors.surface} strokeWidth={2} />
+            ))}
+            {last ? (
+              // End label above the last point, right-aligned to it, so it never leaves the plot.
+              <SvgText fontFamily={FONT} x={last.cx} y={last.cy - 10} fontSize={12} fontWeight="600" fill={colors.text}
+                textAnchor="end">
+                {format(last.value)}
+              </SvgText>
+            ) : null}
+          </Svg>
+          {/* Hit targets: >= 32px, larger than the 8px marks. */}
+          {geo.xy.map((p) => (
+            <Pressable
+              key={`hit-${p.id}`}
+              testID={`point-${p.id}`}
+              accessibilityRole="button"
+              accessibilityLabel={`${formatDate(p.date)}: ${format(p.value)}`}
+              onPress={() => setSelected((s) => (s === p.id ? null : p.id))}
+              style={{ position: 'absolute', left: p.cx - 16, top: p.cy - 16, width: 32, height: 32 }}
+            />
+          ))}
+          {sel ? (
+            <View
+              testID="chart-tooltip"
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: Math.min(Math.max(sel.cx - 60, 0), width - 120),
+                width: 120,
+                paddingVertical: spacing.xs,
+                paddingHorizontal: spacing.sm,
+                borderRadius: radius.sm,
+                backgroundColor: colors.surfaceRaised,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <AppText variant="caption" color="textMuted">
+                {formatDate(sel.date)}
+              </AppText>
+              <AppText variant="label">{format(sel.value)}</AppText>
+            </View>
+          ) : null}
+        </>
+      ) : null}
+    </View>
+  );
+}

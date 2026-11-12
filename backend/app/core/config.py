@@ -1,0 +1,72 @@
+"""Application configuration, loaded from environment variables (and an optional .env file).
+
+The database password is never stored in a file: it is read from the POSTGRES_PASSWORD
+environment variable (the same variable docker compose passes to the container), and the
+connection URL is assembled at runtime.
+"""
+
+import secrets
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import AliasChoices, Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="KINETRA_", extra="ignore", case_sensitive=False
+    )
+
+    environment: Literal["development", "test", "production"] = "development"
+    log_level: str = "INFO"
+
+    db_host: str = "127.0.0.1"
+    db_port: int = 5433
+    db_user: str = "kinetra"
+    db_name: str = "kinetra"
+    test_db_name: str = "kinetra_test"
+    db_password: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias=AliasChoices("POSTGRES_PASSWORD", "KINETRA_DB_PASSWORD"),
+    )
+
+    # Origins allowed to call the API from a browser (Expo web dev server).
+    cors_origins: list[str] = ["http://localhost:8081"]
+
+    api_prefix: str = "/api/v1"
+
+    # --- Authentication
+    # Signing key for access tokens. Read from the KINETRA_JWT_SECRET environment variable only.
+    # In development/test, a random key is generated at startup when it is missing (tokens
+    # then stop working after a restart; the app transparently asks the user to sign in again).
+    jwt_secret: SecretStr = SecretStr("")
+    access_token_minutes: int = 15
+    refresh_token_days: int = 30
+    # Minimum age to register without a parental-consent flow (GDPR Art. 8 default is 16).
+    min_registration_age: int = 16
+    # Login attempts allowed per email+IP within the window before HTTP 429.
+    login_rate_limit_attempts: int = 10
+    login_rate_limit_window_seconds: int = 300
+
+    def model_post_init(self, __context: object) -> None:
+        if not self.jwt_secret.get_secret_value():
+            if self.environment == "production":
+                raise ValueError("KINETRA_JWT_SECRET must be set in production")
+            self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
+
+    def database_url(self, *, test: bool = False) -> URL:
+        return URL.create(
+            "postgresql+psycopg",
+            username=self.db_user,
+            password=self.db_password.get_secret_value() or None,
+            host=self.db_host,
+            port=self.db_port,
+            database=self.test_db_name if test else self.db_name,
+        )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
