@@ -25,6 +25,12 @@ export default function SignIn() {
         </View>
         {/* On success the protected stack swaps to the signed-in screens automatically. */}
         <SignInForm onSubmit={signIn} />
+        <Button
+          testID="forgot-link"
+          variant="ghost"
+          label={t('auth.forgotLink')}
+          onPress={() => router.push('/forgot-password')}
+        />
         <Button variant="ghost" label={t('auth.noAccount')} onPress={() => router.replace('/sign-up')} />
       </View>
     </Screen>

@@ -65,7 +65,7 @@ def api(migrated_engine: Engine) -> Iterator[TestClient]:
     with migrated_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE users, user_profiles, refresh_tokens, user_goals, activity_profiles, activity_profile_sports, readiness_screenings, onboarding_states, test_results, measurements, activity_checkins, user_achievements CASCADE"
+                "TRUNCATE users, user_profiles, refresh_tokens, user_goals, activity_profiles, activity_profile_sports, readiness_screenings, onboarding_states, test_results, measurements, activity_checkins, user_achievements, auth_codes CASCADE"
             )
         )
     get_login_limiter().reset()

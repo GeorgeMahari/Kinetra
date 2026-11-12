@@ -21,6 +21,8 @@ export interface AuthContextValue {
   updateProfile(update: ProfileUpdate): Promise<Me>;
   setLanguage(language: Language): Promise<void>;
   deleteAccount(password: string): Promise<void>;
+  /** Reloads /me (e.g. after the email was verified). */
+  refreshUser(): Promise<void>;
 }
 
 /** Exported so tests and previews can provide a fixed auth state. App code uses `useAuth`. */
@@ -165,6 +167,9 @@ export function AuthProvider({ children, storage = tokenStorage }: { children: R
         await i18n.changeLanguage(language);
         const me = await request<Me>('/me', { method: 'PATCH', body: { preferred_locale: language } });
         applyUser(me);
+      },
+      async refreshUser() {
+        applyUser(await request<Me>('/me'));
       },
       async deleteAccount(password) {
         await request<null>('/me/delete', { method: 'POST', body: { password } });

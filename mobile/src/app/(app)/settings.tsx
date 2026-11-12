@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -51,13 +52,26 @@ export default function Settings() {
           {langMsg ? <Notice {...langMsg} /> : null}
         </Card>
 
+        {!user.email_verified ? (
+          <Card>
+            <AppText variant="heading">{t('auth.verifyCardTitle')}</AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('auth.verifyCardBody')}
+            </AppText>
+            <Button testID="verify-open" label={t('auth.verifyNow')} onPress={() => router.push('/verify-email')} />
+          </Card>
+        ) : null}
+
         <Card>
           <AppText variant="heading">{t('settings.account')}</AppText>
           <View style={{ gap: 2 }}>
             <AppText variant="caption" color="textMuted">
               {t('settings.email')}
             </AppText>
-            <AppText>{user.email}</AppText>
+            <AppText>
+              {user.email}
+              {user.email_verified ? ` · ${t('auth.verified')}` : ''}
+            </AppText>
           </View>
           <View style={{ gap: 2 }}>
             <AppText variant="caption" color="textMuted">

@@ -36,6 +36,7 @@ def to_me(user: User) -> MeResponse:
     return MeResponse(
         id=user.id,
         email=user.email,
+        email_verified=user.email_verified_at is not None,
         preferred_locale=user.preferred_locale,
         created_at=user.created_at,
         profile=ProfileResponse(
@@ -92,6 +93,7 @@ def export_data(db: Session, user: User) -> DataExport:
             "status": str(user.status),
             "created_at": user.created_at.isoformat(),
             "privacy_consent_at": user.privacy_consent_at.isoformat(),
+            "email_verified_at": user.email_verified_at.isoformat() if user.email_verified_at else None,
         },
         profile=me.profile.model_dump(mode="json"),
         sessions=[

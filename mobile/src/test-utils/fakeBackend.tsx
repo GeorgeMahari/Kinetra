@@ -15,6 +15,7 @@ import { ThemeProvider } from '@/theme/ThemeProvider';
 export const TEST_USER: Me = {
   id: 'u1',
   email: 'ana@example.com',
+  email_verified: false,
   preferred_locale: 'en',
   created_at: '2026-11-12T10:00:00Z',
   profile: { display_name: 'Ana', date_of_birth: '1995-06-15', age: 31, sex_for_norms: 'not_specified', height_cm: null },
@@ -239,6 +240,7 @@ export function providers(request: AuthContextValue['request'], user: Me = TEST_
     updateProfile: jest.fn().mockResolvedValue(user),
     setLanguage: noop,
     deleteAccount: noop,
+    refreshUser: noop,
   };
   return function Providers({ children }: { children: ReactNode }) {
     return (

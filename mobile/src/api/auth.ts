@@ -22,6 +22,7 @@ export interface Profile {
 export interface Me {
   id: string;
   email: string;
+  email_verified: boolean;
   preferred_locale: Language;
   created_at: string;
   profile: Profile;
@@ -49,4 +50,11 @@ export const authApi = {
     apiRequest<TokenPair>('/auth/refresh', { method: 'POST', body: { refresh_token: refreshToken } }),
   logout: (refreshToken: string) =>
     apiRequest<null>('/auth/logout', { method: 'POST', body: { refresh_token: refreshToken } }),
+  /** Always succeeds (202) whether or not the email has an account. */
+  forgotPassword: (email: string) => apiRequest<null>('/auth/password/forgot', { method: 'POST', body: { email } }),
+  resetPassword: (email: string, code: string, newPassword: string) =>
+    apiRequest<null>('/auth/password/reset', {
+      method: 'POST',
+      body: { email, code, new_password: newPassword },
+    }),
 };

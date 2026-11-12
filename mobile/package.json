@@ -39,7 +39,8 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "review-pack": "node scripts/export-review-pack.mjs"
   },
   "private": true,
   "jest": {

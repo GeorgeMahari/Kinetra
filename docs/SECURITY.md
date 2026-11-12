@@ -12,6 +12,7 @@ What Kinetra protects, how, and what is knowingly left for later. Reviewed at Mi
 | Goals, activity profile, readiness answers | Choosing safe, relevant tests | onboarding tables |
 | Test results, measurements, weekly check-ins, achievements | The product itself | assessment and progression tables |
 | Refresh-token **hashes** | Sessions | `refresh_tokens` |
+| One-time-code **HMACs**, email-verified time | Email verification, password reset | `auth_codes`, `users` |
 
 There is no tracking, no analytics, no third-party SDK that receives data, no location, and no contacts.
 Logs contain user IDs only, never emails, passwords, tokens or health values.
@@ -89,7 +90,12 @@ it is deliberately not applied. Re-check when Expo publishes updated tooling.
   shared store (Redis or PostgreSQL).
 - **Registration** reveals whether an email exists (409). This is a usual trade-off for a clear sign-up
   experience; a production version could switch to a verification email.
-- **Email** is not verified yet, and there is no password-reset flow. Both need an email provider.
+- **Email delivery:** verification and password reset exist, using 6-digit codes stored as HMACs,
+  with 15-minute expiry, 5 attempts and single use; a reset revokes all sessions. Real delivery needs an
+  SMTP provider to be configured. Until then, development prints codes in the API log, and production
+  refuses to start with the console backend.
+- **Forgot-password timing:** it answers identically for known and unknown emails, but sending real mail
+  takes longer. Before production, move sending to a background task so timing reveals nothing.
 - **Web client** stores the refresh token in sessionStorage. It is a dev preview only; production web
   should use an httpOnly SameSite cookie.
 - **Under-16s** are refused rather than supported, because there is no parental-consent flow yet.

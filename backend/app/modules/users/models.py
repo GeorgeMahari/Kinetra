@@ -56,6 +56,8 @@ class User(TimestampMixin, Base):
     preferred_locale: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     # When the user accepted the privacy notice (required at registration).
     privacy_consent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # When the user proved access to the email address (NULL = not verified yet).
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     profile: Mapped["UserProfile | None"] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False

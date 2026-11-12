@@ -23,6 +23,7 @@ class ProfileResponse(BaseModel):
 class MeResponse(BaseModel):
     id: uuid.UUID
     email: str
+    email_verified: bool
     preferred_locale: Locale
     created_at: datetime
     profile: ProfileResponse

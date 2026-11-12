@@ -36,6 +36,7 @@ export default function SignedInLayout() {
         <Stack.Screen name="record/[code]" options={{ title: '' }} />
         <Stack.Screen name="result/[id]" options={{ title: '' }} />
         <Stack.Screen name="progress/[code]" options={{ title: '' }} />
+        <Stack.Screen name="verify-email" options={{ title: t('auth.verifyTitle') }} />
         <Stack.Screen name="achievements" options={{ title: t('progression.achievementsTitle') }} />
       </Stack>
     </View>

@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      # No password is stored anywhere: a random one is generated for this run only.
+      - name: Start an ephemeral PostgreSQL
+        run: |
+          PW="$(openssl rand -hex 24)"
+          echo "::add-mask::$PW"
+          echo "POSTGRES_PASSWORD=$PW" >> "$GITHUB_ENV"
+          docker run -d --name ci-db -e POSTGRES_USER=kinetra -e POSTGRES_PASSWORD="$PW" -e POSTGRES_DB=kinetra \
+            -v "$GITHUB_WORKSPACE/infra/postgres/init:/docker-entrypoint-initdb.d:ro" \
+            -p 127.0.0.1:5433:5432 postgres:18.1-alpine
+          for i in $(seq 1 30); do docker exec ci-db pg_isready -U kinetra -d kinetra && break; sleep 2; done
+
+      - name: Install
+        run: pip install -e ".[dev]" pip-audit
+
+      - name: Lint and types
+        run: |
+          ruff check app tests alembic
+          ruff format --check app tests alembic
+          mypy app
+
+      - name: Tests (unit, API, migrations, journey)
+        run: pytest -o faulthandler_timeout=120
+
+      - name: Dependency audit
+        run: pip-audit --skip-editable
+
+  mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Types
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npx jest --ci
+
+      - name: Expo dependency check
+        run: npx expo-doctor
+
+      - name: Translation review pack is up to date
+        run: |
+          npm run review-pack
+          git diff --exit-code -- ../docs/TRANSLATION_REVIEW.md || {
+            echo "::error::Translations changed: run 'npm run review-pack' and commit docs/TRANSLATION_REVIEW.md"; exit 1; }

@@ -37,3 +37,24 @@ class TokenPair(BaseModel):
     refresh_token: str
     token_type: Literal["bearer"] = "bearer"  # noqa: S105 - OAuth2 token type
     expires_in: int = Field(description="Access token lifetime in seconds")
+
+
+Code = Field(pattern=r"^\d{6}$", description="6-digit code from the email")
+
+
+class CodeIn(BaseModel):
+    code: str = Code
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+    _norm = field_validator("email", mode="after")(_normalize_email)
+
+
+class ResetPasswordIn(BaseModel):
+    email: EmailStr
+    code: str = Code
+    new_password: str = Field(min_length=1, max_length=256)
+
+    _norm = field_validator("email", mode="after")(_normalize_email)

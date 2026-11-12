@@ -53,6 +53,8 @@ def test_production_hides_docs_and_sends_hsts(monkeypatch: pytest.MonkeyPatch) -
     get_settings.cache_clear()
     monkeypatch.setenv("KINETRA_ENVIRONMENT", "production")
     monkeypatch.setenv("KINETRA_JWT_SECRET", "x" * 48)
+    monkeypatch.setenv("KINETRA_EMAIL_BACKEND", "smtp")
+    monkeypatch.setenv("KINETRA_SMTP_HOST", "smtp.example.com")
     try:
         assert Settings().environment == "production"
         with TestClient(create_app()) as c:
@@ -82,3 +84,11 @@ def test_unhandled_errors_do_not_leak_internals() -> None:
     assert resp.status_code == 500
     assert resp.json()["error"]["code"] == "internal_error"
     assert "secret" not in resp.text and "postgres" not in resp.text
+
+
+def test_production_refuses_the_console_email_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("KINETRA_ENVIRONMENT", "production")
+    monkeypatch.setenv("KINETRA_JWT_SECRET", "x" * 48)
+    monkeypatch.delenv("KINETRA_EMAIL_BACKEND", raising=False)
+    with pytest.raises(ValueError, match="KINETRA_EMAIL_BACKEND=smtp"):
+        Settings()

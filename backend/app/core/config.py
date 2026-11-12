@@ -50,11 +50,25 @@ class Settings(BaseSettings):
     login_rate_limit_attempts: int = 10
     login_rate_limit_window_seconds: int = 300
 
+    # --- Email (verification and password reset codes)
+    email_backend: Literal["console", "smtp"] = "console"
+    email_from: str = "Kinetra <no-reply@kinetra.app>"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    # Read from KINETRA_SMTP_PASSWORD (environment) only.
+    smtp_password: SecretStr = SecretStr("")
+    # One-time codes: lifetime and wrong attempts allowed per code.
+    code_minutes: int = 15
+    code_max_attempts: int = 5
+
     def model_post_init(self, __context: object) -> None:
         if not self.jwt_secret.get_secret_value():
             if self.environment == "production":
                 raise ValueError("KINETRA_JWT_SECRET must be set in production")
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
+        if self.environment == "production" and (self.email_backend != "smtp" or not self.smtp_host):
+            raise ValueError("Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST")
 
     def database_url(self, *, test: bool = False) -> URL:
         return URL.create(
