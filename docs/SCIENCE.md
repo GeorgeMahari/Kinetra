@@ -90,6 +90,7 @@ Information gaps are worded as gaps ("not reported, worth measuring") and never 
 | HRR step test (3 min, 30 cm, 24 steps/min) | recovery | submaximal | HR end; HRR60 and HRR120 (calculated) | none; same recovery mode only |
 | Cooper 12-minute run | cardio | **maximal** | distance (measured), VO₂max (**estimated**) | FRIEND 2015 percentile band, ages 20–79, sex specified |
 | Push-ups (toes or knees) | muscular endurance | submaximal | reps | none |
+| Pulls (pull-ups or inverted rows) | strength | submaximal | reps | none; same variant only |
 | 30-s chair stand | strength | submaximal | reps | none |
 | Plank | strength | submaximal | seconds | none |
 | Sit and reach | mobility | none | cm relative to toes | none |
@@ -143,5 +144,19 @@ Norm tables for push-ups (CSEP / Payne et al. 2000) and the 30-s chair stand (Ri
 60–94) exist, but only secondary websites were reachable, and their numbers disagree. Until the
 primary tables are verified, Kinetra shows raw results and personal trends only. There are no
 validated general-population norms for the plank, the home sit-and-reach or the HRR step protocol.
+
+**Upper-body pulling (`pulls`, added 2026-11-13).** The spec asks for pulling capacity alongside
+pushing. Kinetra uses maximal consecutive repetitions in one of two variants, stored as separate
+protocols:
+- **Pull-ups**, overhand grip, from straight arms to the chin above the bar.
+- **Inverted rows** under a bar at about waist height, with the body straight and heels on the floor.
+  This is the easier option, so people who cannot yet do a pull-up still get a real baseline, and 0 is
+  a valid result.
+
+The test is submaximal: it needs a completed screening that allows submaximal tests, the same as
+push-ups. Published pull-up norms mostly come from military, school or athlete populations, and the
+inverted row's difficulty depends on bar height and body angle, so no general-population reference
+exists. The result is shown raw, with its personal trend, and a personal best counts only within the
+same variant. A dead hang was not chosen, because it measures grip endurance rather than pulling.
 The HRR clinical thresholds (for example Cole et al., NEJM 1999) come from laboratory exercise testing in patients
 and are not applied to a home step test.

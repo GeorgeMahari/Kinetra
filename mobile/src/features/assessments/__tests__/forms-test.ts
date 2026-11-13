@@ -29,6 +29,14 @@ describe('parseForm', () => {
     expect(parseForm(FORMS.pushups, { variant: 'knees', reps: '0' }).inputs).toEqual({ variant: 'knees', reps: 0 });
   });
 
+  it('mirrors the pulling test limits: a 0-rep baseline is valid, the variant is required', () => {
+    expect(parseForm(FORMS.pulls, { variant: 'inverted_row', reps: '0' }).inputs).toEqual({
+      variant: 'inverted_row',
+      reps: 0,
+    });
+    expect(parseForm(FORMS.pulls, { reps: '101' }).errors).toEqual({ variant: 'required', reps: 'invalid' });
+  });
+
   it('defaults booleans to false', () => {
     expect(parseForm(FORMS.chair_stand_30s, { reps: '12' }).inputs).toEqual({ reps: 12, used_arms: false });
   });

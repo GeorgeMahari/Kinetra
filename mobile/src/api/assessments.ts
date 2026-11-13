@@ -5,6 +5,7 @@ export type TestCode =
   | 'hrr_step'
   | 'cooper_12min'
   | 'pushups'
+  | 'pulls'
   | 'chair_stand_30s'
   | 'plank'
   | 'sit_reach'

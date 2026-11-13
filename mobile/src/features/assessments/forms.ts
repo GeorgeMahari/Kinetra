@@ -45,6 +45,12 @@ export const FORMS: Record<TestCode, FormSpec> = {
       { name: 'reps', kind: 'int', min: 0, max: 200 },
     ],
   },
+  pulls: {
+    fields: [
+      { name: 'variant', kind: 'choice', options: ['pullup', 'inverted_row'] },
+      { name: 'reps', kind: 'int', min: 0, max: 100 },
+    ],
+  },
   chair_stand_30s: {
     fields: [
       { name: 'reps', kind: 'int', min: 0, max: 60 },

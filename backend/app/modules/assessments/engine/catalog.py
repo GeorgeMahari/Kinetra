@@ -91,6 +91,13 @@ class PushUpIn(_In):
     reps: int = Field(ge=0, le=200)
 
 
+class PullIn(_In):
+    """Maximal consecutive pulling repetitions: overhand pull-ups, or inverted rows under a waist-high bar."""
+
+    variant: Literal["pullup", "inverted_row"]
+    reps: int = Field(ge=0, le=100)
+
+
 class ChairStandIn(_In):
     reps: int = Field(ge=0, le=60)
     used_arms: bool = False
@@ -265,6 +272,10 @@ def _pushups(d: PushUpIn, ctx: Context, stopped: bool) -> list[Indicator]:
     return [_raw("pushup_reps", "reps", (f"variant_{d.variant}",))(d.reps, stopped)]
 
 
+def _pulls(d: PullIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    return [_raw("pull_reps", "reps", (f"variant_{d.variant}",))(d.reps, stopped)]
+
+
 def _chair(d: ChairStandIn, ctx: Context, stopped: bool) -> list[Indicator]:
     extra = ("used_arms_protocol_deviation",) if d.used_arms else ()
     return [_raw("chair_stand_reps", "reps", extra)(d.reps, stopped)]
@@ -399,6 +410,17 @@ TESTS: dict[str, TestDefinition] = {
             _pushups,
             ("variant",),
             "pushup_reps",
+        ),
+        TestDefinition(
+            "pulls",
+            "1",
+            Dimension.strength,
+            IntensityCeiling.submaximal,
+            ("pull_bar",),
+            PullIn,
+            _pulls,
+            ("variant",),
+            "pull_reps",
         ),
         TestDefinition(
             "chair_stand_30s",

@@ -155,6 +155,8 @@ class TestRawOnlyTests:
         ("code", "inputs", "indicator"),
         [
             ("pushups", {"variant": "toes", "reps": 25}, "pushup_reps"),
+            ("pulls", {"variant": "pullup", "reps": 8}, "pull_reps"),
+            ("pulls", {"variant": "inverted_row", "reps": 0}, "pull_reps"),
             ("chair_stand_30s", {"reps": 14}, "chair_stand_reps"),
             ("plank", {"seconds": 75}, "plank_seconds"),
             ("sit_reach", {"reach_cm": -4.5}, "sit_reach_cm"),
@@ -176,6 +178,8 @@ class TestRawOnlyTests:
         [
             ("pushups", {"variant": "wall", "reps": 3}),
             ("pushups", {"variant": "toes", "reps": -1}),
+            ("pulls", {"variant": "chin_up", "reps": 5}),
+            ("pulls", {"variant": "pullup", "reps": 101}),
             ("plank", {"seconds": 5000}),
             ("resting_hr", {"bpm": 10, "method": "device"}),
             ("body_measurements", {"weight_kg": 70.25}),
@@ -203,6 +207,18 @@ class TestEligibility:
         }
         # No screening yet: same as non-exertional.
         assert offered(None) == offered(IntensityCeiling.non_exertional)
+
+    def test_pulling_test_is_submaximal_strength(self) -> None:
+        t = TESTS["pulls"]
+        assert t.dimension.value == "strength"
+        assert allowed(t, IntensityCeiling.submaximal) and not allowed(t, IntensityCeiling.non_exertional)
+
+    def test_pulling_variants_are_separate_protocols(self) -> None:
+        t = TESTS["pulls"]
+        a, _ = run(t, {"variant": "pullup", "reps": 5}, MAN_30)
+        b, _ = run(t, {"variant": "inverted_row", "reps": 5}, MAN_30)
+        assert protocol_key(t, a) == "pulls|1|variant=pullup"
+        assert protocol_key(t, a) != protocol_key(t, b)
 
     def test_every_dimension_except_lifestyle_has_a_test(self) -> None:
         dims = {t.dimension.value for t in TESTS.values()}

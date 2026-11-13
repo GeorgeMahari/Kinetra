@@ -21,6 +21,7 @@ PROGRESSION_VERSION = "progression-1"
 HIGHER_IS_BETTER = frozenset(
     {
         "pushup_reps",
+        "pull_reps",
         "chair_stand_reps",
         "plank_seconds",
         "sit_reach_cm",

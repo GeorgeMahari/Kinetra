@@ -161,6 +161,15 @@ Each milestone leaves the project runnable and tested. ✅ = done and verified.
 - **Fix:** logs are UTF-8 on Windows (Romanian/Russian text was escaped).
 - **Tests:** backend 227, mobile 121.
 
+## Post-MVP 2 — Upper-body pulling test ✅ (2026-11-13)
+- Closes a gap against spec §5C ("upper-body pulling capacity"), which had no test.
+- New test `pulls` (strength, submaximal), with two variants stored as separate protocols: pull-ups,
+  or inverted rows under a waist-high bar. Raw count only, no rating (see SCIENCE.md), and personal
+  bests within one variant.
+- Texts in EN/RO/RU; the review pack is regenerated (146 strings).
+- Checked end to end against the real API with the persistent dev account.
+- **Tests:** backend 243, mobile 122.
+
 ## After the MVP (remaining)
 - Native-speaker review of the Romanian and Russian safety and scientific text; manual check of the
   NICE thresholds and the FRIEND 2022 tables.
