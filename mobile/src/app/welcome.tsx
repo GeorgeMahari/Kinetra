@@ -55,7 +55,7 @@ export default function Welcome() {
         {sessionExpired ? <Notice tone="info" message={t('auth.sessionExpired')} /> : null}
 
         <View style={{ gap: spacing.md, marginTop: spacing.sm }}>
-          <AppText variant="caption" color="brand" style={{ fontWeight: '600', letterSpacing: 1 }}>
+          <AppText variant="caption" color="brandText" style={{ fontWeight: '600', letterSpacing: 1 }}>
             {t('brand.tagline').toUpperCase()}
           </AppText>
           <AppText variant="display">{t('welcome.title')}</AppText>

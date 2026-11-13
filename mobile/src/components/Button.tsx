@@ -15,7 +15,7 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
   const isDisabled = disabled || loading;
   const background =
     variant === 'primary' ? colors.brand : variant === 'secondary' ? colors.brandSoft : 'transparent';
-  const textColor = variant === 'primary' ? 'onBrand' : 'brand';
+  const textColor = variant === 'primary' ? 'onBrand' : 'brandText';
 
   return (
     <Pressable

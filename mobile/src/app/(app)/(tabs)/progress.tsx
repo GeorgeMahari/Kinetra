@@ -42,7 +42,7 @@ function TestProgress({ code }: { code: TestCode }) {
       >
         <AppText variant="heading">{t(`assess.tests.${code}.name`)}</AppText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <AppText variant="caption" color="brand">{t('progress.allDetails')}</AppText>
+          <AppText variant="caption" color="brandText">{t('progress.allDetails')}</AppText>
           <Icon name="chevronRight" size={16} color={colors.brand} />
         </View>
       </Pressable>

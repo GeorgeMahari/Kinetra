@@ -72,7 +72,7 @@ export default function TestDetail() {
           <Section title={t('assess.sections.howTo')}>
             {steps.map((s, i) => (
               <View key={i} style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <AppText variant="label" color="brand" style={{ width: 20 }}>
+                <AppText variant="label" color="brandText" style={{ width: 20 }}>
                   {i + 1}
                 </AppText>
                 <AppText style={{ flex: 1 }}>{s}</AppText>

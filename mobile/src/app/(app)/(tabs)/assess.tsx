@@ -46,7 +46,7 @@ function TestRow({ test, lastDone, suggested }: { test: TestInfo; lastDone?: str
         </AppText>
       </View>
       {suggested ? (
-        <AppText variant="caption" color="brand" style={{ fontWeight: '600' }}>
+        <AppText variant="caption" color="brandText" style={{ fontWeight: '600' }}>
           {t('assess.suggested')}
         </AppText>
       ) : null}

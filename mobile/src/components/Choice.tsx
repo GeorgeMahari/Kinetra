@@ -43,7 +43,7 @@ export function OptionCard({
       })}
     >
       <View style={{ flex: 1, gap: 2 }}>
-        <AppText variant="label" color={selected ? 'brand' : 'text'}>
+        <AppText variant="label" color={selected ? 'brandText' : 'text'}>
           {title}
         </AppText>
         {body ? (
@@ -120,7 +120,7 @@ export function Stepper({
         opacity: disabled ? 0.4 : 1,
       }}
     >
-      <AppText variant="heading" color="brand">
+      <AppText variant="heading" color="brandText">
         {symbol}
       </AppText>
     </Pressable>
@@ -185,7 +185,7 @@ export function YesNo({
           backgroundColor: selected ? colors.brandSoft : colors.surface,
         }}
       >
-        <AppText variant="label" color={selected ? 'brand' : 'text'}>
+        <AppText variant="label" color={selected ? 'brandText' : 'text'}>
           {label}
         </AppText>
       </Pressable>

@@ -21,6 +21,7 @@ const palette = {
 
   indigo600: '#4B4FE0',
   indigo500: '#6366F1',
+  indigo400: '#8B8EF6',
   indigo300: '#A5A8FA',
   mint500: '#22C7A9',
   mint300: '#7FE3CF',
@@ -39,6 +40,8 @@ export interface ThemeColors {
   textMuted: string;
   textInverse: string;
   brand: string;
+  /** Brand colour for text and links on surfaces; lighter than `brand` in dark mode for 4.5:1 contrast. */
+  brandText: string;
   brandSoft: string;
   onBrand: string;
   progress: string;
@@ -58,6 +61,7 @@ export const colors: Record<ColorScheme, ThemeColors> = {
     textMuted: '#5A6480',
     textInverse: palette.white,
     brand: palette.indigo600,
+    brandText: palette.indigo600,
     brandSoft: '#ECECFE',
     onBrand: palette.white,
     progress: '#14A88E',
@@ -74,6 +78,7 @@ export const colors: Record<ColorScheme, ThemeColors> = {
     textMuted: palette.slate300,
     textInverse: palette.ink900,
     brand: palette.indigo500,
+    brandText: palette.indigo400,
     brandSoft: '#23264F',
     onBrand: palette.white,
     progress: palette.mint500,

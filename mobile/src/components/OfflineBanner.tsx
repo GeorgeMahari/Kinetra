@@ -39,7 +39,7 @@ export function OfflineBanner({ state, onRetry }: { state: ServerState; onRetry:
         {t(state === 'offline' ? 'server.offlineBanner' : 'server.degraded')}
       </AppText>
       <Pressable accessibilityRole="button" onPress={onRetry} hitSlop={8}>
-        <AppText variant="caption" color="brand" style={{ fontWeight: '600' }}>
+        <AppText variant="caption" color="brandText" style={{ fontWeight: '600' }}>
           {t('server.retry')}
         </AppText>
       </Pressable>

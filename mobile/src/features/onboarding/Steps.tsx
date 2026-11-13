@@ -271,7 +271,7 @@ export function FollowUpsStep({
               {value != null ? (
                 <AppText
                   variant="caption"
-                  color="brand"
+                  color="brandText"
                   accessibilityRole="button"
                   onPress={skip.onPress}
                   testID={`fu-${q.code}-skip`}

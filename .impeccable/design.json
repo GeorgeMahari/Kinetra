@@ -1,31 +1,128 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-13T16:00:00+02:00",
+  "generatedAt": "2026-11-14T12:05:00+02:00",
   "title": "Design System: Kinetra",
   "extensions": {
     "colorMeta": {
-      "instrument-indigo": { "role": "primary", "displayName": "Instrument Indigo", "canonical": "#4B4FE0", "tonalRamp": ["#14154A", "#23257A", "#3436B0", "#4B4FE0", "#6366F1", "#8B8EF6", "#B9BBFA", "#E6E7FE"] },
-      "indigo-wash": { "role": "primary", "displayName": "Indigo Wash", "canonical": "#ECECFE" },
-      "signal-mint": { "role": "secondary", "displayName": "Signal Mint", "canonical": "#14A88E", "tonalRamp": ["#05372F", "#0A5C4E", "#0F826D", "#14A88E", "#22C7A9", "#56D8C0", "#9DEADB", "#DDF8F2"] },
-      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#F7F8FB" },
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0B1020", "tonalRamp": ["#070B16", "#0B1020", "#121A2E", "#1C2640", "#2A3655", "#5A6480", "#AEB6CA", "#E7EAF2"] },
-      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#E7EAF2" },
-      "unknown-slate": { "role": "neutral", "displayName": "Unknown Slate", "canonical": "#8A94AD" },
-      "caution-amber": { "role": "status", "displayName": "Caution Amber", "canonical": "#B97511" },
-      "alert-coral": { "role": "status", "displayName": "Alert Coral", "canonical": "#D2483B" }
+      "instrument-indigo": {
+        "role": "primary",
+        "displayName": "Instrument Indigo",
+        "canonical": "#4B4FE0",
+        "tonalRamp": [
+          "#14154A",
+          "#23257A",
+          "#3436B0",
+          "#4B4FE0",
+          "#6366F1",
+          "#8B8EF6",
+          "#B9BBFA",
+          "#E6E7FE"
+        ]
+      },
+      "indigo-wash": {
+        "role": "primary",
+        "displayName": "Indigo Wash",
+        "canonical": "#ECECFE"
+      },
+      "signal-mint": {
+        "role": "secondary",
+        "displayName": "Signal Mint",
+        "canonical": "#14A88E",
+        "tonalRamp": [
+          "#05372F",
+          "#0A5C4E",
+          "#0F826D",
+          "#14A88E",
+          "#22C7A9",
+          "#56D8C0",
+          "#9DEADB",
+          "#DDF8F2"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#F7F8FB"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0B1020",
+        "tonalRamp": [
+          "#070B16",
+          "#0B1020",
+          "#121A2E",
+          "#1C2640",
+          "#2A3655",
+          "#5A6480",
+          "#AEB6CA",
+          "#E7EAF2"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#E7EAF2"
+      },
+      "unknown-slate": {
+        "role": "neutral",
+        "displayName": "Unknown Slate",
+        "canonical": "#8A94AD"
+      },
+      "caution-amber": {
+        "role": "status",
+        "displayName": "Caution Amber",
+        "canonical": "#B97511"
+      },
+      "alert-coral": {
+        "role": "status",
+        "displayName": "Alert Coral",
+        "canonical": "#D2483B"
+      },
+      "indigo-text-dark": {
+        "role": "primary",
+        "displayName": "Indigo Text (dark)",
+        "canonical": "#8B8EF6"
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Greeting and landing headline." },
-      "title": { "displayName": "Title", "purpose": "Screen titles." },
-      "heading": { "displayName": "Heading", "purpose": "Section and card headings." },
-      "body": { "displayName": "Body", "purpose": "Explanations and instructions." },
-      "label": { "displayName": "Label", "purpose": "Row titles, values, button text (16px in buttons)." },
-      "caption": { "displayName": "Caption", "purpose": "Descriptions, dates, hints, provenance." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Greeting and landing headline."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Screen titles."
+      },
+      "heading": {
+        "displayName": "Heading",
+        "purpose": "Section and card headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanations and instructions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Row titles, values, button text (16px in buttons)."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Descriptions, dates, hints, provenance."
+      }
     },
     "shadows": [],
     "motion": [
-      { "name": "press-opacity", "value": "opacity 0.85", "purpose": "Pressed state of every pressable." },
-      { "name": "disabled-opacity", "value": "opacity 0.5", "purpose": "Disabled controls." }
+      {
+        "name": "press-opacity",
+        "value": "opacity 0.85",
+        "purpose": "Pressed state of every pressable."
+      },
+      {
+        "name": "disabled-opacity",
+        "value": "opacity 0.5",
+        "purpose": "Disabled controls."
+      }
     ],
     "breakpoints": []
   },
@@ -90,11 +187,36 @@
       "Honest labelling everywhere: measured, calculated, estimated, reported."
     ],
     "rules": [
-      { "name": "The Meaning-Only Rule", "body": "Amber and coral appear only when something needs care or went wrong. They never decorate, and a low result is never coloured red.", "section": "colors" },
-      { "name": "The Neutral Unknown Rule", "body": "Anything not yet known uses Unknown Slate with a dashed outline, never a warning or error colour.", "section": "colors" },
-      { "name": "The No Verdict Colour Rule", "body": "Changes between results are signed numbers in text colour, never green or red.", "section": "colors" },
-      { "name": "The One Family Rule", "body": "A display face may be added later through expo-font, but every screen must still work in the system font with Romanian diacritics and Cyrillic.", "section": "typography" },
-      { "name": "The Hairline Rule", "body": "Separate with a 1px hairline or a tonal step, never with a shadow.", "section": "elevation" }
+      {
+        "name": "The Meaning-Only Rule",
+        "body": "Amber and coral appear only when something needs care or went wrong. They never decorate, and a low result is never coloured red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Neutral Unknown Rule",
+        "body": "Anything not yet known uses Unknown Slate with a dashed outline, never a warning or error colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Verdict Colour Rule",
+        "body": "Changes between results are signed numbers in text colour, never green or red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Text Contrast Rule",
+        "body": "Indigo text always uses brandText, never brand: body-size text needs 4.5:1 in both themes.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "A display face may be added later through expo-font, but every screen must still work in the system font with Romanian diacritics and Cyrillic.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Separate with a 1px hairline or a tonal step, never with a shadow.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do take every colour, spacing and radius from mobile/src/theme/tokens.ts through useTheme().",

@@ -138,7 +138,7 @@ export function ResultView({ result }: { result: TestResult }) {
               style={{ gap: 2 }}
             >
               <AppText variant="caption">{r.citation}</AppText>
-              <AppText variant="caption" style={{ color: colors.brand }}>
+              <AppText variant="caption" style={{ color: colors.brandText }}>
                 {t('assess.sourceLink')}
               </AppText>
             </Pressable>

@@ -40,7 +40,7 @@ export function ServerStatusBanner({ state, onRetry }: { state: ServerState; onR
       </AppText>
       {state === 'offline' || state === 'degraded' ? (
         <Pressable accessibilityRole="button" onPress={onRetry} hitSlop={8}>
-          <AppText variant="caption" color="brand" style={{ fontWeight: '600' }}>
+          <AppText variant="caption" color="brandText" style={{ fontWeight: '600' }}>
             {t('server.retry')}
           </AppText>
         </Pressable>

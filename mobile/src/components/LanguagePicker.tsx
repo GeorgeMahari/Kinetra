@@ -38,7 +38,7 @@ export function LanguagePicker({ onSelect }: { onSelect?: (lang: Language) => vo
               backgroundColor: selected ? colors.brandSoft : 'transparent',
             }}
           >
-            <AppText variant="caption" color={selected ? 'brand' : 'textMuted'}>
+            <AppText variant="caption" color={selected ? 'brandText' : 'textMuted'}>
               {LANGUAGE_NAMES[lang]}
             </AppText>
           </Pressable>

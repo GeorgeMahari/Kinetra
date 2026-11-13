@@ -45,7 +45,7 @@ export function SegmentedControl<T extends string>({
               backgroundColor: selected ? colors.brandSoft : colors.surface,
             }}
           >
-            <AppText variant="label" color={selected ? 'brand' : 'text'}>
+            <AppText variant="label" color={selected ? 'brandText' : 'text'}>
               {s.label}
             </AppText>
           </Pressable>

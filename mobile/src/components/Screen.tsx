@@ -30,7 +30,9 @@ export function Screen({
     // the window itself (adjustResize), so no extra behaviour there.
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: colors.background }}
+      // Without a header the status-bar inset sits outside the scroll view, so scrolled content stops
+      // below the status bar instead of running under the clock.
+      style={{ flex: 1, backgroundColor: colors.background, paddingTop: header ? 0 : insets.top }}
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -40,7 +42,7 @@ export function Screen({
         contentContainerStyle={{
           flexGrow: 1,
           alignItems: 'center',
-          paddingTop: (header ? 0 : insets.top) + spacing.xl,
+          paddingTop: spacing.xl,
           paddingHorizontal: spacing.xl,
           paddingBottom: spacing.xl,
         }}

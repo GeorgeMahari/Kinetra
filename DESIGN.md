@@ -4,6 +4,7 @@ description: Know your body's full spectrum.
 colors:
   instrument-indigo: "#4B4FE0"
   instrument-indigo-dark: "#6366F1"
+  indigo-text-dark: "#8B8EF6"
   indigo-wash: "#ECECFE"
   indigo-wash-dark: "#23264F"
   signal-mint: "#14A88E"
@@ -138,6 +139,10 @@ A cool ink-and-paper neutral base with a single indigo voice and a mint signal.
 ### Primary
 - **Instrument Indigo** (light `instrument-indigo`, dark `instrument-indigo-dark`): primary buttons,
   active tab, links, selected choices, icons inside dimension badges. The one colour that means "you can act here".
+- **Indigo Text** (light `instrument-indigo`, dark `indigo-text-dark`; token `brandText` in code): every
+  indigo *text*: links, ghost and secondary button labels, selected-choice labels. In dark mode the fill
+  indigo is too dark for text (about 4:1 on ink), so text uses the lighter step (7.3:1 on ink, 5:1 on
+  Indigo Wash). Fills and icons keep `brand`.
 - **Indigo Wash** (`indigo-wash` / `indigo-wash-dark`): secondary buttons, icon badge backgrounds,
   selected-choice fills. Indigo at whisper strength.
 
@@ -163,7 +168,10 @@ They never decorate, and a low result is never coloured red.
 **The Neutral Unknown Rule.** Anything not yet known uses Unknown Slate with a dashed outline, never
 a warning or error colour.
 
-**The No Verdict Colour Rule.** Changes between results are signed numbers in text colour
+**The Text Contrast Rule.** Indigo text always uses `brandText`, never `brand`: body-size text needs
+4.5:1 in both themes.
+
+**The No Verdict Colour Rule. Changes between results are signed numbers in text colour
 ("+3 vs previous"), never green or red: "up" is good for push-ups and not for resting heart rate.
 
 ## Typography

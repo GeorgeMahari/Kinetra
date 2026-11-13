@@ -49,7 +49,7 @@ export function RecommendationCard({ rec }: { rec: Recommendation }) {
           {rec.reference ? (
             <AppText
               variant="caption"
-              style={{ color: colors.brand }}
+              style={{ color: colors.brandText }}
               accessibilityRole="link"
               onPress={() => void Linking.openURL(rec.reference!.url)}
             >
