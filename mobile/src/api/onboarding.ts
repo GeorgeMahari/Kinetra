@@ -82,7 +82,8 @@ export interface OnboardingAnswers {
   goals: Goal[];
   activity: ActivityAnswers;
   follow_ups: FollowUpAnswers;
-  readiness: Record<ReadinessQuestion, boolean>;
+  /** Every asked question; `pregnancy` is not asked when reference standards are male. */
+  readiness: Partial<Record<ReadinessQuestion, boolean>>;
 }
 
 /** Partial answers as saved between steps. */

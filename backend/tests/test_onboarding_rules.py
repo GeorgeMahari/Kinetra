@@ -9,6 +9,7 @@ from app.modules.onboarding.rules import (
     follow_up_questions,
     information_gaps,
     screen_readiness,
+    screening_questions,
 )
 from app.modules.onboarding.vocab import (
     ActivityLevel,
@@ -189,3 +190,17 @@ class TestPriorities:
         once = dimension_priorities([Goal.improve_balance], f)
         twice = dimension_priorities([Goal.improve_balance, Goal.improve_balance], f)
         assert once == twice
+
+
+class TestScreeningQuestions:
+    def test_pregnancy_is_left_out_only_when_it_does_not_apply(self) -> None:
+        assert ReadinessQuestion.pregnancy in screening_questions(pregnancy_applies=True)
+        asked = screening_questions(pregnancy_applies=False)
+        assert asked == frozenset(ReadinessQuestion) - {ReadinessQuestion.pregnancy}
+
+    def test_screening_without_the_pregnancy_question_is_complete(self) -> None:
+        asked = screening_questions(pregnancy_applies=False)
+        answers = {q: False for q in asked}
+        assert screen_readiness(answers, ActivityLevel.active, 4, 30, asked).result is ReadinessResult.clear
+        with pytest.raises(ValueError):
+            screen_readiness(answers, ActivityLevel.active, 4, 30)

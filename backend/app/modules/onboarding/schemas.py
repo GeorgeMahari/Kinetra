@@ -69,7 +69,8 @@ class OnboardingAnswers(BaseModel):
     goals: list[Goal] = Field(min_length=1, max_length=3)
     activity: ActivityAnswers
     follow_ups: FollowUpAnswers = Field(default_factory=FollowUpAnswers)
-    # Safety screening must be fully answered (true/false per question).
+    # Safety screening must be fully answered (true/false per question). Pregnancy may be absent
+    # here; whether it is required depends on the user's profile and is checked on completion.
     readiness: dict[ReadinessQuestion, bool]
 
     @field_validator("goals")
@@ -81,7 +82,7 @@ class OnboardingAnswers(BaseModel):
 
     @model_validator(mode="after")
     def _readiness_complete(self) -> "OnboardingAnswers":
-        missing = set(ReadinessQuestion) - set(self.readiness)
+        missing = set(ReadinessQuestion) - {ReadinessQuestion.pregnancy} - set(self.readiness)
         if missing:
             raise ValueError(f"Answer every screening question: {sorted(q.value for q in missing)}")
         return self

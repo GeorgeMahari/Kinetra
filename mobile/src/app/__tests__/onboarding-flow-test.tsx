@@ -7,7 +7,7 @@ import { Text } from 'react-native';
 
 import { READINESS_QUESTIONS } from '@/api/onboarding';
 import i18n from '@/i18n';
-import { createFakeBackend, providers } from '@/test-utils/fakeBackend';
+import { createFakeBackend, providers, TEST_USER } from '@/test-utils/fakeBackend';
 
 import Onboarding from '../(app)/onboarding';
 
@@ -121,4 +121,26 @@ it('save-and-exit stores progress and leaves', async () => {
   await fireEvent.press(screen.getByTestId('onboarding-save-exit'));
   await waitFor(() => expect(backend.getStatus().draft).toEqual({ goals: ['improve_mobility'] }));
   expect(backend.getStatus().step).toBe(1);
+});
+
+it('does not ask a male user about pregnancy and leaves it out of the answers', async () => {
+  const backend = createFakeBackend({
+    status: 'in_progress',
+    step: 5,
+    draft: {
+      goals: ['get_stronger'],
+      activity: { activity_level: 'moderate', exercise_sessions_per_week: 2, training_experience: 'none' },
+    },
+  });
+  const male = { ...TEST_USER, profile: { ...TEST_USER.profile, sex_for_norms: 'male' as const } };
+  await renderRouter(routes, { initialUrl: '/onboarding', wrapper: providers(backend.request, male) });
+  expect(await screen.findByText('Safety check')).toBeTruthy();
+  expect(screen.queryByTestId('ready-pregnancy-no')).toBeNull();
+  for (const q of READINESS_QUESTIONS.filter((x) => x !== 'pregnancy')) {
+    await fireEvent.press(screen.getByTestId(`ready-${q}-no`));
+  }
+  await next();
+  expect(await screen.findByText('Your starting point')).toBeTruthy();
+  const complete = backend.calls.find((c) => c.path === '/onboarding/complete');
+  expect(Object.keys((complete?.body as { readiness: object }).readiness)).not.toContain('pregnancy');
 });

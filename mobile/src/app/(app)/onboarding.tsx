@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { FollowUpQuestion, OnboardingDraft, OnboardingSummary } from '@/api/onboarding';
 import { errorMessage } from '@/api/errorMessage';
+import { useAuth } from '@/auth/AuthProvider';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
@@ -15,6 +16,7 @@ import {
   buildAnswers,
   canContinue,
   COUNTED_STEPS,
+  readinessQuestions,
   resumeStep,
   STEPS,
   stepName,
@@ -41,6 +43,8 @@ export default function Onboarding() {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
   const { api } = useOnboardingApi();
+  const { user } = useAuth();
+  const questions = readinessQuestions(user?.profile.sex_for_norms);
   const status = useOnboardingStatus();
   const sports = useSports();
   const invalidate = useInvalidateOnboarding();
@@ -101,7 +105,7 @@ export default function Onboarding() {
     setBusy(true);
     try {
       if (name === 'readiness') {
-        const answers = buildAnswers(draft);
+        const answers = buildAnswers(draft, questions);
         if (!answers) {
           setError(t('onboarding.readinessIncomplete'));
           return;
@@ -149,7 +153,7 @@ export default function Onboarding() {
       case 'followUps':
         return <FollowUpsStep draft={draft} update={update} questions={followUps} />;
       case 'readiness':
-        return <ReadinessStep draft={draft} update={update} />;
+        return <ReadinessStep draft={draft} update={update} questions={questions} />;
       case 'summary':
         return summary ? (
           <View style={{ gap: spacing.xl }}>
@@ -172,7 +176,7 @@ export default function Onboarding() {
           testID="onboarding-next"
           label={name === 'intro' ? t('onboarding.start') : name === 'readiness' ? t('onboarding.finish') : t('onboarding.next')}
           loading={busy}
-          disabled={!canContinue(name, draft)}
+          disabled={!canContinue(name, draft, questions)}
           onPress={() => void next()}
         />
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>

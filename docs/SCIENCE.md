@@ -4,7 +4,7 @@ How Kinetra's assessment logic is grounded, and where its limits are. Every rule
 implemented deterministically in `backend/app/modules/*/rules.py` and covered by unit tests
 with known inputs.
 
-## 1. Pre-exercise readiness screening (`kinetra-readiness-1`)
+## 1. Pre-exercise readiness screening (`kinetra-readiness-2`)
 
 **Purpose.** This screening decides only *how intense the tests Kinetra suggests may be*. It does
 not diagnose, and it does not tell anyone that they are healthy.
@@ -37,6 +37,11 @@ PAR-Q+.
 | `musculoskeletal` | Bone, joint or muscle problem that activity could worsen | caution |
 | `supervised_only` | Told to exercise only under medical supervision | caution |
 | `pregnancy` | Pregnant, or gave birth in the last 6 months | caution |
+
+`pregnancy` is not asked when the profile's reference standards are male (`kinetra-readiness-2`).
+It is then not stored at all, rather than stored as "no": a stored screening holds exactly the
+questions that were asked. It stays required for female and unspecified reference standards.
+`kinetra-readiness-1` screenings asked all seven questions of everyone.
 
 **Limitations.**
 - The screening is self-reported and unverified, and it is brief by design. It is not a replacement

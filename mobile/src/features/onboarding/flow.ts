@@ -9,6 +9,7 @@ import {
   type OnboardingDraft,
   type ReadinessQuestion,
 } from '@/api/onboarding';
+import type { SexForNorms } from '@/api/auth';
 
 export const STEPS = ['intro', 'goals', 'activity', 'sports', 'followUps', 'readiness', 'summary'] as const;
 export type StepName = (typeof STEPS)[number];
@@ -24,21 +25,31 @@ export function isActivityComplete(a: Partial<ActivityAnswers> | undefined): a i
   return !!a && !!a.activity_level && typeof a.exercise_sessions_per_week === 'number' && !!a.training_experience;
 }
 
+/** The safety questions this user is asked: pregnancy is left out when reference standards are male. */
+export function readinessQuestions(sex: SexForNorms | undefined): readonly ReadinessQuestion[] {
+  return sex === 'male' ? READINESS_QUESTIONS.filter((q) => q !== 'pregnancy') : READINESS_QUESTIONS;
+}
+
 export function isReadinessComplete(
   r: Partial<Record<ReadinessQuestion, boolean>> | undefined,
-): r is Record<ReadinessQuestion, boolean> {
-  return !!r && READINESS_QUESTIONS.every((q) => typeof r[q] === 'boolean');
+  questions: readonly ReadinessQuestion[] = READINESS_QUESTIONS,
+): r is Partial<Record<ReadinessQuestion, boolean>> {
+  return !!r && questions.every((q) => typeof r[q] === 'boolean');
 }
 
 /** Whether the user may continue past a step. Optional steps are always passable. */
-export function canContinue(step: StepName, draft: OnboardingDraft): boolean {
+export function canContinue(
+  step: StepName,
+  draft: OnboardingDraft,
+  questions: readonly ReadinessQuestion[] = READINESS_QUESTIONS,
+): boolean {
   switch (step) {
     case 'goals':
       return (draft.goals?.length ?? 0) >= 1 && (draft.goals?.length ?? 0) <= MAX_GOALS;
     case 'activity':
       return isActivityComplete(draft.activity);
     case 'readiness':
-      return isReadinessComplete(draft.readiness);
+      return isReadinessComplete(draft.readiness, questions);
     default:
       return true;
   }
@@ -58,14 +69,19 @@ export function activityFromDraft(draft: OnboardingDraft): ActivityAnswers | nul
 }
 
 /** The final payload for POST /onboarding/complete, or null if a required part is missing. */
-export function buildAnswers(draft: OnboardingDraft): OnboardingAnswers | null {
+export function buildAnswers(
+  draft: OnboardingDraft,
+  questions: readonly ReadinessQuestion[] = READINESS_QUESTIONS,
+): OnboardingAnswers | null {
   const activity = activityFromDraft(draft);
-  if (!activity || !draft.goals?.length || !isReadinessComplete(draft.readiness)) return null;
+  const r = draft.readiness;
+  if (!activity || !draft.goals?.length || !isReadinessComplete(r, questions)) return null;
   return {
     goals: draft.goals,
     activity,
     follow_ups: draft.follow_ups ?? {},
-    readiness: draft.readiness,
+    // Only what was asked: an earlier answer to a question no longer asked is not sent.
+    readiness: Object.fromEntries(questions.map((q) => [q, r[q]!])) as OnboardingAnswers['readiness'],
   };
 }
 

@@ -36,7 +36,7 @@ from app.modules.onboarding.vocab import (
     ReadinessResult,
     SportCategory,
 )
-from app.modules.users.models import User
+from app.modules.users.models import SexForNorms, User
 from app.shared.age import age_on
 
 logger = logging.getLogger(__name__)
@@ -111,14 +111,29 @@ def save_draft(db: Session, user: User, data: DraftUpdate) -> OnboardingStatus:
     return get_status(db, user)
 
 
+def _pregnancy_applies(user: User) -> bool:
+    return not (user.profile and user.profile.sex_for_norms is SexForNorms.male)
+
+
 def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingSummary:
     """Writes one consistent snapshot: goals, activity profile, readiness screening, completion."""
     _categories(db, answers.activity)  # rejects unknown or inactive sport codes before writing
+    questions = rules.screening_questions(pregnancy_applies=_pregnancy_applies(user))
+    if ReadinessQuestion.pregnancy in questions and ReadinessQuestion.pregnancy not in answers.readiness:
+        raise AppError(
+            "validation_error",
+            "Answer every screening question.",
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            [{"field": "readiness.pregnancy", "type": "missing", "message": "Required."}],
+        )
+    # Only what was asked is kept: a question not asked is not stored as "no".
+    readiness = {q: v for q, v in answers.readiness.items() if q in questions}
     outcome = rules.screen_readiness(
-        answers.readiness,
+        readiness,
         answers.activity.activity_level,
         answers.activity.exercise_sessions_per_week,
         _user_age(user),
+        questions,
     )
     fu = answers.follow_ups
     a = answers.activity
@@ -150,7 +165,7 @@ def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingS
         ReadinessScreening(
             user_id=user.id,
             version=rules.SCREENING_VERSION,
-            answers={q.value: v for q, v in answers.readiness.items()},
+            answers={q.value: v for q, v in readiness.items()},
             result=outcome.result.value,
             intensity_ceiling=outcome.intensity_ceiling.value,
         )
@@ -228,11 +243,13 @@ def get_summary(db: Session, user: User) -> OnboardingSummary:
     readiness = None
     if screening is not None and profile is not None:
         age = _user_age(user)
+        stored = {ReadinessQuestion(k): v for k, v in screening.answers.items()}
         outcome = rules.screen_readiness(
-            {ReadinessQuestion(k): v for k, v in screening.answers.items()},
+            stored,
             ActivityLevel(profile.activity_level),
             profile.exercise_sessions_per_week,
             age,
+            frozenset(stored),  # exactly the questions that were asked then
         )
         readiness = ReadinessOut(
             result=ReadinessResult(screening.result),

@@ -29,7 +29,7 @@ from app.modules.onboarding.vocab import (
 )
 
 RULES_VERSION = "onboarding-rules-1"
-SCREENING_VERSION = "kinetra-readiness-1"
+SCREENING_VERSION = "kinetra-readiness-2"
 
 LOW_ACTIVITY = {ActivityLevel.sedentary, ActivityLevel.light}
 OLDER_ADULT_AGE = 60
@@ -80,6 +80,12 @@ def follow_up_questions(facts: ActivityFacts) -> list[FollowUpQuestion]:
 
 SYMPTOM_QUESTIONS = frozenset({ReadinessQuestion.chest_pain, ReadinessQuestion.dizziness_or_fainting})
 CONDITION_QUESTIONS = frozenset(set(ReadinessQuestion) - SYMPTOM_QUESTIONS)
+ALL_QUESTIONS = frozenset(ReadinessQuestion)
+
+
+def screening_questions(*, pregnancy_applies: bool) -> frozenset[ReadinessQuestion]:
+    """The questions a user is asked. Pregnancy is not asked when reference standards are male."""
+    return ALL_QUESTIONS if pregnancy_applies else ALL_QUESTIONS - {ReadinessQuestion.pregnancy}
 
 
 @dataclass(frozen=True)
@@ -104,8 +110,9 @@ def screen_readiness(
     activity_level: ActivityLevel,
     exercise_sessions_per_week: int,
     age: int | None = None,
+    questions: frozenset[ReadinessQuestion] = ALL_QUESTIONS,
 ) -> ReadinessOutcome:
-    missing = set(ReadinessQuestion) - set(answers)
+    missing = questions - set(answers)
     if missing:
         raise ValueError(f"Unanswered screening questions: {sorted(missing)}")
 

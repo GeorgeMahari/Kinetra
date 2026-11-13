@@ -212,3 +212,44 @@ class TestPrivacy:
             ):
                 assert conn.execute(text(f"SELECT count(*) FROM {table}")).scalar_one() == 0, table
             assert conn.execute(text("SELECT count(*) FROM sports")).scalar_one() == 30  # catalogue untouched
+
+
+class TestPregnancyQuestion:
+    """Not asked of users whose reference standards are male; required from everyone else."""
+
+    NO_PREGNANCY = {k: v for k, v in READINESS_NO.items() if k != "pregnancy"}
+
+    def _set_sex(self, api: TestClient, h: dict[str, str], sex: str) -> None:
+        assert api.patch("/api/v1/me/profile", headers=h, json={"sex_for_norms": sex}).status_code == 200
+
+    def test_male_user_completes_without_it_and_it_is_stored_as_not_asked(
+        self, api: TestClient, user: dict[str, str], migrated_engine: Engine
+    ) -> None:
+        self._set_sex(api, user, "male")
+        resp = api.post("/api/v1/onboarding/complete", headers=user, json=answers(readiness=self.NO_PREGNANCY))
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["readiness"]["result"] == "clear"
+        with migrated_engine.connect() as conn:
+            stored = conn.execute(text("SELECT answers FROM readiness_screenings")).scalar_one()
+        assert "pregnancy" not in stored
+
+    @pytest.mark.parametrize("sex", ["female", "not_specified"])
+    def test_everyone_else_must_answer_it(
+        self, api: TestClient, user: dict[str, str], migrated_engine: Engine, sex: str
+    ) -> None:
+        self._set_sex(api, user, sex)
+        resp = api.post("/api/v1/onboarding/complete", headers=user, json=answers(readiness=self.NO_PREGNANCY))
+        assert resp.status_code == 422
+        assert resp.json()["error"]["details"][0]["field"] == "readiness.pregnancy"
+        with migrated_engine.connect() as conn:
+            assert conn.execute(text("SELECT count(*) FROM readiness_screenings")).scalar_one() == 0
+
+    def test_a_pregnancy_answer_from_a_male_user_is_ignored(
+        self, api: TestClient, user: dict[str, str], migrated_engine: Engine
+    ) -> None:
+        self._set_sex(api, user, "male")
+        body = answers(readiness=READINESS_NO | {"pregnancy": True})
+        assert api.post("/api/v1/onboarding/complete", headers=user, json=body).json()["readiness"]["result"] == "clear"
+        with migrated_engine.connect() as conn:
+            stored = conn.execute(text("SELECT answers FROM readiness_screenings")).scalar_one()
+        assert "pregnancy" not in stored

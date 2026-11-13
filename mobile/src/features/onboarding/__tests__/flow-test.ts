@@ -1,6 +1,6 @@
 import { READINESS_QUESTIONS, type OnboardingDraft } from '@/api/onboarding';
 
-import { buildAnswers, canContinue, resumeStep, STEPS } from '../flow';
+import { buildAnswers, canContinue, readinessQuestions, resumeStep, STEPS } from '../flow';
 
 const ALL_NO = Object.fromEntries(READINESS_QUESTIONS.map((q) => [q, false])) as Record<
   (typeof READINESS_QUESTIONS)[number],
@@ -84,5 +84,33 @@ describe('stepper nextValue', () => {
     expect(nextValue(null, 10, 10, 240)).toBe(10);
     expect(nextValue(1, -1, 0, 21)).toBe(0);
     expect(nextValue(21, 1, 0, 21)).toBe(21);
+  });
+});
+
+describe('pregnancy question', () => {
+  const { pregnancy: _omitted, ...NO_PREGNANCY } = ALL_NO;
+
+  it('is not asked when reference standards are male, and asked otherwise', () => {
+    expect(readinessQuestions('male')).not.toContain('pregnancy');
+    expect(readinessQuestions('male')).toHaveLength(READINESS_QUESTIONS.length - 1);
+    expect(readinessQuestions('female')).toContain('pregnancy');
+    expect(readinessQuestions('not_specified')).toContain('pregnancy');
+    expect(readinessQuestions(undefined)).toContain('pregnancy');
+  });
+
+  it('a male user can finish without it, and an old answer is not sent', () => {
+    const male = readinessQuestions('male');
+    const draft = { ...COMPLETE, readiness: NO_PREGNANCY };
+    expect(canContinue('readiness', draft, male)).toBe(true);
+    expect(buildAnswers(draft, male)?.readiness).toEqual(NO_PREGNANCY);
+    expect(buildAnswers({ ...COMPLETE, readiness: { ...NO_PREGNANCY, pregnancy: true } }, male)?.readiness).toEqual(
+      NO_PREGNANCY,
+    );
+  });
+
+  it('everyone else still has to answer it', () => {
+    const draft = { ...COMPLETE, readiness: NO_PREGNANCY };
+    expect(canContinue('readiness', draft, readinessQuestions('female'))).toBe(false);
+    expect(buildAnswers(draft, readinessQuestions('not_specified'))).toBeNull();
   });
 });

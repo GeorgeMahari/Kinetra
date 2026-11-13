@@ -6,7 +6,6 @@ import {
   CHOICE_FOLLOW_UPS,
   EXPERIENCE,
   GOALS,
-  READINESS_QUESTIONS,
   type ActivityAnswers,
   type FollowUpAnswers,
   type FollowUpQuestion,
@@ -292,7 +291,15 @@ export function FollowUpsStep({
   );
 }
 
-export function ReadinessStep({ draft, update }: { draft: OnboardingDraft; update: Update }) {
+export function ReadinessStep({
+  draft,
+  update,
+  questions,
+}: {
+  draft: OnboardingDraft;
+  update: Update;
+  questions: readonly ReadinessQuestion[];
+}) {
   const { t } = useTranslation();
   const { spacing } = useTheme();
   const r = draft.readiness ?? {};
@@ -303,7 +310,7 @@ export function ReadinessStep({ draft, update }: { draft: OnboardingDraft; updat
       <AppText variant="caption" color="textMuted">
         {t('onboarding.readinessDisclaimer')}
       </AppText>
-      {READINESS_QUESTIONS.map((q) => (
+      {questions.map((q) => (
         <Card key={q}>
           <YesNo
             testID={`ready-${q}`}
