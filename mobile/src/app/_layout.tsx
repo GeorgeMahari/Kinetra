@@ -1,10 +1,18 @@
 import '@/i18n';
 
+import {
+  Geologica_400Regular,
+  Geologica_500Medium,
+  Geologica_600SemiBold,
+  Geologica_700Bold,
+  useFonts,
+} from '@expo-google-fonts/geologica';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '@/auth/AuthProvider';
@@ -27,8 +35,15 @@ function Splash() {
 function RootNavigator() {
   const { colors, scheme } = useTheme();
   const { status, user } = useAuth();
+  // The brand face; if it fails to load the app still runs on the system font.
+  const [fontsLoaded, fontError] = useFonts({
+    Geologica_400Regular,
+    Geologica_500Medium,
+    Geologica_600SemiBold,
+    Geologica_700Bold,
+  });
 
-  if (status === 'loading') return <Splash />;
+  if (status === 'loading' || (!fontsLoaded && !fontError)) return <Splash />;
 
   const signedIn = status === 'signedIn';
   // Ages 14-15 before a parent agrees: only the waiting screen exists (the API refuses the rest too).
@@ -65,14 +80,16 @@ export default function RootLayout() {
     () => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } }),
   );
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

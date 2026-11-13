@@ -4,7 +4,7 @@ import { View, type ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing, radius, elevation } = useTheme();
   return (
     <View
       style={[
@@ -15,6 +15,7 @@ export function Card({ children, style }: { children: ReactNode; style?: ViewSty
           borderWidth: 1,
           borderColor: colors.border,
           gap: spacing.md,
+          ...elevation.card,
         },
         style,
       ]}

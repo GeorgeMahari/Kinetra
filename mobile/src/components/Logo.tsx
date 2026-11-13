@@ -20,7 +20,7 @@ function point(index: number, r: number, c: number): string {
   return `${(c + Math.cos(angle) * r).toFixed(2)},${(c + Math.sin(angle) * r).toFixed(2)}`;
 }
 
-export function LogoMark({ size = 64 }: { size?: number }) {
+export function LogoMark({ size = 64, onShell = false }: { size?: number; onShell?: boolean }) {
   const c = 50;
   const outer = Array.from({ length: AXES }, (_, i) => point(i, OUTER, c)).join(' ');
   const profile = PROFILE.map((f, i) => point(i, OUTER * f, c)).join(' ');
@@ -28,22 +28,22 @@ export function LogoMark({ size = 64 }: { size?: number }) {
     <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityLabel="Kinetra">
       <Defs>
         <LinearGradient id="kinetraGrad" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={brand.indigo500} />
-          <Stop offset="1" stopColor={brand.mint500} />
+          <Stop offset="0" stopColor={onShell ? brand.white : brand.forest600} />
+          <Stop offset="1" stopColor={onShell ? brand.forest300 : brand.blazeBlue} />
         </LinearGradient>
       </Defs>
-      <Polygon points={outer} fill="none" stroke={brand.indigo300} strokeOpacity={0.45} strokeWidth={2.5} />
+      <Polygon points={outer} fill="none" stroke={onShell ? brand.white : brand.forest300} strokeOpacity={onShell ? 0.4 : 0.55} strokeWidth={2.5} />
       <Polygon points={profile} fill="url(#kinetraGrad)" />
-      <Circle cx={c} cy={c} r={4.5} fill={brand.white} />
+      <Circle cx={c} cy={c} r={4.5} fill={onShell ? brand.forest700 : brand.white} />
     </Svg>
   );
 }
 
-export function Logo({ size = 40 }: { size?: number }) {
+export function Logo({ size = 40, onShell = false }: { size?: number; onShell?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.3 }}>
-      <LogoMark size={size} />
-      <AppText variant="title" style={{ fontSize: size * 0.62, lineHeight: size * 0.8, letterSpacing: 0.5 }}>
+      <LogoMark size={size} onShell={onShell} />
+      <AppText variant="title" color={onShell ? 'onShell' : 'text'} style={{ fontSize: size * 0.62, lineHeight: size * 0.8, letterSpacing: 0.5 }}>
         kinetra
       </AppText>
     </View>

@@ -1,7 +1,7 @@
 /** Standard loading, empty and error states: every data-backed view uses these. */
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, View, type DimensionValue } from 'react-native';
+import { ActivityIndicator, View, type DimensionValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Reanimated from 'react-native-reanimated';
 
 import { errorMessage } from '@/api/errorMessage';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -9,6 +9,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { Icon, type IconName } from './Icon';
+import { useShimmer } from './motion';
 
 export function LoadingState({ label }: { label?: string }) {
   const { t } = useTranslation();
@@ -81,22 +82,11 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
 /** Pulsing placeholder block for content that is loading. */
 export function Skeleton({ width = '100%', height = 16 }: { width?: DimensionValue; height?: number }) {
   const { colors, radius } = useTheme();
-  // A stable Animated.Value created once; state (not a ref) because it is read during render.
-  const [opacity] = useState(() => new Animated.Value(0.5));
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.5, duration: 700, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [opacity]);
+  const shimmer = useShimmer();
   return (
-    <Animated.View
+    <Reanimated.View
       accessibilityElementsHidden
-      style={{ width, height, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised, opacity }}
+      style={[{ width, height, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised }, shimmer]}
     />
   );
 }

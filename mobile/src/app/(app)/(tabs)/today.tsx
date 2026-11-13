@@ -8,7 +8,6 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { SectionHeader } from '@/components/ListRow';
-import { Logo } from '@/components/Logo';
 import { Screen } from '@/components/Screen';
 import { ProfileMap, ProfileMapLegend } from '@/components/charts/ProfileMap';
 import { headlineIndicator } from '@/api/assessments';
@@ -19,6 +18,7 @@ import { ObjectivesList } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
 import { DimensionList } from '@/features/dimensions/DimensionList';
 import { OnboardingCard } from '@/features/onboarding/OnboardingCard';
+import { TrailHead } from '@/features/today/TrailHead';
 import { COMPLETION_TOTAL, missingProfileItems } from '@/features/profile/completion';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -37,13 +37,20 @@ export default function Today() {
   return (
     <Screen>
       <View style={{ gap: spacing.xl }}>
-        <Logo size={28} />
+        <TrailHead
+          title={p.display_name ? t('home.greeting', { name: p.display_name }) : t('home.greetingNoName')}
+          subtitle={t('home.subtitle')}
+          overview={dashboard.data?.overview}
+        />
 
-        <View style={{ gap: spacing.sm }}>
-          <AppText variant="title" testID="greeting">
-            {p.display_name ? t('home.greeting', { name: p.display_name }) : t('home.greetingNoName')}
-          </AppText>
-          <AppText color="textMuted">{t('home.subtitle')}</AppText>
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader title={t('today.dimensionsTitle')} caption={t('today.dimensionsCaption')} />
+          <DimensionList overview={dashboard.data?.overview} />
+          {dashboard.data?.overview.dimensions.every((d) => d.status !== 'not_assessed') ? null : (
+            <AppText variant="caption" color="textMuted">
+              {t('today.notAssessedHint')}
+            </AppText>
+          )}
         </View>
 
         <OnboardingCard />
@@ -151,15 +158,6 @@ export default function Today() {
           </Card>
         ) : null}
 
-        <View style={{ gap: spacing.md }}>
-          <SectionHeader title={t('today.dimensionsTitle')} caption={t('today.dimensionsCaption')} />
-          <DimensionList overview={dashboard.data?.overview} />
-          {dashboard.data?.overview.dimensions.every((d) => d.status !== 'not_assessed') ? null : (
-            <AppText variant="caption" color="textMuted">
-              {t('today.notAssessedHint')}
-            </AppText>
-          )}
-        </View>
       </View>
     </Screen>
   );

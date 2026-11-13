@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useColorScheme } from 'react-native';
 
 import { loadThemePreference, saveThemePreference, type ThemePreference } from './preferences';
-import { colors, radius, spacing, typography, type ColorScheme, type ThemeColors } from './tokens';
+import { colors, elevation, motion, radius, spacing, typography, type ColorScheme, type ThemeColors } from './tokens';
 
 export interface Theme {
   scheme: ColorScheme;
@@ -10,6 +10,8 @@ export interface Theme {
   spacing: typeof spacing;
   radius: typeof radius;
   typography: typeof typography;
+  elevation: (typeof elevation)[ColorScheme];
+  motion: typeof motion;
   preference: ThemePreference;
   setPreference(p: ThemePreference): void;
 }
@@ -46,7 +48,17 @@ export function ThemeProvider({ children, scheme }: { children: ReactNode; schem
 
   const resolved = scheme ?? resolveScheme(preference, system);
   const theme = useMemo<Theme>(
-    () => ({ scheme: resolved, colors: colors[resolved], spacing, radius, typography, preference, setPreference }),
+    () => ({
+      scheme: resolved,
+      colors: colors[resolved],
+      spacing,
+      radius,
+      typography,
+      elevation: elevation[resolved],
+      motion,
+      preference,
+      setPreference,
+    }),
     [resolved, preference, setPreference],
   );
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;

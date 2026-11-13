@@ -1,8 +1,9 @@
-import { ActivityIndicator, Pressable, type PressableProps } from 'react-native';
+import { ActivityIndicator, type PressableProps } from 'react-native';
 
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { AppText } from './AppText';
+import { PressableScale } from './motion';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
@@ -18,20 +19,20 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
   const textColor = variant === 'primary' ? 'onBrand' : 'brandText';
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       {...rest}
-      style={({ pressed }) => ({
+      style={{
         minHeight: 52,
         paddingHorizontal: spacing.xl,
         borderRadius: radius.md,
         backgroundColor: background,
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1,
-      })}
+        opacity: isDisabled ? 0.5 : 1,
+      }}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? colors.onBrand : colors.brand} />
@@ -40,6 +41,6 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
           {label}
         </AppText>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }
