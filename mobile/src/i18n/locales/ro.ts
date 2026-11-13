@@ -113,6 +113,9 @@ const ro: TranslationResources = {
     dimensionsCaption: 'Opt dimensiuni independente. Fiecare este evaluată separat; nu există un scor general unic.',
     notAssessed: 'Neevaluat',
     reported: 'Doar declarat',
+    reportedBy: 'Declarat de tine',
+    sleepQuality: 'Somn: {{quality}}',
+    sleepHours: '{{hours}} h',
     notAssessedHint: 'Încă nu există măsurători. Dimensiunea rămâne „neevaluată” până când faci un test pentru ea, în loc să afișeze o valoare ghicită.',
   },
   dimensions: {

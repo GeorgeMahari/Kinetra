@@ -69,6 +69,8 @@ export interface DimensionOverview {
   status: 'assessed' | 'reported' | 'not_assessed';
   latest: TestResult[];
   suggested_tests: TestCode[];
+  /** Lifestyle only: what the user reported about sleep (never a measurement). */
+  reported?: { sleep_hours: number | null; sleep_quality: 'poor' | 'fair' | 'good' | null } | null;
 }
 
 export interface Overview {

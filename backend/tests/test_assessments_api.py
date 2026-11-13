@@ -134,6 +134,9 @@ class TestOverview:
         assert "plank" not in ov["strength"]["suggested_tests"]  # just done
         # Sleep was reported during onboarding: reported, not assessed.
         assert ov["lifestyle"]["status"] == "reported"
+        # ...and what was reported comes along, so the app can show it (answers() reports 7.5 h).
+        assert ov["lifestyle"]["reported"] == {"sleep_hours": 7.5, "sleep_quality": None}
+        assert ov["strength"]["reported"] is None
 
     def test_stopped_early_results_do_not_count_as_assessed(
         self, api: TestClient, user: dict[str, str]

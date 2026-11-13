@@ -20,6 +20,7 @@ from app.modules.assessments.schemas import (
     IndicatorOut,
     Overview,
     ReferenceOut,
+    ReportedLifestyle,
     ResultCreate,
     ResultOut,
     TestOut,
@@ -216,7 +217,8 @@ def overview(db: Session, user: User) -> Overview:
             latest_by_test.setdefault(r.test_code, r)
 
     now = datetime.now(UTC)
-    reported_lifestyle = onboarding_service.has_reported_lifestyle(db, user)
+    sleep = onboarding_service.reported_sleep(db, user)
+    reported_lifestyle = ReportedLifestyle(sleep_hours=sleep[0], sleep_quality=sleep[1]) if sleep else None
     dims: list[DimensionOverview] = []
     for d in Dimension:
         tests = [t for t in TESTS.values() if t.dimension is d]
@@ -238,6 +240,7 @@ def overview(db: Session, user: User) -> Overview:
                 status=state,
                 latest=[_to_out(r) for r in latest],
                 suggested_tests=suggested,
+                reported=reported_lifestyle if d is Dimension.lifestyle else None,
             )
         )
     return Overview(intensity_ceiling=ceiling, dimensions=dims)

@@ -34,6 +34,7 @@ from app.modules.onboarding.vocab import (
     MobilityPractice,
     ReadinessQuestion,
     ReadinessResult,
+    SleepQuality,
     SportCategory,
 )
 from app.modules.users.models import SexForNorms, User
@@ -329,10 +330,13 @@ def latest_intensity_ceiling(db: Session, user: User) -> IntensityCeiling | None
     return rules.cap_for_age(IntensityCeiling(s.intensity_ceiling), _user_age(user)) if s else None
 
 
-def has_reported_lifestyle(db: Session, user: User) -> bool:
-    """True when the latest activity profile contains self-reported sleep information."""
+def reported_sleep(db: Session, user: User) -> tuple[float | None, SleepQuality | None] | None:
+    """Self-reported sleep (hours, quality) from the latest activity profile, or None if neither was given."""
     p = _latest_profile(db, user)
-    return bool(p and (p.sleep_hours is not None or p.sleep_quality is not None))
+    if not p or (p.sleep_hours is None and p.sleep_quality is None):
+        return None
+    hours = float(p.sleep_hours) if p.sleep_hours is not None else None
+    return hours, SleepQuality(p.sleep_quality) if p.sleep_quality else None
 
 
 class ActivitySnapshot(TypedDict):

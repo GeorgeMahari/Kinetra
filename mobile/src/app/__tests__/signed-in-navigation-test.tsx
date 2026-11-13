@@ -64,6 +64,21 @@ describe('signed-in navigation', () => {
     expect(screen.getByText(/Maximal-effort tests can be suggested/)).toBeTruthy();
   });
 
+  it('shows what was reported about sleep, marked as reported', async () => {
+    const backend = createFakeBackend({ status: 'in_progress', step: 1 });
+    backend.setReportedSleep({ sleep_hours: 7, sleep_quality: 'fair' });
+    await open(TEST_USER, backend);
+    const card = await screen.findByTestId('dimension-lifestyle');
+    await waitFor(() => expect(card).toHaveTextContent(/Reported by you · Sleep: Fair/));
+    expect(screen.getByTestId('dimension-lifestyle-value')).toHaveTextContent('7 h');
+    expect(screen.getByTestId('dimension-balance')).toHaveTextContent(/Not assessed/);
+  });
+
+  it('explains "not assessed" only while something is not assessed', async () => {
+    await open();
+    expect(await screen.findByText(/No measurements yet/)).toBeTruthy();
+  });
+
   it('shows the profile-completion card only while details are missing', async () => {
     await open();
     expect(screen.getByText('Complete your profile')).toBeTruthy();

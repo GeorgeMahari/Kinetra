@@ -106,6 +106,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
   });
   let status: OnboardingStatus = { status: 'not_started', step: 0, draft: {}, completed_at: null, ...initial };
   let recommendations: unknown[] | null = null;
+  let reportedSleep: { sleep_hours: number | null; sleep_quality: string | null } | null = null;
 
   const request = jest.fn(async (path: string, options: { method?: string; body?: unknown } = {}) => {
     const method = options.method ?? 'GET';
@@ -175,9 +176,14 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
             intensity_ceiling: 'submaximal',
             dimensions: dims.map((d) => ({
               dimension: d,
-              status: d === 'muscularEndurance' && results.length ? 'assessed' : 'not_assessed',
+              status: d === 'muscularEndurance' && results.length
+                ? 'assessed'
+                : d === 'lifestyle' && reportedSleep
+                  ? 'reported'
+                  : 'not_assessed',
               latest: d === 'muscularEndurance' ? results.slice(0, 1) : [],
               suggested_tests: [],
+              reported: d === 'lifestyle' ? reportedSleep : null,
             })),
           },
         };
@@ -223,10 +229,13 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
 
   // The fake answers per path; the generic signature is the app's contract, not checked per call here.
   const seedResult = (reps: number) => results.unshift(pushupResult(reps, `r${results.length + 1}`));
+  const setReportedSleep = (sleep: { sleep_hours: number | null; sleep_quality: string | null }) => {
+    reportedSleep = sleep;
+  };
   const setRecommendations = (recs: unknown[]) => {
     recommendations = recs;
   };
-  return { calls, seedResult, setRecommendations, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
+  return { calls, seedResult, setRecommendations, setReportedSleep, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
 }
 
 const METRICS = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };

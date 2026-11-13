@@ -113,6 +113,9 @@ const ru: TranslationResources = {
     dimensionsCaption: 'Восемь независимых измерений. Каждое оценивается отдельно; единого общего балла нет.',
     notAssessed: 'Не оценено',
     reported: 'Только со слов',
+    reportedBy: 'Указано вами',
+    sleepQuality: 'Сон: {{quality}}',
+    sleepHours: '{{hours}} ч',
     notAssessedHint: 'Измерений пока нет. Это измерение остаётся «не оценённым», пока вы не пройдёте тест, — вместо угаданного значения.',
   },
   dimensions: {

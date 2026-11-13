@@ -154,9 +154,11 @@ export default function Today() {
         <View style={{ gap: spacing.md }}>
           <SectionHeader title={t('today.dimensionsTitle')} caption={t('today.dimensionsCaption')} />
           <DimensionList overview={dashboard.data?.overview} />
-          <AppText variant="caption" color="textMuted">
-            {t('today.notAssessedHint')}
-          </AppText>
+          {dashboard.data?.overview.dimensions.every((d) => d.status !== 'not_assessed') ? null : (
+            <AppText variant="caption" color="textMuted">
+              {t('today.notAssessedHint')}
+            </AppText>
+          )}
         </View>
       </View>
     </Screen>

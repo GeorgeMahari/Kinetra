@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.onboarding.vocab import Dimension, IntensityCeiling
+from app.modules.onboarding.vocab import Dimension, IntensityCeiling, SleepQuality
 
 
 class ReferenceOut(BaseModel):
@@ -68,11 +68,20 @@ class ResultOut(BaseModel):
     references: list[ReferenceOut]
 
 
+class ReportedLifestyle(BaseModel):
+    """What the user said about sleep in onboarding. Self-reported, never a measurement."""
+
+    sleep_hours: float | None
+    sleep_quality: SleepQuality | None
+
+
 class DimensionOverview(BaseModel):
     dimension: Dimension
     status: Literal["assessed", "reported", "not_assessed"]
     latest: list[ResultOut]
     suggested_tests: list[str]
+    # Only for the lifestyle dimension, when something was reported.
+    reported: ReportedLifestyle | None = None
 
 
 class Overview(BaseModel):

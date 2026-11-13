@@ -23,12 +23,27 @@ export function DimensionList({ overview }: { overview?: Overview }) {
         const headline = latest ? headlineIndicator(latest) : undefined;
         const value = headline ? formatValue(headline, i18n.resolvedLanguage) : null;
         const status = ov?.status ?? 'not_assessed';
+        const rep = status === 'reported' ? ov?.reported : null;
+        const quality = rep?.sleep_quality ? t(`followUps.options.${rep.sleep_quality}`) : null;
+        // What the user reported is shown as such, never as a measured value.
+        const reportedValue =
+          rep?.sleep_hours != null
+            ? t('today.sleepHours', { hours: rep.sleep_hours.toLocaleString(i18n.resolvedLanguage) })
+            : quality;
         const statusLabel =
           status === 'assessed'
             ? value ?? t(`assess.tests.${latest!.test_code}.name`)
             : status === 'reported'
-              ? t('today.reported')
+              ? reportedValue ?? t('today.reported')
               : t('today.notAssessed');
+        const caption = latest
+          ? `${t(`assess.tests.${latest.test_code}.name`)} · ${new Date(latest.performed_at).toLocaleDateString(i18n.resolvedLanguage)}`
+          : rep
+            ? [t('today.reportedBy'), quality && rep.sleep_hours != null ? t('today.sleepQuality', { quality }) : null]
+                .filter(Boolean)
+                .join(' · ')
+            : t(`dimensions.${d.key}.body`);
+        const showsValue = status === 'assessed' || reportedValue != null;
         return (
           <Pressable
             key={d.key}
@@ -62,12 +77,10 @@ export function DimensionList({ overview }: { overview?: Overview }) {
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="label">{t(`dimensions.${d.key}.name`)}</AppText>
               <AppText variant="caption" color="textMuted" numberOfLines={2}>
-                {latest
-                  ? `${t(`assess.tests.${latest.test_code}.name`)} · ${new Date(latest.performed_at).toLocaleDateString(i18n.resolvedLanguage)}`
-                  : t(`dimensions.${d.key}.body`)}
+                {caption}
               </AppText>
             </View>
-            {status === 'assessed' ? (
+            {showsValue ? (
               <AppText variant="label" testID={`dimension-${d.key}-value`}>
                 {statusLabel}
               </AppText>

@@ -112,6 +112,9 @@ const en = {
     dimensionsCaption: 'Eight independent dimensions. Each is assessed separately; there is no single overall score.',
     notAssessed: 'Not assessed',
     reported: 'Reported only',
+    reportedBy: 'Reported by you',
+    sleepQuality: 'Sleep: {{quality}}',
+    sleepHours: '{{hours}} h',
     notAssessedHint: 'No measurements yet. This dimension stays “not assessed” until you complete a test for it, instead of showing a guessed value.',
   },
   dimensions: {
