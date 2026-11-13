@@ -196,6 +196,21 @@ FastAPI converts exceptions raised while reading the body into its own 400, so t
 the 413 directly and makes the app see a disconnected client. This covers chunked bodies, which carry
 no Content-Length.
 
+### D38 — Health Connect: read-only import, chosen after the MVP (2026-11-13)
+Spec §16 kept external integrations out of the initial version. After the MVP the owner chose Android
+Health Connect as the first one.
+- **What is read:** resting heart rate, weight and daily steps, for the last 30 days, and only on request
+  ("Sync"). Kinetra never writes to Health Connect.
+- **Where it goes:** values land in `measurements` with `source = health_connect` and the source's own
+  record id, so a re-sync updates rows instead of duplicating them. Steps come from Health Connect's
+  aggregate, which removes phone + watch double counting, keyed per local day.
+- **What it never does:** imported values never become test results or interpretations. The screen labels
+  them "Source: Health Connect".
+- **Removal:** the user can delete every imported value. Account deletion and the data export cover them.
+- **Where it works:** it needs a development or store build (`expo-dev-client`), because Expo Go has no
+  native module. In Expo Go, on iOS and on the web the screen says so honestly and nothing is simulated.
+  Apple Health remains future scope.
+
 ### D10 — Minors (planned, Milestone 2/4)
 Users under 18 get a reduced data set, no adult norms, no maximal-effort tests, and no
 public or social features. Under the minimum age (16 by default, configurable per

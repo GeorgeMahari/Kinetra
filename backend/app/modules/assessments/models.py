@@ -29,8 +29,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
 
-MEASUREMENT_KINDS = ("weight_kg", "waist_cm", "resting_hr_bpm")
-MEASUREMENT_SOURCES = ("manual",)
+MEASUREMENT_KINDS = ("weight_kg", "waist_cm", "resting_hr_bpm", "steps_daily")
+MEASUREMENT_SOURCES = ("manual", "health_connect")
 
 
 class TestResult(Base):

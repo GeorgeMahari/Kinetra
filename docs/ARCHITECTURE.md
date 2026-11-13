@@ -65,7 +65,9 @@ is shown with an explicit "no validated reference for this group" note.
 - **History is append-only.** Results, measurements and assessments are never overwritten;
   a re-test creates a new row. Corrections create a new version and mark the old one superseded.
 - **Measurements are generic and source-tagged** (`source = manual | healthkit | health_connect | …`)
-  so wearable integrations can be added later without a schema redesign. For now only `manual` exists.
+  so wearable integrations can be added later without a schema redesign. Sources in use: `manual`
+  and, since migration `0007`, `health_connect` (read-only Android import; see DECISIONS D38).
+  Imports are idempotent on `(user, source, external_id)` and never become test results.
 - **Protocol is part of the result.** HRR measured with active recovery is never compared
   with HRR measured with passive recovery.
 - UUID primary keys; `created_at`/`updated_at` timestamps with time zone; deterministic

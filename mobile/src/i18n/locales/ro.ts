@@ -1,11 +1,13 @@
 import assessRo from './assess.ro';
 import insightsRo from './insights.ro';
+import devicesRo from './devices.ro';
 import progressionRo from './progression.ro';
 import type { TranslationResources } from './en';
 
 const ro: TranslationResources = {
   assess: assessRo,
   ...insightsRo,
+  ...devicesRo,
   ...progressionRo,
   brand: {
     name: 'Kinetra',

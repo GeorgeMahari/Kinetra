@@ -74,6 +74,14 @@ export default function ProfileTab() {
             detail={LANGUAGE_NAMES[(i18n.resolvedLanguage as Language) ?? 'en']}
             onPress={() => router.push('/settings')}
           />
+          <Divider />
+          <ListRow
+            testID="open-connected-data"
+            icon="device"
+            title={t('devices.title')}
+            subtitle={t('devices.rowHint')}
+            onPress={() => router.push('/connected-data')}
+          />
           {__DEV__ ? (
             <>
               <Divider />

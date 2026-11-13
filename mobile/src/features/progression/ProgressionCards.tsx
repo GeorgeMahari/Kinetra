@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -84,11 +84,14 @@ export function WeekCard({ p }: { p: Progression }) {
   const [busy, setBusy] = useState(false);
   const showStrength = p.objectives.some((o) => o.code === 'strength_sessions');
 
-  useEffect(() => {
+  // When the saved check-in changes (after saving or refetching), show its values.
+  const [shownCheckin, setShownCheckin] = useState(p.checkin);
+  if (shownCheckin !== p.checkin) {
+    setShownCheckin(p.checkin);
     setSessions(p.checkin?.sessions ?? null);
     setStrength(p.checkin?.strength_sessions ?? null);
     setMinutes(p.checkin?.active_minutes ?? null);
-  }, [p.checkin]);
+  }
 
   return (
     <Card>

@@ -7,6 +7,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import SecurityMiddleware
 from app.modules.assessments.router import router as assessments_router
 from app.modules.auth.router import router as auth_router
+from app.modules.devices.router import router as devices_router
 from app.modules.health.router import API_VERSION
 from app.modules.health.router import router as health_router
 from app.modules.insights.router import router as insights_router
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
         assessments_router,
         insights_router,
         progression_router,
+        devices_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

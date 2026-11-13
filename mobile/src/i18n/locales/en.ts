@@ -1,10 +1,12 @@
 import assessEn from './assess.en';
 import insightsEn from './insights.en';
+import devicesEn from './devices.en';
 import progressionEn from './progression.en';
 
 const en = {
   assess: assessEn,
   ...insightsEn,
+  ...devicesEn,
   ...progressionEn,
   brand: {
     name: 'Kinetra',

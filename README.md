@@ -91,8 +91,15 @@ $sdk = "$env:LOCALAPPDATA\Android\Sdk"
 cd mobile; npx expo start --android                  # installs Expo Go on the emulator on first run
 ```
 
-Re-run `adb reverse` after restarting the emulator. Expo Go is enough: the app only uses
-modules that Expo Go includes.
+Re-run `adb reverse` after restarting the emulator. Expo Go is enough for everything except
+**Connected data (Health Connect)**, which needs a development build because Expo Go has no Health
+Connect module:
+
+```powershell
+cd mobile; npx expo run:android      # builds and installs the Kinetra dev client (needs JDK 17+ and ~4 GB free RAM)
+```
+
+In Expo Go the Connected data screen explains this and does nothing else.
 
 ## Tests and checks
 

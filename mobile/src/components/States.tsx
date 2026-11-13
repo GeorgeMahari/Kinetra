@@ -1,5 +1,5 @@
 /** Standard loading, empty and error states: every data-backed view uses these. */
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, View, type DimensionValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -81,7 +81,8 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
 /** Pulsing placeholder block for content that is loading. */
 export function Skeleton({ width = '100%', height = 16 }: { width?: DimensionValue; height?: number }) {
   const { colors, radius } = useTheme();
-  const opacity = useRef(new Animated.Value(0.5)).current;
+  // A stable Animated.Value created once; state (not a ref) because it is read during render.
+  const [opacity] = useState(() => new Animated.Value(0.5));
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([

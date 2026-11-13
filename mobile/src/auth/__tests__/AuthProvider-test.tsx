@@ -37,6 +37,8 @@ function memoryStorage(initial: string | null = null): TokenStorage & { value: s
 
 let ctx: AuthContextValue;
 function Probe() {
+  // Test-only probe: exposes the latest context value to the test body.
+  // eslint-disable-next-line react-hooks/globals
   ctx = useAuth();
   return <Text testID="status">{ctx.status}</Text>;
 }

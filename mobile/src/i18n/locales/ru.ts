@@ -1,11 +1,13 @@
 import assessRu from './assess.ru';
 import insightsRu from './insights.ru';
+import devicesRu from './devices.ru';
 import progressionRu from './progression.ru';
 import type { TranslationResources } from './en';
 
 const ru: TranslationResources = {
   assess: assessRu,
   ...insightsRu,
+  ...devicesRu,
   ...progressionRu,
   brand: {
     name: 'Kinetra',

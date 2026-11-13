@@ -1,5 +1,5 @@
 import { router, Stack } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -50,19 +50,26 @@ export default function Onboarding() {
   const [summary, setSummary] = useState<OnboardingSummary | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const initialised = useRef(false);
+  const [resumed, setResumed] = useState(false);
 
   // Resume saved progress once (a completed onboarding starts again from the saved answers' defaults).
-  useEffect(() => {
-    if (initialised.current || !status.data) return;
-    initialised.current = true;
+  // Adjusting state during render, not in an effect, avoids an extra render pass with the empty draft.
+  if (!resumed && status.data) {
+    setResumed(true);
     if (status.data.status === 'in_progress') {
       setDraft(status.data.draft);
       setStep(resumeStep(status.data.step, status.data.draft));
     }
-  }, [status.data]);
+  }
 
   const name = stepName(step);
+
+  // Entering the follow-ups step drops questions fetched for earlier answers.
+  const [prevName, setPrevName] = useState(name);
+  if (prevName !== name) {
+    setPrevName(name);
+    if (name === 'followUps') setFollowUps(undefined);
+  }
 
   // Follow-up questions depend on the activity answers; fetch them when entering that step.
   useEffect(() => {
@@ -70,7 +77,6 @@ export default function Onboarding() {
     const activity = activityFromDraft(draft);
     if (!activity) return;
     let active = true;
-    setFollowUps(undefined);
     api
       .followUps(activity)
       .then((q) => active && setFollowUps(q))

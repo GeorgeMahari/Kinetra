@@ -170,10 +170,26 @@ Each milestone leaves the project runnable and tested. ✅ = done and verified.
 - Checked end to end against the real API with the persistent dev account.
 - **Tests:** backend 243, mobile 122.
 
+## Post-MVP 3 — Health Connect (read-only) ✅ code, ⏳ device check (2026-11-13)
+- **Migration `0007`:** the measurements CHECKs now allow `steps_daily` and `source = health_connect`.
+- **API `devices`:**
+  - `POST /measurements/import`: idempotent on the source's record id; implausible values reject the
+    batch; future timestamps are skipped.
+  - `GET /measurements`; `GET` and `DELETE /measurements/sources/health_connect`.
+- **Mobile, Profile → Connected data:**
+  - States: Expo Go / not installed / update needed / permissions.
+  - Asking for access, syncing the last 30 days, the latest value per kind labelled with its source,
+    and removal after confirmation.
+- **Lint:** mobile ESLint (`eslint-config-expo`) is now configured; 8 React Compiler errors fixed
+  (no setState in effects, no ref read during render).
+- **Tests:** backend 243, mobile 130.
+- **Not yet verified on a device:** it needs a development build (`npx expo run:android`) on an emulator
+  or phone with Health Connect. The tests cover the logic with the native module mocked.
+
 ## After the MVP (remaining)
 - Native-speaker review of the Romanian and Russian safety and scientific text; manual check of the
   NICE thresholds and the FRIEND 2022 tables.
 - An SMTP provider for real email delivery; a parental-consent flow for under-16s.
 - A shared rate-limit store and an httpOnly-cookie web client before any public web deployment.
-- Wearable imports (HealthKit / Health Connect) into `measurements` with new `source` values.
+- HealthKit (iOS) import; checking the Health Connect import on a real device with a development build.
 - An EAS development build and store builds; a CI pipeline running both suites.

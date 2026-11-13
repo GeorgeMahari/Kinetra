@@ -31,6 +31,7 @@ export default function SignedInLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="edit-profile" options={{ title: t('profile.title') }} />
         <Stack.Screen name="settings" options={{ title: t('profileTab.accountAndData') }} />
+        <Stack.Screen name="connected-data" options={{ title: t('devices.title') }} />
         <Stack.Screen name="onboarding" options={{ title: '' }} />
         <Stack.Screen name="test/[code]" options={{ title: '' }} />
         <Stack.Screen name="record/[code]" options={{ title: '' }} />

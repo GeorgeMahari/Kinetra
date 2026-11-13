@@ -28,7 +28,9 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      "react-native-health-connect",
+      "expo-build-properties"
     ],
     "scheme": "kinetra",
     "experiments": {
