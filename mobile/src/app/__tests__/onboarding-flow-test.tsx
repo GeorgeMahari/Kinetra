@@ -3,6 +3,7 @@ import '@/i18n';
 
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
+import { Text } from 'react-native';
 
 import { READINESS_QUESTIONS } from '@/api/onboarding';
 import i18n from '@/i18n';
@@ -10,7 +11,7 @@ import { createFakeBackend, providers } from '@/test-utils/fakeBackend';
 
 import Onboarding from '../(app)/onboarding';
 
-const routes = { index: () => null, onboarding: Onboarding };
+const routes = { index: () => null, '(tabs)/today': () => <Text>Today stub</Text>, onboarding: Onboarding };
 
 beforeEach(() => i18n.changeLanguage('en'));
 
@@ -91,6 +92,10 @@ it('walks through every step and sends a complete, honest payload', async () => 
     follow_ups: { strength_sessions_per_week: 0 },
     readiness: Object.fromEntries(READINESS_QUESTIONS.map((q) => [q, false])),
   });
+
+  // Done lands on the main page, wherever onboarding was opened from.
+  await fireEvent.press(screen.getByTestId('onboarding-done'));
+  await waitFor(() => expect(screen).toHavePathname('/today'));
 });
 
 it('resumes saved progress at the right step', async () => {

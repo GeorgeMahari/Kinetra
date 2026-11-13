@@ -6,6 +6,7 @@ import { renderRouter } from 'expo-router/testing-library';
 import type { Me } from '@/api/auth';
 import { resetOnboardingAutoOpen } from '@/features/onboarding/OnboardingCard';
 import i18n from '@/i18n';
+import { ApiError } from '@/api/client';
 import { createFakeBackend, providers, TEST_USER } from '@/test-utils/fakeBackend';
 
 import EditProfile from '../(app)/edit-profile';
@@ -74,6 +75,25 @@ describe('signed-in navigation', () => {
     expect(await screen.findByText('Personal details')).toBeTruthy();
     expect(screen).toHavePathname('/profile');
     await fireEvent.press(screen.getByTestId('edit-details'));
+    expect(screen).toHavePathname('/edit-profile');
+  });
+
+  it('saving the profile returns to Today', async () => {
+    const updateProfile = jest.fn().mockResolvedValue(TEST_USER);
+    const backend = createFakeBackend({ status: 'in_progress', step: 1 });
+    await renderRouter(routes, { initialUrl: '/edit-profile', wrapper: providers(backend.request, TEST_USER, { updateProfile }) });
+    await fireEvent.changeText(await screen.findByTestId('display-name'), 'Ana Maria');
+    await fireEvent.press(screen.getByTestId('save-profile'));
+    await waitFor(() => expect(screen).toHavePathname('/today'));
+    expect(updateProfile).toHaveBeenCalledWith(expect.objectContaining({ display_name: 'Ana Maria' }));
+  });
+
+  it('a failed profile save stays on the form and explains why', async () => {
+    const updateProfile = jest.fn().mockRejectedValue(new ApiError('network_error', 'offline', 0));
+    const backend = createFakeBackend({ status: 'in_progress', step: 1 });
+    await renderRouter(routes, { initialUrl: '/edit-profile', wrapper: providers(backend.request, TEST_USER, { updateProfile }) });
+    await fireEvent.press(await screen.findByTestId('save-profile'));
+    expect(await screen.findByTestId('profile-status')).toBeTruthy();
     expect(screen).toHavePathname('/edit-profile');
   });
 });

@@ -33,6 +33,8 @@ const assessRu = {
   deleteResult: 'Удалить этот результат',
   deleteConfirm: 'Удалить навсегда',
   resultTitle: 'Результат',
+  nextTest: 'Следующий тест: {{name}}',
+  backHome: 'На главную',
   savedTitle: 'Результат сохранён',
   viewTest: 'Назад к тесту',
   incomplete: 'Не завершён (остановлен раньше)',

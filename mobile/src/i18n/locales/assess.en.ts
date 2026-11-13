@@ -33,6 +33,8 @@ const assessEn = {
   deleteResult: 'Delete this result',
   deleteConfirm: 'Delete permanently',
   resultTitle: 'Result',
+  nextTest: 'Next test: {{name}}',
+  backHome: 'Back to home',
   savedTitle: 'Result saved',
   viewTest: 'Back to the test',
   incomplete: 'Incomplete (stopped early)',

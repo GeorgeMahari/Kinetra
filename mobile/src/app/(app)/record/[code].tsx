@@ -58,7 +58,7 @@ export default function RecordResult() {
     try {
       const result = await api.record(testCode, parsed.inputs, stopped);
       await invalidate();
-      router.replace({ pathname: '/result/[id]', params: { id: result.id } });
+      router.replace({ pathname: '/result/[id]', params: { id: result.id, fresh: '1' } });
     } catch (err) {
       if (err instanceof ApiError && err.code === 'validation_error') {
         const fieldErrs: Record<string, FieldError> = {};

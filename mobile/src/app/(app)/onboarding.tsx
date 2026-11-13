@@ -34,6 +34,7 @@ import {
   useOnboardingStatus,
   useSports,
 } from '@/features/onboarding/useOnboarding';
+import { goHome } from '@/navigation/afterSave';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function Onboarding() {
@@ -164,7 +165,7 @@ export default function Onboarding() {
 
   const footer =
     name === 'summary' ? (
-      <Button testID="onboarding-done" label={t('onboarding.done')} onPress={() => router.back()} />
+      <Button testID="onboarding-done" label={t('onboarding.done')} onPress={goHome} />
     ) : (
       <>
         <Button

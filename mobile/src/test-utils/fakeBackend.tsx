@@ -105,6 +105,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
       : [],
   });
   let status: OnboardingStatus = { status: 'not_started', step: 0, draft: {}, completed_at: null, ...initial };
+  let recommendations: unknown[] | null = null;
 
   const request = jest.fn(async (path: string, options: { method?: string; body?: unknown } = {}) => {
     const method = options.method ?? 'GET';
@@ -161,7 +162,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
             coverage: d === 'muscularEndurance' && results.length ? 'current' : d === 'lifestyle' ? 'reported' : 'unknown',
             latest_at: null,
           })),
-          recommendations: [
+          recommendations: recommendations ?? [
             { code: 'strength_two_days', kind: 'habit', priority: 70, dimension: 'strength', test_code: null,
               params: { current: 0, target: 2, step: 'start_one_session' }, reasons: ['below_who_strength_guideline'],
               reference: { id: 'who_pa_2020', citation: 'Bull FC, et al. WHO 2020 guidelines. Br J Sports Med.', url: 'https://iris.who.int' },
@@ -222,12 +223,19 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
 
   // The fake answers per path; the generic signature is the app's contract, not checked per call here.
   const seedResult = (reps: number) => results.unshift(pushupResult(reps, `r${results.length + 1}`));
-  return { calls, seedResult, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
+  const setRecommendations = (recs: unknown[]) => {
+    recommendations = recs;
+  };
+  return { calls, seedResult, setRecommendations, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
 }
 
 const METRICS = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };
 
-export function providers(request: AuthContextValue['request'], user: Me = TEST_USER) {
+export function providers(
+  request: AuthContextValue['request'],
+  user: Me = TEST_USER,
+  overrides: Partial<AuthContextValue> = {},
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const noop = jest.fn().mockResolvedValue(undefined);
   const auth: AuthContextValue = {
@@ -242,6 +250,7 @@ export function providers(request: AuthContextValue['request'], user: Me = TEST_
     setLanguage: noop,
     deleteAccount: noop,
     refreshUser: noop,
+    ...overrides,
   };
   return function Providers({ children }: { children: ReactNode }) {
     return (

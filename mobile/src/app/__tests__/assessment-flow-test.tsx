@@ -1,8 +1,10 @@
 /** Assess tab → test detail → record → result, against the in-memory backend. */
 import '@/i18n';
 
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { router } from 'expo-router';
 import { renderRouter } from 'expo-router/testing-library';
+import { Text } from 'react-native';
 
 import i18n from '@/i18n';
 import { createFakeBackend, providers } from '@/test-utils/fakeBackend';
@@ -13,7 +15,8 @@ import ResultScreen from '../(app)/result/[id]';
 import TestDetail from '../(app)/test/[code]';
 
 const routes = {
-  assess: Assess,
+  '(tabs)/today': () => <Text>Today stub</Text>,
+  '(tabs)/assess': Assess,
   'test/[code]': TestDetail,
   'record/[code]': RecordResult,
   'result/[id]': ResultScreen,
@@ -63,4 +66,56 @@ it('locked tests offer no way to record a result', async () => {
   expect(await screen.findByText('How to do it')).toBeTruthy();
   expect(screen.queryByTestId('enter-result')).toBeNull();
   expect(screen.getByText('Not suggested after your safety check')).toBeTruthy();
+});
+
+async function recordPushups(backend: ReturnType<typeof createFakeBackend>) {
+  await renderRouter(routes, { initialUrl: '/test/pushups', wrapper: providers(backend.request) });
+  await fireEvent.press(await screen.findByTestId('enter-result'));
+  await fireEvent.press(await screen.findByRole('radio', { name: 'On toes' }));
+  await fireEvent.changeText(screen.getByTestId('field-reps'), '27');
+  await fireEvent.press(screen.getByTestId('save-result'));
+  await waitFor(() => expect(screen).toHavePathname('/result/r1'));
+  expect(await screen.findByTestId('value-pushup_reps')).toHaveTextContent('27 reps');
+}
+
+describe('after saving a result', () => {
+  it('offers the next suggested test', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    await recordPushups(backend);
+    expect(await screen.findByTestId('next-test')).toHaveTextContent('Next test: Single-leg stance');
+    await fireEvent.press(screen.getByTestId('next-test'));
+    await waitFor(() => expect(screen).toHavePathname('/test/single_leg_stance'));
+    // Back from the next test goes home, not to the previous result or test.
+    await act(() => router.back());
+    await waitFor(() => expect(screen).toHavePathname('/today'));
+  });
+
+  it('goes back to the main page', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    await recordPushups(backend);
+    await fireEvent.press(await screen.findByTestId('back-home'));
+    await waitFor(() => expect(screen).toHavePathname('/today'));
+    expect(screen.getByText('Today stub')).toBeTruthy();
+  });
+
+  it('offers only the way home when no other test is recommended', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    backend.setRecommendations([
+      { code: 'retest_pushups', kind: 'retest', priority: 90, dimension: 'muscularEndurance', test_code: 'pushups',
+        params: {}, reasons: [], reference: null, general_guidance: true },
+    ]);
+    await recordPushups(backend);
+    expect(await screen.findByTestId('back-home')).toBeTruthy();
+    await waitFor(() => expect(backend.calls.some((c) => c.path === '/dashboard')).toBe(true));
+    expect(screen.queryByTestId('next-test')).toBeNull();
+  });
+
+  it('a result opened from history has no after-save buttons', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    backend.seedResult(20);
+    await renderRouter(routes, { initialUrl: '/result/r1', wrapper: providers(backend.request) });
+    expect(await screen.findByTestId('value-pushup_reps')).toHaveTextContent('20 reps');
+    expect(screen.queryByTestId('back-home')).toBeNull();
+    expect(screen.queryByTestId('next-test')).toBeNull();
+  });
 });

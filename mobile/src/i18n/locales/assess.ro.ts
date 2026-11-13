@@ -33,6 +33,8 @@ const assessRo = {
   deleteResult: 'Șterge acest rezultat',
   deleteConfirm: 'Șterge definitiv',
   resultTitle: 'Rezultat',
+  nextTest: 'Testul următor: {{name}}',
+  backHome: 'Înapoi la pagina principală',
   savedTitle: 'Rezultat salvat',
   viewTest: 'Înapoi la test',
   incomplete: 'Incomplet (oprit mai devreme)',
