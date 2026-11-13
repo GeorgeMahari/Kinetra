@@ -26,6 +26,8 @@ class MeResponse(BaseModel):
     email_verified: bool
     preferred_locale: Locale
     created_at: datetime
+    # 'pending' = locked until a parent consents (users aged 14-15).
+    parental_consent: Literal["not_required", "pending", "granted"] = "not_required"
     profile: ProfileResponse
 
 

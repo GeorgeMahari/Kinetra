@@ -9,6 +9,7 @@ from app.core.errors import AppError
 from app.core.security import verify_password
 from app.modules.assessments import service as assessments_service
 from app.modules.auth.models import RefreshToken
+from app.modules.consent.models import ParentalConsent
 from app.modules.onboarding import service as onboarding_service
 from app.modules.progression import service as progression_service
 from app.modules.users.models import User, UserProfile
@@ -22,6 +23,21 @@ from app.modules.users.schemas import (
 from app.shared.age import age_on
 
 logger = logging.getLogger(__name__)
+
+
+def _parental_consent_export(db: Session, user: User) -> dict[str, str | None] | None:
+    """Ages 14-15 only: the consent record (never the link token or its hash)."""
+    c = db.scalar(select(ParentalConsent).where(ParentalConsent.user_id == user.id))
+    if c is None:
+        return None
+    return {
+        "status": user.parental_consent_status,
+        "parent_email": c.parent_email,
+        "policy_version": c.policy_version,
+        "requested_at": c.requested_at.isoformat(),
+        "expires_at": c.expires_at.isoformat(),
+        "granted_at": c.granted_at.isoformat() if c.granted_at else None,
+    }
 
 
 def _profile(user: User) -> UserProfile:
@@ -39,6 +55,7 @@ def to_me(user: User) -> MeResponse:
         email_verified=user.email_verified_at is not None,
         preferred_locale=user.preferred_locale,
         created_at=user.created_at,
+        parental_consent=user.parental_consent_status,
         profile=ProfileResponse(
             display_name=p.display_name,
             date_of_birth=p.date_of_birth,
@@ -94,6 +111,7 @@ def export_data(db: Session, user: User) -> DataExport:
             "created_at": user.created_at.isoformat(),
             "privacy_consent_at": user.privacy_consent_at.isoformat(),
             "email_verified_at": user.email_verified_at.isoformat() if user.email_verified_at else None,
+            "parental_consent": _parental_consent_export(db, user),
         },
         profile=me.profile.model_dump(mode="json"),
         sessions=[

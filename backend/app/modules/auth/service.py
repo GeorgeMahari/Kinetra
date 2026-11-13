@@ -20,6 +20,7 @@ from app.core.security import (
 from app.modules.auth.models import RefreshToken
 from app.modules.auth.passwords import password_problems
 from app.modules.auth.schemas import RegisterRequest, TokenPair
+from app.modules.consent import service as consent_service
 from app.modules.users.models import User, UserProfile
 from app.shared.age import age_on
 
@@ -47,12 +48,29 @@ def register(db: Session, data: RegisterRequest, today: date | None = None) -> U
             status.HTTP_422_UNPROCESSABLE_CONTENT,
             [{"field": "date_of_birth", "type": "future_date"}],
         )
-    if age_on(data.date_of_birth, today) < settings.min_registration_age:
+    age = age_on(data.date_of_birth, today)
+    if age < settings.min_age_with_parental_consent:
         raise AppError(
             "underage",
-            f"You must be at least {settings.min_registration_age} to create an account.",
+            f"You must be at least {settings.min_age_with_parental_consent} to create an account.",
             status.HTTP_422_UNPROCESSABLE_CONTENT,
             [{"field": "date_of_birth", "type": "underage"}],
+        )
+    needs_consent = consent_service.needs_parental_consent(age)
+    if needs_consent and data.parent_email is None:
+        raise AppError(
+            "parent_email_required",
+            "A parent's email is needed for users under "
+            f"{settings.min_registration_age}.",
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            [{"field": "parent_email", "type": "required"}],
+        )
+    if needs_consent and data.parent_email == data.email:
+        raise AppError(
+            "parent_email_same",
+            "The parent's email must be different from yours.",
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            [{"field": "parent_email", "type": "same_as_email"}],
         )
 
     problems = password_problems(data.password, data.email)
@@ -83,7 +101,10 @@ def register(db: Session, data: RegisterRequest, today: date | None = None) -> U
         raise AppError(
             "email_taken", "An account with this email already exists.", status.HTTP_409_CONFLICT
         ) from exc
-    logger.info("User registered id=%s", user.id)
+    if needs_consent:
+        assert data.parent_email is not None
+        consent_service.start(db, user, data.parent_email)
+    logger.info("User registered id=%s parental_consent=%s", user.id, user.parental_consent_status)
     return user
 
 
@@ -92,6 +113,9 @@ def authenticate(db: Session, email: str, password: str) -> User:
     if not verify_password(user.password_hash if user else None, password) or user is None:
         raise INVALID_CREDENTIALS
     if user.status != "active":
+        raise INVALID_CREDENTIALS
+    if consent_service.delete_if_expired(db, user):
+        # The parent never answered in time: the account no longer exists.
         raise INVALID_CREDENTIALS
     if password_needs_rehash(user.password_hash):
         user.password_hash = hash_password(password)

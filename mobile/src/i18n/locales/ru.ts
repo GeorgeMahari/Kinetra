@@ -1,6 +1,7 @@
 import assessRu from './assess.ru';
 import insightsRu from './insights.ru';
 import devicesRu from './devices.ru';
+import parentalConsentRu from './parentalConsent.ru';
 import progressionRu from './progression.ru';
 import type { TranslationResources } from './en';
 
@@ -8,6 +9,7 @@ const ru: TranslationResources = {
   assess: assessRu,
   ...insightsRu,
   ...devicesRu,
+  ...parentalConsentRu,
   ...progressionRu,
   brand: {
     name: 'Kinetra',
@@ -44,7 +46,9 @@ const ru: TranslationResources = {
     password: 'Пароль',
     passwordHint: 'Не менее 10 символов. Короткую фразу запомнить легче, чем сложное слово.',
     dateOfBirth: 'Дата рождения',
-    dateOfBirthHint: 'Нужна, чтобы подобрать тесты и нормативы по возрасту. Вам должно быть не меньше 16 лет.',
+    dateOfBirthHint: 'Нужна, чтобы подобрать тесты и нормативы по возрасту. Вам должно быть не меньше 14 лет; в 14 или 15 лет нужно согласие родителя.',
+    parentEmail: 'Эл. почта родителя или опекуна',
+    parentEmailHint: 'Вам меньше 16 лет, поэтому мы отправим ему ссылку для согласия. До этого аккаунт заблокирован.',
     day: 'День',
     month: 'Месяц',
     year: 'Год',
@@ -88,6 +92,7 @@ const ru: TranslationResources = {
     futureDate: 'Дата не может быть в будущем.',
     underage: 'Чтобы создать аккаунт, вам должно быть не меньше {{age}} лет.',
     consentRequired: 'Подтвердите согласие, чтобы продолжить.',
+    parentEmailSame: 'Укажите адрес родителя, а не свой.',
     heightRange: 'Введите рост от 50 до 260 см, не более одного знака после запятой.',
     nameTooLong: 'Используйте не более 80 символов.',
   },
@@ -290,7 +295,11 @@ const ru: TranslationResources = {
     invalid_credentials: 'Неверная эл. почта или пароль.',
     email_taken: 'Аккаунт с этой эл. почтой уже существует.',
     weak_password: 'Выберите более надёжный пароль.',
-    underage: 'Чтобы создать аккаунт, вам должно быть не меньше 16 лет.',
+    underage: 'Чтобы создать аккаунт, вам должно быть не меньше 14 лет.',
+    parent_email_required: 'Укажите эл. почту родителя или опекуна.',
+    parent_email_same: 'Укажите адрес родителя, а не свой.',
+    parental_consent_pending: 'Ваш аккаунт ожидает согласия родителя.',
+    consent_not_pending: 'Нет запроса согласия, ожидающего ответа.',
     rate_limited: 'Слишком много попыток. Подождите несколько минут и повторите.',
     invalid_refresh_token: 'Сессия истекла. Пожалуйста, войдите снова.',
     invalid_code: 'Код неверный или истёк. При необходимости запросите новый.',

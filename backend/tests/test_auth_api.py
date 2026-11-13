@@ -80,8 +80,9 @@ class TestRegister:
         assert {"field": "password", "type": "too_short"} in err["details"]
 
     def test_underage_registration_is_refused(self, api: TestClient) -> None:
+        # Below the parental-consent age there is no way to register (14-15: see the consent tests).
         today = datetime.now(UTC).date()
-        dob = date(today.year - get_settings().min_registration_age + 1, 1, 1)
+        dob = date(today.year - get_settings().min_age_with_parental_consent + 1, 1, 1)
         resp = api.post(
             "/api/v1/auth/register",
             json={

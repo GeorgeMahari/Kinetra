@@ -26,11 +26,13 @@ function Splash() {
 
 function RootNavigator() {
   const { colors, scheme } = useTheme();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
 
   if (status === 'loading') return <Splash />;
 
   const signedIn = status === 'signedIn';
+  // Ages 14-15 before a parent agrees: only the waiting screen exists (the API refuses the rest too).
+  const awaitingParent = signedIn && user?.parental_consent === 'pending';
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
@@ -43,8 +45,11 @@ function RootNavigator() {
           <Stack.Screen name="sign-up" />
           <Stack.Screen name="forgot-password" />
         </Stack.Protected>
-        <Stack.Protected guard={signedIn}>
+        <Stack.Protected guard={signedIn && !awaitingParent}>
           <Stack.Screen name="(app)" />
+        </Stack.Protected>
+        <Stack.Protected guard={awaitingParent}>
+          <Stack.Screen name="parental-consent" />
         </Stack.Protected>
         {/* Design-system reference; never registered in production builds. */}
         <Stack.Protected guard={__DEV__}>

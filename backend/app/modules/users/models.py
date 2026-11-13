@@ -58,6 +58,10 @@ class User(TimestampMixin, Base):
     privacy_consent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     # When the user proved access to the email address (NULL = not verified yet).
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # 'pending' locks the account (no personal data can be added) until a parent consents.
+    parental_consent_status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="not_required", server_default="not_required"
+    )
 
     profile: Mapped["UserProfile | None"] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
@@ -65,6 +69,10 @@ class User(TimestampMixin, Base):
 
     __table_args__ = (
         CheckConstraint("preferred_locale IN ('en', 'ro', 'ru')", name="preferred_locale_supported"),
+        CheckConstraint(
+            "parental_consent_status IN ('not_required', 'pending', 'granted')",
+            name="parental_consent_status_valid",
+        ),
         # Case-insensitive unique email.
         Index("uq_users_email_lower", func.lower(email), unique=True),
     )

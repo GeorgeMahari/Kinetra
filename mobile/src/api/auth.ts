@@ -25,6 +25,8 @@ export interface Me {
   email_verified: boolean;
   preferred_locale: Language;
   created_at: string;
+  /** 'pending' = locked until a parent consents (ages 14-15). */
+  parental_consent: 'not_required' | 'pending' | 'granted';
   profile: Profile;
 }
 
@@ -34,6 +36,8 @@ export interface RegisterInput {
   date_of_birth: string; // YYYY-MM-DD
   preferred_locale: Language;
   privacy_consent: true;
+  /** Required at ages 14-15 only. */
+  parent_email?: string;
 }
 
 export interface ProfileUpdate {

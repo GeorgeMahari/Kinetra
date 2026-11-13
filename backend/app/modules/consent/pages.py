@@ -1,0 +1,149 @@
+"""Server-rendered pages for the parent's consent link: no scripts, no external resources.
+
+The page is in the child's chosen app language, since the parent is reading on behalf of that
+account. Every value inserted into the HTML is escaped.
+"""
+
+from collections.abc import Mapping, Sequence
+from html import escape
+
+_T = {
+    "en": {
+        "title": "Kinetra: parent's consent",
+        "intro": "The account {child} was created by someone aged 14 or 15, who named you as their parent. "
+        "It stays locked until you answer.",
+        "what": "Kinetra is a wellness app. It helps people understand their physical condition through "
+        "simple tests and tracks their own progress. It gives no medical diagnoses.",
+        "collects": "What the app collects if you agree",
+        "items": [
+            "Email address and date of birth (already given at sign-up).",
+            "Optional profile details: name to show, height, and the sex used for reference values.",
+            "Answers about activity and sport habits, sleep, and a short health-safety questionnaire.",
+            "Results of the tests your child chooses to do, and weekly activity check-ins.",
+            "Only if your child turns it on: resting heart rate, weight and steps from Health Connect.",
+        ],
+        "never": "What it never does for anyone under 18",
+        "never_items": [
+            "No maximal-effort tests and no adult reference values.",
+            "No comparisons with other people, no public profile and no social features.",
+            "No advertising, and the data is not sold or shared.",
+        ],
+        "rights": "Your child can export or delete all of this data at any time from the app.",
+        "agree": "I am the parent or legal guardian, and I agree",
+        "refuse": "I refuse: delete this account",
+        "granted": "Thank you. The account is now unlocked.",
+        "refused": "The account and all its data have been deleted.",
+        "invalid": "This link is no longer valid. It may have been used already, replaced by a newer email, "
+        "or expired; an expired request deletes the account.",
+    },
+    "ro": {
+        "title": "Kinetra: acordul părintelui",
+        "intro": "Contul {child} a fost creat de cineva în vârstă de 14 sau 15 ani, care te-a indicat ca "
+        "părinte. Contul rămâne blocat până răspunzi.",
+        "what": "Kinetra este o aplicație de wellness. Îi ajută pe oameni să-și înțeleagă condiția fizică "
+        "prin teste simple și le urmărește propriul progres. Nu pune diagnostice medicale.",
+        "collects": "Ce colectează aplicația dacă ești de acord",
+        "items": [
+            "Adresa de email și data nașterii (date deja la înregistrare).",
+            "Detalii de profil opționale: numele afișat, înălțimea și sexul folosit pentru valorile "
+            "de referință.",
+            "Răspunsuri despre activitate și sport, somn și un scurt chestionar de siguranță.",
+            "Rezultatele testelor pe care copilul alege să le facă și înregistrările săptămânale "
+            "de activitate.",
+            "Doar dacă copilul activează: pulsul în repaus, greutatea și pașii din Health Connect.",
+        ],
+        "never": "Ce nu face niciodată pentru cineva sub 18 ani",
+        "never_items": [
+            "Nu oferă teste de efort maxim și nu folosește valori de referință pentru adulți.",
+            "Nu face comparații cu alți oameni, nu are profil public și nici funcții sociale.",
+            "Nu are reclame, iar datele nu sunt vândute sau partajate.",
+        ],
+        "rights": "Copilul poate exporta sau șterge oricând toate aceste date din aplicație.",
+        "agree": "Sunt părintele sau tutorele legal și sunt de acord",
+        "refuse": "Refuz: șterge acest cont",
+        "granted": "Mulțumim. Contul este acum deblocat.",
+        "refused": "Contul și toate datele lui au fost șterse.",
+        "invalid": "Acest link nu mai este valabil. Poate a fost deja folosit, înlocuit de un email mai nou "
+        "sau a expirat; o cerere expirată șterge contul.",
+    },
+    "ru": {
+        "title": "Kinetra: согласие родителя",
+        "intro": "Аккаунт {child} создан пользователем в возрасте 14 или 15 лет, который указал вас как "
+        "родителя. Аккаунт заблокирован, пока вы не ответите.",
+        "what": "Kinetra — приложение для оценки физического состояния с помощью простых тестов и "
+        "отслеживания собственного прогресса. Оно не ставит медицинских диагнозов.",
+        "collects": "Что собирает приложение, если вы согласитесь",
+        "items": [
+            "Адрес эл. почты и дата рождения (уже указаны при регистрации).",
+            "Необязательные данные профиля: отображаемое имя, рост и пол для выбора эталонных значений.",
+            "Ответы об активности и спорте, сне и короткая анкета безопасности.",
+            "Результаты тестов, которые ребёнок решит пройти, и еженедельные отметки об активности.",
+            "Только если ребёнок включит: пульс в покое, вес и шаги из Health Connect.",
+        ],
+        "never": "Чего приложение никогда не делает для лиц младше 18 лет",
+        "never_items": [
+            "Нет тестов с максимальной нагрузкой и нет эталонных значений для взрослых.",
+            "Нет сравнения с другими людьми, публичного профиля и социальных функций.",
+            "Нет рекламы, данные не продаются и не передаются.",
+        ],
+        "rights": "Ребёнок может в любой момент экспортировать или удалить все эти данные в приложении.",
+        "agree": "Я родитель или законный представитель и даю согласие",
+        "refuse": "Отказываю: удалить этот аккаунт",
+        "granted": "Спасибо. Аккаунт разблокирован.",
+        "refused": "Аккаунт и все его данные удалены.",
+        "invalid": "Эта ссылка больше не действует. Возможно, она уже использована, заменена более новым "
+        "письмом или истекла; при истечении срока аккаунт удаляется.",
+    },
+}
+
+# Inline styles only; the response's CSP allows nothing else (no scripts, images or fonts).
+_STYLE = (
+    "body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto;"
+    "padding:24px 16px;line-height:1.5;color:#1a1d24;background:#f6f7f9}"
+    "h1{font-size:1.4rem}h2{font-size:1.05rem;margin-top:1.5rem}"
+    ".card{background:#fff;border-radius:12px;padding:16px 20px;margin:16px 0}"
+    "button{display:block;width:100%;padding:14px;margin:10px 0;border-radius:10px;font-size:1rem;"
+    "cursor:pointer;border:1px solid #2f5bea}"
+    ".agree{background:#2f5bea;color:#fff}.refuse{background:#fff;color:#2f5bea}"
+    "@media (prefers-color-scheme:dark){body{background:#0f1115;color:#e8eaf0}.card{background:#1a1d24}"
+    ".refuse{background:#1a1d24;color:#9db3ff}}"
+)
+
+CSP = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'"
+
+
+def texts(lang: str) -> Mapping[str, str | Sequence[str]]:
+    return _T.get(lang, _T["en"])
+
+
+def _page(lang: str, body: str) -> str:
+    t = texts(lang)
+    return (
+        f'<!doctype html><html lang="{escape(lang)}"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        '<meta name="robots" content="noindex">'
+        f"<title>{escape(str(t['title']))}</title><style>{_STYLE}</style></head>"
+        f"<body><h1>{escape(str(t['title']))}</h1>{body}</body></html>"
+    )
+
+
+def consent_form(lang: str, child_email: str, action: str) -> str:
+    t = texts(lang)
+    items = "".join(f"<li>{escape(i)}</li>" for i in t["items"])
+    never = "".join(f"<li>{escape(i)}</li>" for i in t["never_items"])
+    body = (
+        f"<p>{escape(str(t['intro']).format(child=child_email))}</p>"
+        f"<div class=\"card\"><p>{escape(str(t['what']))}</p>"
+        f"<h2>{escape(str(t['collects']))}</h2><ul>{items}</ul>"
+        f"<h2>{escape(str(t['never']))}</h2><ul>{never}</ul>"
+        f"<p>{escape(str(t['rights']))}</p></div>"
+        f'<form method="post" action="{escape(action)}">'
+        f'<button class="agree" name="decision" value="grant">{escape(str(t["agree"]))}</button>'
+        f'<button class="refuse" name="decision" value="refuse">{escape(str(t["refuse"]))}</button>'
+        "</form>"
+    )
+    return _page(lang, body)
+
+
+def message(lang: str, key: str) -> str:
+    return _page(lang, f"<div class=\"card\"><p>{escape(str(texts(lang)[key]))}</p></div>")

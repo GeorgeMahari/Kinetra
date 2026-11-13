@@ -15,7 +15,7 @@ def test_readiness_reports_unavailable_database() -> None:
         def execute(self, *_: object) -> None:
             raise ConnectionError("db down")
 
-    app = create_app()
+    app = create_app(background_jobs=False)
     app.dependency_overrides[get_db] = lambda: BrokenSession()
     with TestClient(app) as c:
         resp = c.get("/api/v1/health/ready")

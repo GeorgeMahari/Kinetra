@@ -5,7 +5,9 @@ import {
   fieldErrorsFromApi,
   parseHeight,
   toIsoDate,
+  needsParentEmail,
   validateDateOfBirth,
+  validateParentEmail,
   validateEmail,
   validateNewPassword,
 } from '../validation';
@@ -62,11 +64,22 @@ describe('dates', () => {
     expect(validateDateOfBirth({ day: '', month: '', year: '' }, TODAY)?.key).toBe('required');
     expect(validateDateOfBirth({ day: '31', month: '2', year: '2000' }, TODAY)?.key).toBe('invalidDate');
     expect(validateDateOfBirth({ day: '1', month: '1', year: '2027' }, TODAY)?.key).toBe('futureDate');
-    expect(validateDateOfBirth({ day: '13', month: '11', year: '2010' }, TODAY)).toEqual({
+    // The absolute minimum is 14 (from 14 to 15 a parent must agree).
+    expect(validateDateOfBirth({ day: '13', month: '11', year: '2012' }, TODAY)).toEqual({
       key: 'underage',
-      values: { age: 16 },
+      values: { age: 14 },
     });
-    expect(validateDateOfBirth({ day: '12', month: '11', year: '2010' }, TODAY)).toBeUndefined();
+    expect(validateDateOfBirth({ day: '12', month: '11', year: '2012' }, TODAY)).toBeUndefined();
+  });
+
+  it('asks for a parent email only at 14 and 15, and never accepts the user’s own', () => {
+    expect(needsParentEmail({ day: '12', month: '11', year: '2012' }, TODAY)).toBe(true); // 14
+    expect(needsParentEmail({ day: '13', month: '11', year: '2010' }, TODAY)).toBe(true); // 15
+    expect(needsParentEmail({ day: '12', month: '11', year: '2010' }, TODAY)).toBe(false); // 16
+    expect(needsParentEmail({ day: '13', month: '11', year: '2012' }, TODAY)).toBe(false); // 13: refused anyway
+    expect(validateParentEmail('Teen@Example.com ', 'teen@example.com')?.key).toBe('parentEmailSame');
+    expect(validateParentEmail('', 'teen@example.com')?.key).toBe('required');
+    expect(validateParentEmail('parent@example.com', 'teen@example.com')).toBeUndefined();
   });
 });
 

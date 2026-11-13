@@ -1,12 +1,14 @@
 import assessEn from './assess.en';
 import insightsEn from './insights.en';
 import devicesEn from './devices.en';
+import parentalConsentEn from './parentalConsent.en';
 import progressionEn from './progression.en';
 
 const en = {
   assess: assessEn,
   ...insightsEn,
   ...devicesEn,
+  ...parentalConsentEn,
   ...progressionEn,
   brand: {
     name: 'Kinetra',
@@ -43,7 +45,9 @@ const en = {
     password: 'Password',
     passwordHint: 'At least 10 characters. A short phrase is easier to remember than a complex word.',
     dateOfBirth: 'Date of birth',
-    dateOfBirthHint: 'Used to choose age-appropriate tests and reference values. You must be 16 or older.',
+    dateOfBirthHint: 'Used to choose age-appropriate tests and reference values. You must be 14 or older; at 14 or 15, a parent needs to agree.',
+    parentEmail: 'Your parent’s or guardian’s email',
+    parentEmailHint: 'Because you are under 16, we’ll email them a link to agree. Your account stays locked until they do.',
     day: 'Day',
     month: 'Month',
     year: 'Year',
@@ -87,6 +91,7 @@ const en = {
     futureDate: 'The date can’t be in the future.',
     underage: 'You must be at least {{age}} years old to create an account.',
     consentRequired: 'Please confirm that you agree to continue.',
+    parentEmailSame: 'Use your parent’s email, not your own.',
     heightRange: 'Enter a height between 50 and 260 cm, with at most one decimal.',
     nameTooLong: 'Use at most 80 characters.',
   },
@@ -289,7 +294,11 @@ const en = {
     invalid_credentials: 'Email or password is incorrect.',
     email_taken: 'An account with this email already exists.',
     weak_password: 'Choose a stronger password.',
-    underage: 'You must be at least 16 years old to create an account.',
+    underage: 'You must be at least 14 years old to create an account.',
+    parent_email_required: 'Enter a parent’s or guardian’s email.',
+    parent_email_same: 'Use your parent’s email, not your own.',
+    parental_consent_pending: 'Your account is waiting for your parent’s consent.',
+    consent_not_pending: 'There is no consent request waiting.',
     rate_limited: 'Too many attempts. Wait a few minutes and try again.',
     invalid_refresh_token: 'Your session has expired. Please sign in again.',
     invalid_code: 'That code is wrong or has expired. Request a new one if needed.',

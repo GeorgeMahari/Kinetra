@@ -55,7 +55,7 @@ def migrated_engine(test_db_url: URL) -> Iterator[Engine]:
 
 @pytest.fixture
 def client() -> Iterator[TestClient]:
-    with TestClient(create_app()) as c:
+    with TestClient(create_app(background_jobs=False)) as c:
         yield c
 
 
@@ -65,7 +65,7 @@ def api(migrated_engine: Engine) -> Iterator[TestClient]:
     with migrated_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE users, user_profiles, refresh_tokens, user_goals, activity_profiles, activity_profile_sports, readiness_screenings, onboarding_states, test_results, measurements, activity_checkins, user_achievements, auth_codes CASCADE"
+                "TRUNCATE users, user_profiles, refresh_tokens, user_goals, activity_profiles, activity_profile_sports, readiness_screenings, onboarding_states, test_results, measurements, activity_checkins, user_achievements, auth_codes, parental_consents CASCADE"
             )
         )
     get_login_limiter().reset()
@@ -83,7 +83,7 @@ def api(migrated_engine: Engine) -> Iterator[TestClient]:
         finally:
             session.close()
 
-    app = create_app()
+    app = create_app(background_jobs=False)
     app.dependency_overrides[get_db] = _test_db
     with TestClient(app) as c:
         yield c

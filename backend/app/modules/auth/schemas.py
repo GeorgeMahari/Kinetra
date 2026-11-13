@@ -17,8 +17,13 @@ class RegisterRequest(BaseModel):
     preferred_locale: Locale = "en"
     # Must be explicitly true: the user accepted the privacy notice.
     privacy_consent: Literal[True]
+    # Required only at ages 14-15 (parental consent); ignored and never stored for anyone older.
+    parent_email: EmailStr | None = None
 
     _norm = field_validator("email", mode="after")(_normalize_email)
+    _norm_parent = field_validator("parent_email", mode="after")(
+        lambda v: _normalize_email(v) if v is not None else None
+    )
 
 
 class LoginRequest(BaseModel):

@@ -7,7 +7,9 @@ import type { ApiError } from '@/api/client';
 
 export const MIN_PASSWORD = 10;
 export const MAX_PASSWORD = 128;
-export const MIN_AGE = 16;
+/** Youngest age that can register at all; from MIN_AGE to CONSENT_AGE - 1 a parent must agree. */
+export const MIN_AGE = 14;
+export const CONSENT_AGE = 16;
 
 /** A translation key under `validation.*`, plus interpolation values. */
 export interface FieldError {
@@ -23,6 +25,7 @@ export interface FieldError {
     | 'futureDate'
     | 'underage'
     | 'consentRequired'
+    | 'parentEmailSame'
     | 'heightRange'
     | 'nameTooLong';
   values?: Record<string, string | number>;
@@ -84,6 +87,20 @@ export function validateDateOfBirth(parts: DateParts, today = new Date()): Field
   return undefined;
 }
 
+/** True when the date of birth is valid and the person is 14 or 15 (a parent must agree). */
+export function needsParentEmail(parts: DateParts, today = new Date()): boolean {
+  const iso = toIsoDate(parts);
+  if (!iso || validateDateOfBirth(parts, today)) return false;
+  return ageOn(iso, today) < CONSENT_AGE;
+}
+
+export function validateParentEmail(parentEmail: string, ownEmail: string): FieldError | undefined {
+  const err = validateEmail(parentEmail);
+  if (err) return err;
+  if (parentEmail.trim().toLowerCase() === ownEmail.trim().toLowerCase()) return { key: 'parentEmailSame' };
+  return undefined;
+}
+
 /** Height in cm, 50–260, at most one decimal. Empty means "clear the value". */
 export function parseHeight(input: string): { value: number | null; error?: FieldError } {
   const v = input.trim().replace(',', '.');
@@ -105,6 +122,8 @@ const SERVER_TYPE_TO_KEY: Record<string, FieldError['key']> = {
   value_error: 'invalidEmail',
   missing: 'required',
   literal_error: 'consentRequired',
+  same_as_email: 'parentEmailSame',
+  required: 'required',
 };
 
 /** Maps server-side field errors (error.details) onto form fields. */

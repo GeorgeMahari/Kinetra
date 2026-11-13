@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/AuthProvider';
  * always forwards to a screen that exists for the current session state.
  */
 export default function Index() {
-  const { status } = useAuth();
-  return <Redirect href={status === 'signedIn' ? '/today' : '/welcome'} />;
+  const { status, user } = useAuth();
+  if (status !== 'signedIn') return <Redirect href="/welcome" />;
+  return <Redirect href={user?.parental_consent === 'pending' ? '/parental-consent' : '/today'} />;
 }

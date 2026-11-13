@@ -16,12 +16,12 @@ def _unauthorized() -> AppError:
     return AppError("unauthorized", "Authentication required.", status.HTTP_401_UNAUTHORIZED)
 
 
-def get_current_user(
+def get_user_allow_pending(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: Session = Depends(get_db),
 ) -> User:
-    """Every route that touches personal data depends on this. Ownership is then enforced
-    by always querying through the returned user's id, never through ids from the request."""
+    """The signed-in user, even while their account waits for a parent's consent. Only for routes
+    that add no personal data: reading the account, the consent status, export and deletion."""
     if credentials is None:
         raise _unauthorized()
     user_id = decode_access_token(credentials.credentials)
@@ -30,6 +30,19 @@ def get_current_user(
     user = db.get(User, user_id)
     if user is None or user.status != UserStatus.active:
         raise _unauthorized()
+    return user
+
+
+def get_current_user(user: User = Depends(get_user_allow_pending)) -> User:
+    """Every route that touches personal data depends on this. Ownership is then enforced
+    by always querying through the returned user's id, never through ids from the request.
+    Accounts waiting for a parent's consent are locked out (DECISIONS D39)."""
+    if user.parental_consent_status == "pending":
+        raise AppError(
+            "parental_consent_pending",
+            "This account is waiting for a parent's consent.",
+            status.HTTP_403_FORBIDDEN,
+        )
     return user
 
 

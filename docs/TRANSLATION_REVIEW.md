@@ -11,7 +11,7 @@ Mark each row OK or propose wording; the developer applies changes in the locale
 | | Română | | |
 | | Русский | | |
 
-## Safety screening and test-intensity outcomes (20)
+## Safety screening and test-intensity outcomes (22)
 
 | Key | English | Română | Русский | OK? |
 |---|---|---|---|---|
@@ -31,6 +31,8 @@ Mark each row OK or propose wording; the developer applies changes in the locale
 | `readiness.maximalBody` | Nothing in your answers suggests limiting test intensity. Every test can still be skipped, and you should stop if you feel unwell. | Nimic din răspunsurile tale nu indică necesitatea de a limita intensitatea testelor. Orice test poate fi omis, iar dacă nu te simți bine trebuie să te oprești. | Ничто в ваших ответах не говорит о необходимости ограничивать интенсивность тестов. Любой тест можно пропустить, а при плохом самочувствии нужно остановиться. | |
 | `readiness.submaximal_build` | Moderate-effort tests first | Întâi teste de efort moderat | Сначала тесты с умеренной нагрузкой | |
 | `readiness.submaximal_buildBody` | Nothing in your answers suggests a risk. Because you don’t exercise regularly yet, Kinetra starts with moderate-effort tests. | Nimic din răspunsurile tale nu indică un risc. Pentru că încă nu faci exerciții regulat, Kinetra începe cu teste de efort moderat. | Ничто в ваших ответах не указывает на риск. Поскольку вы пока не занимаетесь регулярно, Kinetra начнёт с тестов умеренной нагрузки. | |
+| `readiness.submaximal_minor` | Moderate-effort tests | Teste de efort moderat | Тесты умеренной нагрузки | |
+| `readiness.submaximal_minorBody` | Nothing in your answers suggests a risk. Maximal-effort tests, such as the 12-minute run, are offered only from age 18. | Nimic din răspunsurile tale nu indică un risc. Testele de efort maxim, cum ar fi alergarea de 12 minute, sunt oferite doar de la 18 ani. | Ничто в ваших ответах не указывает на риск. Тесты с максимальной нагрузкой, например 12-минутный бег, доступны только с 18 лет. | |
 | `readiness.submaximal` | Moderate-effort tests only | Doar teste de efort moderat | Только тесты с умеренной нагрузкой | |
 | `readiness.submaximalBody` | Because of your answers, Kinetra will suggest only moderate-effort tests. Consider checking with a healthcare professional before more intense exercise. | Din cauza răspunsurilor tale, Kinetra va sugera doar teste de efort moderat. Ia în considerare o discuție cu un profesionist din domeniul sănătății înainte de efort mai intens. | С учётом ваших ответов Kinetra будет предлагать только тесты с умеренной нагрузкой. Перед более интенсивными нагрузками стоит проконсультироваться с медицинским специалистом. | |
 | `readiness.non_exertional` | No effort tests for now | Deocamdată fără teste de efort | Пока без нагрузочных тестов | |

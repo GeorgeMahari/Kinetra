@@ -211,6 +211,46 @@ Health Connect as the first one.
   native module. In Expo Go, on iOS and on the web the screen says so honestly and nothing is simulated.
   Apple Health remains future scope.
 
+### D39 — Parental consent for ages 14–15 (2026-11-13)
+The owner chose these settings, all configurable:
+- **Ages:** 14 is the absolute minimum. From 14 to 15 a parent must agree; from 16 no consent is needed.
+- **How:** the parent receives an email link.
+- **Deadline:** a request not answered within 7 days deletes the account.
+
+**Registration.** A 14–15-year-old must give a parent's email, different from their own. The account is
+created `pending` and holds only the email, the password hash and the date of birth. For anyone 16 or
+older a `parent_email` sent by the client is ignored and never stored.
+
+**Locked account.** `get_current_user` refuses every data route with `403 parental_consent_pending`.
+Only `get_user_allow_pending` routes work: read `/me`, change the language, export, delete, and the
+consent status and resend. The app shows nothing but the waiting screen. The server enforces the lock
+too.
+
+**The parent's page.**
+- It is served by the API, in the parent's own browser, separate from the child's phone. Its CSP allows
+  no scripts and no external resources, only inline styles and posting back to itself.
+- GET only shows the page, because email scanners prefetch links. Only the POST from the page's form
+  records "agree" or "refuse".
+- The page lists what is collected and what never happens under 18: no maximal tests, no adult norms,
+  no comparisons with others, no social features, no advertising.
+
+**The link.**
+- 256 random bits, stored as SHA-256 only. It works once.
+- A resend, at most every 10 minutes, replaces it. The deadline still counts from registration.
+
+**Refusal or expiry.** The account and everything linked to it are deleted (cascade), including the
+parent's email. Expiry is enforced three ways:
+- the link stops working;
+- signing in deletes the account on the spot;
+- an hourly job in the API process purges the rest. The tests disable it so it never touches the
+  development database.
+
+**Limits, accepted for now.**
+- Email possession is the only proof that the person is the parent. This is the usual "email plus"
+  level; stronger verification would need an identity provider.
+- Real delivery needs SMTP. With the console backend the email is only printed to the API log.
+- `public_base_url` must point to where a parent's browser can reach the API.
+
 ### D10 — Minors (16–17 implemented; under 16 pending)
 Users under 18 get a reduced data set, no adult norms, no maximal-effort tests, and no
 public or social features. Under the minimum age (16 by default, configurable per

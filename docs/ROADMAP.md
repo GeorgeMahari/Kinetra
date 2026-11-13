@@ -186,10 +186,21 @@ Each milestone leaves the project runnable and tested. ✅ = done and verified.
 - **Not yet verified on a device:** it needs a development build (`npx expo run:android`) on an emulator
   or phone with Health Connect. The tests cover the logic with the native module mocked.
 
+## Post-MVP 4 — Minors ✅ (2026-11-13)
+- **Under 18:** never above submaximal effort. This fixes a gap: a regularly active 17-year-old was
+  cleared for the Cooper run. Enforced at screening time and again on the stored ceiling, by current age.
+- **Ages 14–15, parental consent (D39):**
+  - **Migration `0008`:** `users.parental_consent_status` and `parental_consents`.
+  - Registration asks for a parent's email and the account stays locked (server and app).
+  - The parent's page, served by the API, records agree or refuse.
+  - Resend (at most every 10 min); deletion on refusal, at an expired sign-in, and by an hourly purge.
+  - Texts in EN/RO/RU.
+- **Tests:** backend 263; mobile: new sign-up, routing and waiting-screen tests.
+
 ## After the MVP (remaining)
 - Native-speaker review of the Romanian and Russian safety and scientific text; manual check of the
   NICE thresholds and the FRIEND 2022 tables.
-- An SMTP provider for real email delivery; a parental-consent flow for under-16s.
+- An SMTP provider for real email delivery (needed for parents to actually receive consent links).
 - A shared rate-limit store and an httpOnly-cookie web client before any public web deployment.
 - HealthKit (iOS) import; checking the Health Connect import on a real device with a development build.
 - An EAS development build and store builds; a CI pipeline running both suites.

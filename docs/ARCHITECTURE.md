@@ -29,6 +29,8 @@ one FastAPI service, one PostgreSQL database and one Expo (React Native) app.
 | `assessments` | Test catalogue, results (append-only), measurements, overview; **engine** (pure) |
 | `insights` | Progress series per protocol, coverage map, sourced recommendations |
 | `progression` | Points and levels, achievements, personal bests, weekly objectives and check-ins, streaks |
+| `devices` | Read-only Health Connect import into `measurements`, listing, removal (D38) |
+| `consent` | Parental consent for ages 14–15: locked accounts, the parent's link page, hourly purge of expired requests (D39) |
 
 All modules are complete as of Milestone 8. Every rule set (`engine`, `onboarding/rules`,
 `insights/rules`, `progression/rules`) is pure and versioned, and results store the version that

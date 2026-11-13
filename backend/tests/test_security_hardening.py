@@ -57,7 +57,7 @@ def test_production_hides_docs_and_sends_hsts(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("KINETRA_SMTP_HOST", "smtp.example.com")
     try:
         assert Settings().environment == "production"
-        with TestClient(create_app()) as c:
+        with TestClient(create_app(background_jobs=False)) as c:
             assert c.get("/docs").status_code == 404
             assert c.get("/openapi.json").status_code == 404
             assert "max-age" in c.get("/api/v1/health/live").headers["strict-transport-security"]
@@ -73,7 +73,7 @@ def test_production_refuses_to_start_without_a_jwt_secret(monkeypatch: pytest.Mo
 
 
 def test_unhandled_errors_do_not_leak_internals() -> None:
-    app = create_app()
+    app = create_app(background_jobs=False)
 
     @app.get("/api/v1/boom")
     def boom() -> None:

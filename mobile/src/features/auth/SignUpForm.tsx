@@ -16,15 +16,17 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 import {
   fieldErrorsFromApi,
+  needsParentEmail,
   toIsoDate,
   validateDateOfBirth,
   validateEmail,
   validateNewPassword,
+  validateParentEmail,
   type DateParts,
   type FieldErrors,
 } from './validation';
 
-const FIELDS = ['email', 'password', 'date_of_birth', 'privacy_consent'] as const;
+const FIELDS = ['email', 'password', 'date_of_birth', 'parent_email', 'privacy_consent'] as const;
 type Field = (typeof FIELDS)[number];
 
 export function SignUpForm({ onSubmit }: { onSubmit: (input: RegisterInput) => Promise<void> }) {
@@ -33,16 +35,21 @@ export function SignUpForm({ onSubmit }: { onSubmit: (input: RegisterInput) => P
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [dob, setDob] = useState<DateParts>({ day: '', month: '', year: '' });
+  const [parentEmail, setParentEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors<Field>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Ages 14-15: a parent must agree, so their email is asked for (and only then sent).
+  const minor = needsParentEmail(dob);
 
   const submit = async () => {
     const next: FieldErrors<Field> = {
       email: validateEmail(email),
       password: validateNewPassword(password, email),
       date_of_birth: validateDateOfBirth(dob),
+      parent_email: minor ? validateParentEmail(parentEmail, email) : undefined,
       privacy_consent: consent ? undefined : { key: 'consentRequired' },
     };
     setErrors(next);
@@ -58,6 +65,7 @@ export function SignUpForm({ onSubmit }: { onSubmit: (input: RegisterInput) => P
         date_of_birth: toIsoDate(dob)!,
         preferred_locale: isSupportedLanguage(lang) ? lang : 'en',
         privacy_consent: true,
+        ...(minor ? { parent_email: parentEmail.trim() } : {}),
       });
     } catch (err) {
       const fieldErrors = err instanceof ApiError ? fieldErrorsFromApi(err, FIELDS) : {};
@@ -103,6 +111,19 @@ export function SignUpForm({ onSubmit }: { onSubmit: (input: RegisterInput) => P
         onChange={setDob}
         error={msg('date_of_birth')}
       />
+      {minor ? (
+        <TextField
+          testID="parent-email"
+          label={t('auth.parentEmail')}
+          value={parentEmail}
+          onChangeText={setParentEmail}
+          autoCapitalize="none"
+          autoComplete="off"
+          keyboardType="email-address"
+          hint={t('auth.parentEmailHint')}
+          error={msg('parent_email')}
+        />
+      ) : null}
       <AppText variant="caption" color="textMuted">
         {t('auth.privacyNotice')}
       </AppText>

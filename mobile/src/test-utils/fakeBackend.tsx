@@ -18,6 +18,7 @@ export const TEST_USER: Me = {
   email_verified: false,
   preferred_locale: 'en',
   created_at: '2026-11-12T10:00:00Z',
+  parental_consent: 'not_required',
   profile: { display_name: 'Ana', date_of_birth: '1995-06-15', age: 31, sex_for_norms: 'not_specified', height_cm: null },
 };
 

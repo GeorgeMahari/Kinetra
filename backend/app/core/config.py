@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     refresh_token_days: int = 30
     # Minimum age to register without a parental-consent flow (GDPR Art. 8 default is 16).
     min_registration_age: int = 16
+    # From this age up to min_registration_age, registration needs a parent's consent by email link.
+    min_age_with_parental_consent: int = 14
+    # A consent request not answered within this many days deletes the pending account.
+    parental_consent_days: int = 7
+    # Base URL the parent's browser uses to reach this API (links in consent emails).
+    public_base_url: str = "http://127.0.0.1:8000"
     # Login attempts allowed per email+IP within the window before HTTP 429.
     login_rate_limit_attempts: int = 10
     login_rate_limit_window_seconds: int = 300

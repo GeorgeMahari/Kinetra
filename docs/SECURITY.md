@@ -7,7 +7,8 @@ What Kinetra protects, how, and what is knowingly left for later. Reviewed at Mi
 | Data | Why | Where |
 |---|---|---|
 | Email, Argon2id password hash | Sign-in | `users` |
-| Date of birth | Age-appropriate tests and references; minimum age 16 | `user_profiles` |
+| Date of birth | Age-appropriate tests and references; minimum age 14, with a parent's consent at 14–15 | `user_profiles` |
+| Ages 14–15 only: the parent's email, a link-token **hash**, the policy version and timestamps | Proving the parent's consent (D39); deleted with the account on refusal or after 7 days | `parental_consents` |
 | Optional: name, height, sex-for-norms ("prefer not to say" by default) | Display, BMI, sex-specific references | `user_profiles` |
 | Goals, activity profile, readiness answers | Choosing safe, relevant tests | onboarding tables |
 | Test results, measurements, weekly check-ins, achievements | The product itself | assessment and progression tables |

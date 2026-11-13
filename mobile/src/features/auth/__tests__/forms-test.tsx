@@ -63,7 +63,7 @@ describe('SignUpForm', () => {
     expect(screen.getByText('Please confirm that you agree to continue.')).toBeTruthy();
   });
 
-  it('blocks users under 16 on the client', async () => {
+  it('blocks users under 14 on the client', async () => {
     const onSubmit = jest.fn();
     const year = String(new Date().getFullYear() - 10);
     await render(withTheme(<SignUpForm onSubmit={onSubmit} />));
@@ -71,7 +71,7 @@ describe('SignUpForm', () => {
     await fireEvent.press(screen.getByTestId('consent'));
     await fireEvent.press(screen.getByTestId('submit'));
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByText('You must be at least 16 years old to create an account.')).toBeTruthy();
+    expect(screen.getByText('You must be at least 14 years old to create an account.')).toBeTruthy();
   });
 
   it('sends an ISO date, the current language and consent', async () => {

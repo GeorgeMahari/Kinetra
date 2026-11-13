@@ -1,6 +1,7 @@
 import assessRo from './assess.ro';
 import insightsRo from './insights.ro';
 import devicesRo from './devices.ro';
+import parentalConsentRo from './parentalConsent.ro';
 import progressionRo from './progression.ro';
 import type { TranslationResources } from './en';
 
@@ -8,6 +9,7 @@ const ro: TranslationResources = {
   assess: assessRo,
   ...insightsRo,
   ...devicesRo,
+  ...parentalConsentRo,
   ...progressionRo,
   brand: {
     name: 'Kinetra',
@@ -44,7 +46,9 @@ const ro: TranslationResources = {
     password: 'Parolă',
     passwordHint: 'Cel puțin 10 caractere. O frază scurtă se reține mai ușor decât un cuvânt complicat.',
     dateOfBirth: 'Data nașterii',
-    dateOfBirthHint: 'Folosită pentru a alege teste și valori de referință potrivite vârstei. Trebuie să ai cel puțin 16 ani.',
+    dateOfBirthHint: 'Folosită pentru a alege teste și valori de referință potrivite vârstei. Trebuie să ai cel puțin 14 ani; la 14 sau 15 ani e nevoie de acordul unui părinte.',
+    parentEmail: 'Emailul părintelui sau al tutorelui',
+    parentEmailHint: 'Pentru că ai sub 16 ani, îi trimitem un link prin care să-și dea acordul. Contul rămâne blocat până atunci.',
     day: 'Zi',
     month: 'Lună',
     year: 'An',
@@ -88,6 +92,7 @@ const ro: TranslationResources = {
     futureDate: 'Data nu poate fi în viitor.',
     underage: 'Trebuie să ai cel puțin {{age}} ani pentru a crea un cont.',
     consentRequired: 'Confirmă că ești de acord pentru a continua.',
+    parentEmailSame: 'Folosește emailul părintelui, nu pe al tău.',
     heightRange: 'Introdu o înălțime între 50 și 260 cm, cu cel mult o zecimală.',
     nameTooLong: 'Folosește cel mult 80 de caractere.',
   },
@@ -290,7 +295,11 @@ const ro: TranslationResources = {
     invalid_credentials: 'Emailul sau parola sunt incorecte.',
     email_taken: 'Există deja un cont cu acest email.',
     weak_password: 'Alege o parolă mai puternică.',
-    underage: 'Trebuie să ai cel puțin 16 ani pentru a crea un cont.',
+    underage: 'Trebuie să ai cel puțin 14 ani pentru a crea un cont.',
+    parent_email_required: 'Introdu emailul unui părinte sau al tutorelui.',
+    parent_email_same: 'Folosește emailul părintelui, nu pe al tău.',
+    parental_consent_pending: 'Contul tău așteaptă acordul părintelui.',
+    consent_not_pending: 'Nu există nicio cerere de acord în așteptare.',
     rate_limited: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
     invalid_refresh_token: 'Sesiunea a expirat. Te rugăm să te autentifici din nou.',
     invalid_code: 'Codul este greșit sau a expirat. Cere unul nou dacă e nevoie.',
