@@ -82,17 +82,6 @@ export default function ProfileTab() {
             subtitle={t('devices.rowHint')}
             onPress={() => router.push('/connected-data')}
           />
-          {__DEV__ ? (
-            <>
-              <Divider />
-              <ListRow
-                icon="info"
-                title={t('dev.galleryTitle')}
-                subtitle={t('dev.galleryHint')}
-                onPress={() => router.push('/dev-gallery')}
-              />
-            </>
-          ) : null}
         </Card>
       </View>
     </Screen>
