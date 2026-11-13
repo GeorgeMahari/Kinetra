@@ -10,9 +10,12 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 type Readiness = NonNullable<OnboardingSummary['readiness']>;
 
-export function readinessKey(r: Readiness): 'maximal' | 'submaximal_build' | 'submaximal' | 'non_exertional' {
+export function readinessKey(
+  r: Readiness,
+): 'maximal' | 'submaximal_build' | 'submaximal_minor' | 'submaximal' | 'non_exertional' {
   if (r.intensity_ceiling === 'maximal') return 'maximal';
   if (r.intensity_ceiling === 'non_exertional') return 'non_exertional';
+  if (r.reasons.includes('under_18')) return 'submaximal_minor';
   return r.reasons.includes('build_up_first') ? 'submaximal_build' : 'submaximal';
 }
 

@@ -21,6 +21,9 @@ screening.* Med Sci Sports Exerc. 2015;47(11):2473–2479):
 - **Currently inactive** people should progress gradually. In Kinetra they are `clear` but capped at
   submaximal (`build_up_first`) until they report at least 2 exercise sessions a week and an activity level of
   "moderate" or higher.
+- **Under 18** (16–17; registration starts at 16): never above submaximal (`under_18`), however active.
+  The maximal-effort protocols and the norms in this app were developed in adults. The cap also applies
+  to the stored ceiling by current age, so nothing unlocks maximal tests before the 18th birthday.
 
 **Questions.** Kinetra wrote its own seven yes/no questions. It does not reproduce the copyrighted
 PAR-Q+.

@@ -115,7 +115,10 @@ def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingS
     """Writes one consistent snapshot: goals, activity profile, readiness screening, completion."""
     _categories(db, answers.activity)  # rejects unknown or inactive sport codes before writing
     outcome = rules.screen_readiness(
-        answers.readiness, answers.activity.activity_level, answers.activity.exercise_sessions_per_week
+        answers.readiness,
+        answers.activity.activity_level,
+        answers.activity.exercise_sessions_per_week,
+        _user_age(user),
     )
     fu = answers.follow_ups
     a = answers.activity
@@ -224,14 +227,16 @@ def get_summary(db: Session, user: User) -> OnboardingSummary:
 
     readiness = None
     if screening is not None and profile is not None:
+        age = _user_age(user)
         outcome = rules.screen_readiness(
             {ReadinessQuestion(k): v for k, v in screening.answers.items()},
             ActivityLevel(profile.activity_level),
             profile.exercise_sessions_per_week,
+            age,
         )
         readiness = ReadinessOut(
             result=ReadinessResult(screening.result),
-            intensity_ceiling=IntensityCeiling(screening.intensity_ceiling),
+            intensity_ceiling=rules.cap_for_age(IntensityCeiling(screening.intensity_ceiling), age),
             reasons=list(outcome.reasons),
             answered_at=screening.answered_at,
         )
@@ -303,7 +308,8 @@ def export_data(db: Session, user: User) -> dict[str, object]:
 def latest_intensity_ceiling(db: Session, user: User) -> IntensityCeiling | None:
     """The test-intensity ceiling from the most recent safety screening; None if never screened."""
     s = _latest_screening(db, user)
-    return IntensityCeiling(s.intensity_ceiling) if s else None
+    # Capped by the current age as well, so screenings stored before this rule existed stay safe.
+    return rules.cap_for_age(IntensityCeiling(s.intensity_ceiling), _user_age(user)) if s else None
 
 
 def has_reported_lifestyle(db: Session, user: User) -> bool:

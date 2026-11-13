@@ -260,6 +260,8 @@ const en = {
     maximalBody: 'Nothing in your answers suggests limiting test intensity. Every test can still be skipped, and you should stop if you feel unwell.',
     submaximal_build: 'Moderate-effort tests first',
     submaximal_buildBody: 'Nothing in your answers suggests a risk. Because you don’t exercise regularly yet, Kinetra starts with moderate-effort tests.',
+    submaximal_minor: 'Moderate-effort tests',
+    submaximal_minorBody: 'Nothing in your answers suggests a risk. Maximal-effort tests, such as the 12-minute run, are offered only from age 18.',
     submaximal: 'Moderate-effort tests only',
     submaximalBody: 'Because of your answers, Kinetra will suggest only moderate-effort tests. Consider checking with a healthcare professional before more intense exercise.',
     non_exertional: 'No effort tests for now',

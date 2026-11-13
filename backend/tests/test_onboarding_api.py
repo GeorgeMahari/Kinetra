@@ -1,5 +1,6 @@
 """Onboarding API against the test database: save/resume, validation, completion, history, isolation."""
 
+from datetime import date
 from typing import Any
 
 import pytest
@@ -104,6 +105,27 @@ class TestComplete:
         assert "strength" in top  # goal + information gap (cyclist, no strength training)
         state = api.get("/api/v1/onboarding", headers=user).json()
         assert state["status"] == "completed" and state["draft"] == {}
+
+    def test_seventeen_year_old_never_gets_maximal_tests(self, api: TestClient) -> None:
+        dob = date(date.today().year - 17, 1, 1)  # already 17 on any day of this year
+        resp = api.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "teen@example.com",
+                "password": PASSWORD,
+                "date_of_birth": dob.isoformat(),
+                "privacy_consent": True,
+            },
+        )
+        assert resp.status_code == 201, resp.text
+        h = auth(resp.json()["access_token"])
+        summary = api.post("/api/v1/onboarding/complete", headers=h, json=answers()).json()
+        assert summary["readiness"]["intensity_ceiling"] == "submaximal"
+        assert summary["readiness"]["reasons"] == ["under_18"]
+        tests = {t["code"]: t for t in api.get("/api/v1/assessments/tests", headers=h).json()}
+        assert tests["cooper_12min"]["allowed"] is False and tests["pulls"]["allowed"] is True
+        cooper = {"test_code": "cooper_12min", "inputs": {"distance_m": 2400, "mode": "run"}}
+        assert api.post("/api/v1/assessments/results", headers=h, json=cooper).status_code == 403
 
     def test_symptom_answer_limits_intensity(self, api: TestClient, user: dict[str, str]) -> None:
         body = answers(readiness=READINESS_NO | {"chest_pain": True})

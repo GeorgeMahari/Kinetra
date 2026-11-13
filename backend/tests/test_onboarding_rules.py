@@ -4,6 +4,7 @@ import pytest
 
 from app.modules.onboarding.rules import (
     ActivityFacts,
+    cap_for_age,
     dimension_priorities,
     follow_up_questions,
     information_gaps,
@@ -85,6 +86,22 @@ class TestReadiness:
     def test_all_no_and_regularly_active_allows_maximal(self) -> None:
         out = screen_readiness(ALL_NO, ActivityLevel.active, 4)
         assert (out.result, out.intensity_ceiling) == (ReadinessResult.clear, IntensityCeiling.maximal)
+
+    @pytest.mark.parametrize(("age", "ceiling"), [(16, "submaximal"), (17, "submaximal"), (18, "maximal")])
+    def test_maximal_effort_is_adult_only(self, age: int, ceiling: str) -> None:
+        out = screen_readiness(ALL_NO, ActivityLevel.very_active, 6, age)
+        assert out.result is ReadinessResult.clear and out.intensity_ceiling.value == ceiling
+        assert out.reasons == (("under_18",) if age < 18 else ())
+
+    def test_minor_with_symptoms_still_gets_consult(self) -> None:
+        out = screen_readiness({**ALL_NO, ReadinessQuestion.chest_pain: True}, ActivityLevel.active, 4, 16)
+        assert out.intensity_ceiling is IntensityCeiling.non_exertional
+
+    def test_cap_for_age_covers_stored_screenings_and_unknown_age(self) -> None:
+        assert cap_for_age(IntensityCeiling.maximal, 17) is IntensityCeiling.submaximal
+        assert cap_for_age(IntensityCeiling.maximal, None) is IntensityCeiling.submaximal
+        assert cap_for_age(IntensityCeiling.maximal, 30) is IntensityCeiling.maximal
+        assert cap_for_age(IntensityCeiling.non_exertional, 17) is IntensityCeiling.non_exertional
 
     def test_all_no_but_inactive_is_capped_at_submaximal(self) -> None:
         out = screen_readiness(ALL_NO, ActivityLevel.sedentary, 0)

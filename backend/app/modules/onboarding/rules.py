@@ -89,8 +89,21 @@ class ReadinessOutcome:
     reasons: tuple[str, ...]
 
 
+ADULT_AGE = 18
+
+
+def cap_for_age(ceiling: IntensityCeiling, age: int | None) -> IntensityCeiling:
+    """Maximal-effort tests are adult-only (DECISIONS D10). Unknown age is not treated as adult."""
+    if ceiling is IntensityCeiling.maximal and (age is None or age < ADULT_AGE):
+        return IntensityCeiling.submaximal
+    return ceiling
+
+
 def screen_readiness(
-    answers: Mapping[ReadinessQuestion, bool], activity_level: ActivityLevel, exercise_sessions_per_week: int
+    answers: Mapping[ReadinessQuestion, bool],
+    activity_level: ActivityLevel,
+    exercise_sessions_per_week: int,
+    age: int | None = None,
 ) -> ReadinessOutcome:
     missing = set(ReadinessQuestion) - set(answers)
     if missing:
@@ -113,6 +126,9 @@ def screen_readiness(
     # regularly (ACSM: inactive individuals should progress gradually before vigorous effort).
     regularly_active = activity_level not in LOW_ACTIVITY and exercise_sessions_per_week >= 2
     if regularly_active:
+        if age is not None and age < ADULT_AGE:
+            # Under 18: no maximal-effort tests, however active (adult norms and protocols don't apply).
+            return ReadinessOutcome(ReadinessResult.clear, IntensityCeiling.submaximal, ("under_18",))
         return ReadinessOutcome(ReadinessResult.clear, IntensityCeiling.maximal, ())
     return ReadinessOutcome(ReadinessResult.clear, IntensityCeiling.submaximal, ("build_up_first",))
 

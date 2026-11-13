@@ -211,9 +211,21 @@ Health Connect as the first one.
   native module. In Expo Go, on iOS and on the web the screen says so honestly and nothing is simulated.
   Apple Health remains future scope.
 
-### D10 — Minors (planned, Milestone 2/4)
+### D10 — Minors (16–17 implemented; under 16 pending)
 Users under 18 get a reduced data set, no adult norms, no maximal-effort tests, and no
 public or social features. Under the minimum age (16 by default, configurable per
 jurisdiction under GDPR Art. 8) registration requires a parental-consent flow. Until that flow
-exists, registration will be limited to users aged 16 or older rather than collecting a minor's data
+exists, registration is limited to users aged 16 or older rather than collecting a minor's data
 without safeguards.
+
+Status (2026-11-13):
+- **No adult norms:** FRIEND starts at 20, WHO BMI at 20 and NICE WHtR at 18.
+- **No effort objectives:** weekly objectives skip minors.
+- **No maximal-effort tests:** missing until today. A regularly active 17-year-old was cleared for the
+  Cooper run. Fixed in two places:
+  - the screening rule caps under-18s at submaximal, with the reason `under_18`;
+  - the stored ceiling is capped again by the *current* age (`cap_for_age`) wherever tests are offered
+    or accepted.
+
+  A screening stored before the fix therefore can't unlock maximal tests either. Unknown age is
+  treated as not adult.

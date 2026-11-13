@@ -261,6 +261,8 @@ const ro: TranslationResources = {
     maximalBody: 'Nimic din răspunsurile tale nu indică necesitatea de a limita intensitatea testelor. Orice test poate fi omis, iar dacă nu te simți bine trebuie să te oprești.',
     submaximal_build: 'Întâi teste de efort moderat',
     submaximal_buildBody: 'Nimic din răspunsurile tale nu indică un risc. Pentru că încă nu faci exerciții regulat, Kinetra începe cu teste de efort moderat.',
+    submaximal_minor: 'Teste de efort moderat',
+    submaximal_minorBody: 'Nimic din răspunsurile tale nu indică un risc. Testele de efort maxim, cum ar fi alergarea de 12 minute, sunt oferite doar de la 18 ani.',
     submaximal: 'Doar teste de efort moderat',
     submaximalBody: 'Din cauza răspunsurilor tale, Kinetra va sugera doar teste de efort moderat. Ia în considerare o discuție cu un profesionist din domeniul sănătății înainte de efort mai intens.',
     non_exertional: 'Deocamdată fără teste de efort',
