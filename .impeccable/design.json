@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-13T16:00:00+02:00",
+  "title": "Design System: Kinetra",
+  "extensions": {
+    "colorMeta": {
+      "instrument-indigo": { "role": "primary", "displayName": "Instrument Indigo", "canonical": "#4B4FE0", "tonalRamp": ["#14154A", "#23257A", "#3436B0", "#4B4FE0", "#6366F1", "#8B8EF6", "#B9BBFA", "#E6E7FE"] },
+      "indigo-wash": { "role": "primary", "displayName": "Indigo Wash", "canonical": "#ECECFE" },
+      "signal-mint": { "role": "secondary", "displayName": "Signal Mint", "canonical": "#14A88E", "tonalRamp": ["#05372F", "#0A5C4E", "#0F826D", "#14A88E", "#22C7A9", "#56D8C0", "#9DEADB", "#DDF8F2"] },
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#F7F8FB" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0B1020", "tonalRamp": ["#070B16", "#0B1020", "#121A2E", "#1C2640", "#2A3655", "#5A6480", "#AEB6CA", "#E7EAF2"] },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#E7EAF2" },
+      "unknown-slate": { "role": "neutral", "displayName": "Unknown Slate", "canonical": "#8A94AD" },
+      "caution-amber": { "role": "status", "displayName": "Caution Amber", "canonical": "#B97511" },
+      "alert-coral": { "role": "status", "displayName": "Alert Coral", "canonical": "#D2483B" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Greeting and landing headline." },
+      "title": { "displayName": "Title", "purpose": "Screen titles." },
+      "heading": { "displayName": "Heading", "purpose": "Section and card headings." },
+      "body": { "displayName": "Body", "purpose": "Explanations and instructions." },
+      "label": { "displayName": "Label", "purpose": "Row titles, values, button text (16px in buttons)." },
+      "caption": { "displayName": "Caption", "purpose": "Descriptions, dates, hints, provenance." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "press-opacity", "value": "opacity 0.85", "purpose": "Pressed state of every pressable." },
+      { "name": "disabled-opacity", "value": "opacity 0.5", "purpose": "Disabled controls." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single main action of a screen.",
+      "html": "<button class=\"ds-btn-primary\">Save result</button>",
+      "css": ".ds-btn-primary { min-height: 52px; padding: 0 24px; border: none; border-radius: 12px; background: #4B4FE0; color: #FFFFFF; font: 600 16px/19px system-ui, Roboto, sans-serif; width: 100%; } .ds-btn-primary:active { opacity: 0.85; } .ds-btn-primary:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The second action, e.g. Back to home under Next test.",
+      "html": "<button class=\"ds-btn-secondary\">Back to home</button>",
+      "css": ".ds-btn-secondary { min-height: 52px; padding: 0 24px; border: none; border-radius: 12px; background: #ECECFE; color: #4B4FE0; font: 600 16px/19px system-ui, Roboto, sans-serif; width: 100%; } .ds-btn-secondary:active { opacity: 0.85; } .ds-btn-secondary:focus-visible { outline: 2px solid #4B4FE0; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Quiet actions such as Delete this result.",
+      "html": "<button class=\"ds-btn-ghost\">Delete this result</button>",
+      "css": ".ds-btn-ghost { min-height: 52px; padding: 0 24px; border: none; border-radius: 12px; background: transparent; color: #4B4FE0; font: 600 16px/19px system-ui, Roboto, sans-serif; } .ds-btn-ghost:active { opacity: 0.85; } .ds-btn-ghost:focus-visible { outline: 2px solid #4B4FE0; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Numeric and text entry with a 1.5px stroke.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Repetitions</span><input class=\"ds-input\" inputmode=\"numeric\" placeholder=\"0\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; font-family: system-ui, Roboto, sans-serif; } .ds-field-label { font: 600 14px/19px system-ui, Roboto, sans-serif; color: #0B1020; } .ds-input { min-height: 52px; padding: 0 12px; border: 1.5px solid #E7EAF2; border-radius: 12px; background: #FFFFFF; color: #0B1020; font: 400 16px/23px system-ui, Roboto, sans-serif; } .ds-input:focus-visible { outline: none; border-color: #4B4FE0; }"
+    },
+    {
+      "name": "Segmented Choice",
+      "kind": "chip",
+      "refersTo": "chip-segment",
+      "description": "Pill choices such as the theme selector or test version.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-item ds-seg-on\">Automatic</button><button class=\"ds-seg-item\">Light</button><button class=\"ds-seg-item\">Dark</button></div>",
+      "css": ".ds-seg { display: flex; gap: 8px; flex-wrap: wrap; } .ds-seg-item { padding: 10px 16px; border: 1.5px solid #E7EAF2; border-radius: 999px; background: #FFFFFF; color: #0B1020; font: 600 14px/19px system-ui, Roboto, sans-serif; } .ds-seg-item:focus-visible { outline: 2px solid #4B4FE0; outline-offset: 2px; } .ds-seg-on { background: #ECECFE; border-color: #4B4FE0; color: #4B4FE0; }"
+    },
+    {
+      "name": "Dimension Row",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Signature row: icon badge, dimension, caption, value or neutral unknown pill.",
+      "html": "<div class=\"ds-dim\"><span class=\"ds-dim-badge\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#4B4FE0\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M3 12h4l2-5 4 10 2-5h6\"/></svg></span><span class=\"ds-dim-text\"><span class=\"ds-dim-name\">Cardiovascular endurance</span><span class=\"ds-dim-cap\">Resting heart rate · 11/13/2026</span></span><span class=\"ds-dim-value\">86 bpm</span></div><div class=\"ds-dim\"><span class=\"ds-dim-badge\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#4B4FE0\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"7\"/></svg></span><span class=\"ds-dim-text\"><span class=\"ds-dim-name\">Balance and coordination</span><span class=\"ds-dim-cap\">Standing on one leg, eyes open.</span></span><span class=\"ds-pill-unknown\">Not assessed</span></div>",
+      "css": ".ds-dim { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; border: 1px solid #E7EAF2; border-radius: 12px; background: #FFFFFF; font-family: system-ui, Roboto, sans-serif; } .ds-dim-badge { width: 40px; height: 40px; border-radius: 999px; background: #ECECFE; display: flex; align-items: center; justify-content: center; flex: none; } .ds-dim-text { display: flex; flex-direction: column; gap: 2px; flex: 1; } .ds-dim-name { font: 600 14px/19px system-ui, Roboto, sans-serif; color: #0B1020; } .ds-dim-cap { font: 400 13px/18px system-ui, Roboto, sans-serif; color: #5A6480; } .ds-dim-value { font: 600 14px/19px system-ui, Roboto, sans-serif; color: #0B1020; } .ds-pill-unknown { padding: 3px 8px; border: 1px dashed #8A94AD; border-radius: 999px; color: #8A94AD; font: 400 11px/14px system-ui, Roboto, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The scientific instrument with human warmth",
+    "overview": "Kinetra reads like a precise measuring instrument that a beginner is still comfortable holding. The precision comes from restraint: deep ink or soft paper surfaces, hairline borders instead of shadows, one confident indigo for action and a mint signal reserved for progress. The warmth comes from generous spacing, softly rounded forms, plain language and a tone that never judges a result.",
+    "keyCharacteristics": [
+      "Flat surfaces separated by 1px hairlines; no drop shadows.",
+      "One accent (indigo) for action, one signal (mint) for progress, status colours only for meaning.",
+      "System fonts (SF Pro / Roboto) for full Romanian and Cyrillic coverage.",
+      "Soft geometry: 12px controls, 20px cards, pills for choices and status.",
+      "Honest labelling everywhere: measured, calculated, estimated, reported."
+    ],
+    "rules": [
+      { "name": "The Meaning-Only Rule", "body": "Amber and coral appear only when something needs care or went wrong. They never decorate, and a low result is never coloured red.", "section": "colors" },
+      { "name": "The Neutral Unknown Rule", "body": "Anything not yet known uses Unknown Slate with a dashed outline, never a warning or error colour.", "section": "colors" },
+      { "name": "The No Verdict Colour Rule", "body": "Changes between results are signed numbers in text colour, never green or red.", "section": "colors" },
+      { "name": "The One Family Rule", "body": "A display face may be added later through expo-font, but every screen must still work in the system font with Romanian diacritics and Cyrillic.", "section": "typography" },
+      { "name": "The Hairline Rule", "body": "Separate with a 1px hairline or a tonal step, never with a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do take every colour, spacing and radius from mobile/src/theme/tokens.ts through useTheme().",
+      "Do give each screen one primary (indigo) action; put a second action in the secondary style.",
+      "Do label every value with its provenance (measured, calculated, estimated, reported).",
+      "Do check every new screen in light and dark, and in Romanian, English and Russian."
+    ],
+    "donts": [
+      "Don't add drop shadows; use a hairline or a tonal step.",
+      "Don't colour a result as good or bad, or a change as green or red.",
+      "Don't show an overall score, a ranking, or a comparison with other people.",
+      "Don't use amber or coral for anything that isn't a safety note or an error.",
+      "Don't encode status by colour alone; pair it with text, shape or a dashed outline."
+    ]
+  }
+}
