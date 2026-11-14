@@ -3,12 +3,14 @@
  * (Reanimated) and turns off when the system's Reduce Motion setting is on.
  */
 import * as Haptics from 'expo-haptics';
-import { useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { Platform, Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   createAnimatedComponent,
   FadeInDown,
+  interpolateColor,
   ReduceMotion,
+  type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -42,28 +44,70 @@ export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
   style?: StyleProp<ViewStyle>;
   /** Feedback on press; `none` for controls that already give their own. */
   hapticKind?: HapticKind;
+  /**
+   * Tint the background while pressed or hovered (web, desktop). `base` is the resting background.
+   * Kept under Reduce Motion: a colour change is state feedback, not movement.
+   */
+  highlight?: { base: string; active: string };
   children: ReactNode;
 }
 
-/** A pressable that settles to 0.97 with a spring and a light haptic. Reduced motion: opacity only. */
-export function PressableScale({ style, hapticKind = 'tap', onPressIn, onPressOut, onPress, disabled, children, ...rest }: PressableScaleProps) {
+/** Press (0..1) and hover (0..1) progress of the nearest PressableScale, for children that react. */
+const PressContext = createContext<{ pressed: SharedValue<number>; hovered: SharedValue<number> } | null>(null);
+export function usePressProgress() {
+  return useContext(PressContext);
+}
+
+/**
+ * A pressable that settles to 0.97 with a spring and a light haptic, lifts slightly on hover, and
+ * optionally tints its background. Reduced motion: no scale or lift, the tint and opacity remain.
+ */
+export function PressableScale({
+  style,
+  hapticKind = 'tap',
+  highlight,
+  onPressIn,
+  onPressOut,
+  onHoverIn,
+  onHoverOut,
+  onPress,
+  disabled,
+  children,
+  ...rest
+}: PressableScaleProps) {
   const reduced = useReducedMotion();
   const pressed = useSharedValue(0);
-  const animated = useAnimatedStyle(() => ({
-    transform: [{ scale: reduced ? 1 : 1 - (1 - motion.pressScale) * pressed.value }],
-    opacity: reduced ? 1 - 0.15 * pressed.value : 1,
-  }));
+  const hovered = useSharedValue(0);
+  const animated = useAnimatedStyle(() => {
+    const active = Math.max(pressed.value, hovered.value);
+    return {
+      transform: reduced
+        ? []
+        : [{ scale: 1 - (1 - motion.pressScale) * pressed.value + 0.006 * hovered.value }, { translateY: -1.5 * hovered.value }],
+      opacity: reduced ? 1 - 0.12 * pressed.value : 1,
+      ...(highlight ? { backgroundColor: interpolateColor(active, [0, 1], [highlight.base, highlight.active]) } : null),
+    };
+  });
+  const ctx = useMemo(() => ({ pressed, hovered }), [pressed, hovered]);
   return (
     <AnimatedPressable
       {...rest}
       disabled={disabled}
       onPressIn={(e) => {
-        pressed.value = withSpring(1, motion.spring);
+        pressed.set(withSpring(1, motion.spring));
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        pressed.value = withSpring(0, motion.spring);
+        pressed.set(withSpring(0, motion.spring));
         onPressOut?.(e);
+      }}
+      onHoverIn={(e) => {
+        hovered.set(withTiming(1, { duration: motion.duration.fast }));
+        onHoverIn?.(e);
+      }}
+      onHoverOut={(e) => {
+        hovered.set(withTiming(0, { duration: motion.duration.fast }));
+        onHoverOut?.(e);
       }}
       onPress={(e) => {
         haptic(hapticKind);
@@ -71,7 +115,7 @@ export function PressableScale({ style, hapticKind = 'tap', onPressIn, onPressOu
       }}
       style={[style, animated]}
     >
-      {children}
+      <PressContext.Provider value={ctx}>{children}</PressContext.Provider>
     </AnimatedPressable>
   );
 }
@@ -96,7 +140,7 @@ export function useShimmer() {
   const v = useSharedValue(0.55);
   useEffect(() => {
     if (reduced) return;
-    v.value = withRepeat(withSequence(withTiming(1, { duration: 700 }), withTiming(0.55, { duration: 700 })), -1);
+    v.set(withRepeat(withSequence(withTiming(1, { duration: 700 }), withTiming(0.55, { duration: 700 })), -1));
   }, [reduced, v]);
   return useAnimatedStyle(() => ({ opacity: v.value }));
 }

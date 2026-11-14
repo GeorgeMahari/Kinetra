@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router/js-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { Icon } from '@/components/Icon';
+import { TabIcon } from '@/components/TabIcon';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export const unstable_settings = { anchor: 'today' };
@@ -26,7 +26,7 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.today'),
           tabBarButtonTestID: 'tab-today',
-          tabBarIcon: ({ color, size }) => <Icon name="today" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <TabIcon name="today" color={color} size={size} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -34,7 +34,7 @@ export default function TabsLayout() {
         options={{
           title: t('assess.tab'),
           tabBarButtonTestID: 'tab-assess',
-          tabBarIcon: ({ color, size }) => <Icon name="cardio" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <TabIcon name="cardio" color={color} size={size} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -42,7 +42,7 @@ export default function TabsLayout() {
         options={{
           title: t('progress.tab'),
           tabBarButtonTestID: 'tab-progress',
-          tabBarIcon: ({ color, size }) => <Icon name="endurance" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <TabIcon name="endurance" color={color} size={size} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -50,7 +50,7 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.profile'),
           tabBarButtonTestID: 'tab-profile',
-          tabBarIcon: ({ color, size }) => <Icon name="profile" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <TabIcon name="profile" color={color} size={size} focused={focused} />,
         }}
       />
     </Tabs>

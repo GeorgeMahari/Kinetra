@@ -18,6 +18,7 @@ import { ObjectivesList } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
 import { DimensionList } from '@/features/dimensions/DimensionList';
 import { OnboardingCard } from '@/features/onboarding/OnboardingCard';
+import { CompactBar } from '@/features/today/CompactBar';
 import { TrailHead } from '@/features/today/TrailHead';
 import { COMPLETION_TOTAL, missingProfileItems } from '@/features/profile/completion';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -34,18 +35,21 @@ export default function Today() {
   const missing = missingProfileItems(p);
   const done = COMPLETION_TOTAL - missing.length;
 
+  const greeting = p.display_name ? t('home.greeting', { name: p.display_name }) : t('home.greetingNoName');
+  const known = dashboard.data?.overview.dimensions.filter((d) => d.status !== 'not_assessed').length ?? 0;
+  const next = dashboard.data?.recommendations.find((r) => r.dimension)?.dimension ?? null;
+
   return (
-    <Screen>
+    <Screen
+      onRefresh={() => Promise.all([dashboard.refetch(), prog.refetch()])}
+      topBar={<CompactBar title={greeting} count={`${known}/${dashboard.data?.overview.dimensions.length ?? 8}`} />}
+    >
       <View style={{ gap: spacing.xl }}>
-        <TrailHead
-          title={p.display_name ? t('home.greeting', { name: p.display_name }) : t('home.greetingNoName')}
-          subtitle={t('home.subtitle')}
-          overview={dashboard.data?.overview}
-        />
+        <TrailHead title={greeting} subtitle={t('home.subtitle')} overview={dashboard.data?.overview} next={next} />
 
         <View style={{ gap: spacing.md }}>
           <SectionHeader title={t('today.dimensionsTitle')} caption={t('today.dimensionsCaption')} />
-          <DimensionList overview={dashboard.data?.overview} />
+          <DimensionList overview={dashboard.data?.overview} loading={dashboard.isPending} />
           {dashboard.data?.overview.dimensions.every((d) => d.status !== 'not_assessed') ? null : (
             <AppText variant="caption" color="textMuted">
               {t('today.notAssessedHint')}

@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
-import { Linking, Pressable, View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Recommendation } from '@/api/insights';
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { Icon, type IconName } from '@/components/Icon';
+import { PressableScale } from '@/components/motion';
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { recommendationText } from './present';
@@ -62,9 +63,9 @@ export function RecommendationCard({ rec }: { rec: Recommendation }) {
     </Card>
   );
   return onPress ? (
-    <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={onPress}>
+    <PressableScale accessibilityRole="button" accessibilityLabel={title} onPress={onPress}>
       {content}
-    </Pressable>
+    </PressableScale>
   ) : (
     content
   );

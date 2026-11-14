@@ -1,18 +1,20 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
+import Animated, { useAnimatedStyle, useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type Overview } from '@/api/assessments';
 import { AppText } from '@/components/AppText';
-import { Blaze } from '@/components/Blaze';
-import { FadeInItem, PressableScale } from '@/components/motion';
+import { Blaze, type BlazeSpec } from '@/components/Blaze';
+import { FadeInItem, PressableScale, usePressProgress } from '@/components/motion';
+import { Skeleton } from '@/components/States';
 import { formatValue } from '@/features/assessments/ResultView';
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { DIMENSIONS } from './dimensions';
 
 /** Eight dimensions with their real status. Without an overview (loading/offline) all show as not assessed. */
-export function DimensionList({ overview }: { overview?: Overview }) {
+export function DimensionList({ overview, loading = false }: { overview?: Overview; loading?: boolean }) {
   const { t, i18n } = useTranslation();
   const { colors, spacing, radius, elevation } = useTheme();
 
@@ -63,6 +65,7 @@ export function DimensionList({ overview }: { overview?: Overview }) {
               accessibilityLabel={`${t(`dimensions.${d.key}.name`)}: ${statusLabel}`}
               onPress={() => router.push('/assess')}
               hapticKind="select"
+              highlight={{ base: colors.surface, active: colors.brandSoft }}
               style={{
                 flexDirection: 'row',
                 gap: spacing.md,
@@ -72,14 +75,20 @@ export function DimensionList({ overview }: { overview?: Overview }) {
                 minHeight: 64,
               }}
             >
-              <Blaze {...d.blaze} />
+              <PressableBlaze {...d.blaze} />
               <View style={{ flex: 1, gap: 2 }}>
                 <AppText variant="label">{t(`dimensions.${d.key}.name`)}</AppText>
-                <AppText variant="caption" color="textMuted" numberOfLines={2}>
-                  {caption}
-                </AppText>
+                {loading ? (
+                  <Skeleton width="70%" height={12} />
+                ) : (
+                  <AppText variant="caption" color="textMuted" numberOfLines={2}>
+                    {caption}
+                  </AppText>
+                )}
               </View>
-              {showsValue ? (
+              {loading ? (
+                <Skeleton width={56} height={16} />
+              ) : showsValue ? (
                 <AppText
                   variant="label"
                   testID={`dimension-${d.key}-value`}
@@ -108,5 +117,20 @@ export function DimensionList({ overview }: { overview?: Overview }) {
         );
       })}
     </View>
+  );
+}
+
+/** The row's blaze tilts a few degrees while its row is pressed or hovered, like a touched waymark. */
+function PressableBlaze(spec: BlazeSpec) {
+  const press = usePressProgress();
+  const reduced = useReducedMotion();
+  const style = useAnimatedStyle(() => {
+    const v = press ? Math.max(press.pressed.value, press.hovered.value) : 0;
+    return { transform: [{ rotate: `${reduced ? 0 : -8 * v}deg` }, { scale: reduced ? 1 : 1 + 0.06 * v }] };
+  });
+  return (
+    <Animated.View style={style}>
+      <Blaze {...spec} />
+    </Animated.View>
   );
 }

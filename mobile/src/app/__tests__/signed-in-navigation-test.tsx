@@ -37,7 +37,10 @@ describe('signed-in navigation', () => {
   it('opens on Today with all eight dimensions shown as not assessed', async () => {
     await open();
     expect(screen.getByTestId('greeting')).toHaveTextContent('Hello, Ana');
-    expect(screen.getAllByText('Not assessed')).toHaveLength(8);
+    // Loading shows placeholders, never a false "not assessed"; once loaded every row says so.
+    for (const d of ['cardio', 'recovery', 'strength', 'muscularEndurance', 'mobility', 'balance', 'body', 'lifestyle']) {
+      await waitFor(() => expect(screen.getByTestId(`dimension-${d}`)).toHaveTextContent(/Not assessed/));
+    }
     expect(screen.queryByText(/\d+\s*\/\s*100/)).toBeNull();
   });
 
