@@ -12,7 +12,7 @@ from typing import Any
 
 from app.modules.onboarding.vocab import IntensityCeiling
 
-INSIGHTS_VERSION = "insights-1"
+INSIGHTS_VERSION = "insights-2"
 RETEST_AFTER = timedelta(weeks=8)
 MAX_RECOMMENDATIONS = 6
 
@@ -95,6 +95,63 @@ def coverage(status: str, latest_at: datetime | None, now: datetime) -> str:
     if status == "reported":
         return "reported"
     return "unknown"
+
+
+# ---------------------------------------------------------------- standing (where you are on a spoke)
+#
+# The map's radius: 0 (centre) = no verified norm judges this dimension yet; 0.2 = the lowest
+# band of a norm; 1 = its best band. Only norms already verified in the engine (D26) place a
+# point; an unrecognised label is ignored, never guessed. A dimension with several judged
+# indicators sits at their mean. The positions are display steps along a norm's own ordered
+# bands, not a cross-dimension score (D40).
+
+LOWEST = 0.2
+
+_FRIEND = ("below_p5", "p5_10", "p10_25", "p25_50", "p50_75", "p75_90", "p90_95", "above_p95")
+_THREE = (LOWEST, 0.6, 1.0)  # unhealthy / borderline / healthy range
+
+LEVELS: dict[str, dict[str, float]] = {
+    "friend_2015_treadmill": {
+        label: round(LOWEST + (1 - LOWEST) * i / (len(_FRIEND) - 1), 3) for i, label in enumerate(_FRIEND)
+    },
+    "who_bmi_adults": {
+        "who_obesity": _THREE[0],
+        "who_underweight": _THREE[1],
+        "who_overweight": _THREE[1],
+        "who_normal": _THREE[2],
+    },
+    "nice_ng246_whtr": {"nice_high": _THREE[0], "nice_increased": _THREE[1], "nice_healthy": _THREE[2]},
+}
+# AASM/SRS is a single threshold: below it is drawn halfway, because the norm does not grade how far below.
+SLEEP_MET, SLEEP_BELOW = 1.0, 0.5
+
+
+@dataclass(frozen=True)
+class StandingBasis:
+    indicator: str
+    reference_id: str
+    label: str
+
+
+@dataclass(frozen=True)
+class Standing:
+    level: float  # 0 < level <= 1
+    basis: tuple[StandingBasis, ...]
+
+
+def standing(
+    interpreted: Sequence[StandingBasis], *, sleep_hours: float | None, age: int | None
+) -> Standing | None:
+    """Where the person sits on one spoke, from verified norms only. None = no norm judges it."""
+    used = [b for b in interpreted if b.label in LEVELS.get(b.reference_id, {})]
+    levels = [LEVELS[b.reference_id][b.label] for b in used]
+    if sleep_hours is not None and age is not None and 18 <= age <= 60:
+        met = sleep_hours >= 7
+        used.append(StandingBasis("sleep_hours", AASM_SRS_2015.id, "aasm_met" if met else "aasm_below"))
+        levels.append(SLEEP_MET if met else SLEEP_BELOW)
+    if not levels:
+        return None
+    return Standing(round(sum(levels) / len(levels), 3), tuple(used))
 
 
 # ---------------------------------------------------------------- recommendations

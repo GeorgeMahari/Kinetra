@@ -33,10 +33,24 @@ class ProgressOut(BaseModel):
     indicators: list[IndicatorSeries]
 
 
+class StandingBasisOut(BaseModel):
+    indicator: str
+    reference_id: str
+    label: str
+
+
+class StandingOut(BaseModel):
+    """Where the person sits on the spoke: 0.2 = a norm's lowest band, 1 = its best (D40)."""
+
+    level: float
+    basis: list[StandingBasisOut]
+
+
 class CoverageOut(BaseModel):
     dimension: Dimension
     coverage: Literal["current", "dated", "reported", "unknown"]
     latest_at: datetime | None
+    standing: StandingOut | None = None
 
 
 class ReferenceOut(BaseModel):

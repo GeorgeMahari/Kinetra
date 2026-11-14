@@ -157,11 +157,16 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
         const dims = ['cardio', 'recovery', 'strength', 'muscularEndurance', 'mobility', 'balance', 'body', 'lifestyle'];
         return {
           generated_at: '2026-11-12T12:00:00Z',
-          insights_version: 'insights-1',
+          insights_version: 'insights-2',
           profile_map: dims.map((d) => ({
             dimension: d,
             coverage: d === 'muscularEndurance' && results.length ? 'current' : d === 'lifestyle' ? 'reported' : 'unknown',
             latest_at: null,
+            // Reported 7.5 h of sleep meets the AASM norm; nothing else is rated.
+            standing:
+              d === 'lifestyle'
+                ? { level: 1, basis: [{ indicator: 'sleep_hours', reference_id: 'aasm_srs_2015', label: 'aasm_met' }] }
+                : null,
           })),
           recommendations: recommendations ?? [
             { code: 'strength_two_days', kind: 'habit', priority: 70, dimension: 'strength', test_code: null,

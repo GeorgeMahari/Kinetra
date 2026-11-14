@@ -181,3 +181,50 @@ class TestRecommendations:
         assert len(out) == 6
         assert out == recommend(x)
         assert [r.priority for r in out] == sorted((r.priority for r in out), reverse=True)
+
+
+# ---------------------------------------------------------------- standing (where you are on a spoke)
+
+from app.modules.insights.rules import StandingBasis, standing  # noqa: E402
+
+
+def _b(ref: str, label: str) -> StandingBasis:
+    return StandingBasis(indicator="x", reference_id=ref, label=label)
+
+
+def test_standing_none_without_a_verified_norm() -> None:
+    assert standing([], sleep_hours=None, age=30) is None
+
+
+def test_standing_friend_bands_run_from_near_centre_to_the_rim() -> None:
+    low = standing([_b("friend_2015_treadmill", "below_p5")], sleep_hours=None, age=30)
+    mid = standing([_b("friend_2015_treadmill", "p50_75")], sleep_hours=None, age=30)
+    top = standing([_b("friend_2015_treadmill", "above_p95")], sleep_hours=None, age=30)
+    assert low is not None and mid is not None and top is not None
+    assert low.level == 0.2  # worst sits next to the centre, never on it (the centre means unknown)
+    assert low.level < mid.level < top.level == 1.0
+
+
+def test_standing_categories_put_the_healthy_range_at_the_rim() -> None:
+    assert standing([_b("who_bmi_adults", "who_normal")], sleep_hours=None, age=30).level == 1.0  # type: ignore[union-attr]
+    assert standing([_b("who_bmi_adults", "who_underweight")], sleep_hours=None, age=30).level == 0.6  # type: ignore[union-attr]
+    assert standing([_b("who_bmi_adults", "who_obesity")], sleep_hours=None, age=30).level == 0.2  # type: ignore[union-attr]
+    both = standing(
+        [_b("who_bmi_adults", "who_normal"), _b("nice_ng246_whtr", "nice_increased")],
+        sleep_hours=None,
+        age=30,
+    )
+    assert both is not None and both.level == 0.8 and len(both.basis) == 2
+
+
+def test_standing_unknown_labels_are_ignored_not_guessed() -> None:
+    assert standing([_b("who_bmi_adults", "something_new")], sleep_hours=None, age=30) is None
+
+
+def test_standing_sleep_uses_aasm_only_for_adults_18_to_60() -> None:
+    ok = standing([], sleep_hours=7.5, age=30)
+    short = standing([], sleep_hours=6, age=30)
+    assert ok is not None and ok.level == 1.0 and ok.basis[0].reference_id == "aasm_srs_2015"
+    assert short is not None and short.level == 0.5
+    assert standing([], sleep_hours=6, age=70) is None
+    assert standing([], sleep_hours=6, age=None) is None

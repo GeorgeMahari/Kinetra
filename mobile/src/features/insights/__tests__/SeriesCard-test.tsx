@@ -57,35 +57,27 @@ describe('SeriesCard', () => {
 });
 
 describe('ProfileMap', () => {
-  it('counts known dimensions; unknown ones are not drawn as zero-length bars', async () => {
-    await render(
-      themed(
-        <ProfileMap
-          items={[
-            { key: 'cardio', label: 'Cardio', coverage: 'current' },
-            { key: 'body', label: 'Body', coverage: 'dated' },
-            { key: 'lifestyle', label: 'Lifestyle', coverage: 'reported' },
-            { key: 'balance', label: 'Balance', coverage: 'unknown' },
-          ]}
-        />,
-      ),
-    );
-    expect(screen.getByTestId('profile-map-count')).toHaveTextContent('3 of 4 dimensions have information');
+  const items = [
+    { key: 'cardio', label: 'Cardio', coverage: 'current', level: 0.66 },
+    { key: 'body', label: 'Body', coverage: 'dated', level: 1 },
+    { key: 'strength', label: 'Strength', coverage: 'current', level: null },
+    { key: 'balance', label: 'Balance', coverage: 'unknown', level: null },
+  ] as const;
+
+  it('places a point only where a verified norm rates the dimension', async () => {
+    await render(themed(<ProfileMap items={[...items]} />));
+    expect(screen.getByTestId('profile-map-count')).toHaveTextContent('2 of 4 dimensions are rated against a norm');
+    expect(screen.getByTestId('map-point-cardio')).toBeTruthy();
+    expect(screen.getByTestId('map-point-body')).toBeTruthy();
+    // Measured without a norm, and not assessed: both stay at the centre, drawn differently.
+    expect(screen.queryByTestId('map-point-strength')).toBeNull();
+    expect(screen.getByTestId('map-unrated-strength')).toBeTruthy();
+    expect(screen.getByTestId('map-unassessed-balance')).toBeTruthy();
   });
 
   it('ends every dimension spoke in its trail blaze, so each spoke is named', async () => {
-    await render(
-      themed(
-        <ProfileMap
-          items={[
-            { key: 'cardio', label: 'Cardio', coverage: 'current' },
-            { key: 'balance', label: 'Balance', coverage: 'unknown' },
-          ]}
-        />,
-      ),
-    );
+    await render(themed(<ProfileMap items={[...items]} />));
     expect(screen.getByTestId('map-badge-cardio')).toBeTruthy();
     expect(screen.getByTestId('map-badge-balance')).toBeTruthy();
   });
 });
-

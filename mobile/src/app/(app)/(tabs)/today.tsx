@@ -75,6 +75,7 @@ export default function Today() {
                   key: m.dimension,
                   label: t(`dimensions.${m.dimension}.name`),
                   coverage: m.coverage,
+                  level: m.standing?.level ?? null,
                 }))}
               />
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}>

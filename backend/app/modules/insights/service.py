@@ -9,6 +9,7 @@ from app.core.errors import AppError
 from app.modules.assessments import service as assessments_service
 from app.modules.assessments.engine.catalog import TESTS, allowed
 from app.modules.assessments.models import TestResult
+from app.modules.assessments.schemas import DimensionOverview
 from app.modules.insights import rules
 from app.modules.insights.schemas import (
     CoverageOut,
@@ -19,6 +20,8 @@ from app.modules.insights.schemas import (
     RecommendationOut,
     ReferenceOut,
     SeriesOut,
+    StandingBasisOut,
+    StandingOut,
 )
 from app.modules.onboarding import service as onboarding_service
 from app.modules.users.models import User
@@ -92,11 +95,28 @@ def dashboard(db: Session, user: User) -> DashboardOut:
     snapshot = onboarding_service.latest_activity_snapshot(db, user)
 
     latest_at = {d.dimension.value: (d.latest[0].performed_at if d.latest else None) for d in ov.dimensions}
+    age = _age(user)
+
+    def standing_of(d: DimensionOverview) -> StandingOut | None:
+        judged = [
+            rules.StandingBasis(i.code, i.interpretation.reference_id, i.interpretation.label)
+            for r in d.latest
+            if r.status == "completed"
+            for i in r.indicators
+            if i.interpretation is not None
+        ]
+        sleep = snapshot["sleep_hours"] if snapshot and d.dimension.value == "lifestyle" else None
+        s = rules.standing(judged, sleep_hours=sleep, age=age)
+        if s is None:
+            return None
+        return StandingOut(level=s.level, basis=[StandingBasisOut(**asdict(b)) for b in s.basis])
+
     profile_map = [
         CoverageOut(
             dimension=d.dimension,
             coverage=rules.coverage(d.status, latest_at[d.dimension.value], now),
             latest_at=latest_at[d.dimension.value],
+            standing=standing_of(d),
         )
         for d in ov.dimensions
     ]

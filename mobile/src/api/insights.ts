@@ -3,6 +3,12 @@ import type { DimensionCode } from './onboarding';
 
 export type Coverage = 'current' | 'dated' | 'reported' | 'unknown';
 
+/** 0.2 = a norm's lowest band … 1 = its best. `basis` names the norms that placed the point. */
+export interface Standing {
+  level: number;
+  basis: { indicator: string; reference_id: string; label: string }[];
+}
+
 export interface Recommendation {
   code: string;
   kind: 'setup' | 'safety' | 'profile' | 'assess' | 'retest' | 'habit';
@@ -18,7 +24,13 @@ export interface Recommendation {
 export interface Dashboard {
   generated_at: string;
   insights_version: string;
-  profile_map: { dimension: DimensionCode; coverage: Coverage; latest_at: string | null }[];
+  profile_map: {
+    dimension: DimensionCode;
+    coverage: Coverage;
+    latest_at: string | null;
+    /** Where the person stands, from verified norms only (D40); null = no norm rates it. */
+    standing: Standing | null;
+  }[];
   recommendations: Recommendation[];
   recent_results: TestResult[];
   overview: Overview;

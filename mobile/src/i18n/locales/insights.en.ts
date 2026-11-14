@@ -1,12 +1,28 @@
 const insightsEn = {
   dashboard: {
-    mapTitle: 'How well your profile is known',
-    mapCaption: 'Each spoke is one dimension. A longer spoke means it is better known — not that it is better.',
+    mapTitle: 'Where you stand',
+    mapCaption: "The centre means not rated yet. Next to the centre is a norm's lowest level; the rim is the ideal. Only tests with a verified scientific norm get a point.",
     mapCount: '{{known}} of {{total}} dimensions have information',
     mapA11y: 'Profile map: {{known}} of {{total}} dimensions have information.',
     mapScreenTitle: 'Profile map',
     mapOpen: 'Open the map',
-    mapKeyTitle: 'Which spoke is which',
+    mapKeyTitle: 'Each spoke',
+    standCount: '{{rated}} of {{total}} dimensions are rated against a norm',
+    standA11y: 'Profile map: {{rated}} of {{total}} dimensions are rated against a verified norm.',
+    legend: {
+      point: 'Where you stand: near the centre = low, at the rim = ideal',
+      unrated: 'Measured, but no verified norm yet',
+      unassessed: 'Not assessed',
+    },
+    band: { high: 'Close to ideal', mid: 'In the middle', low: 'Far from ideal' },
+    unrated: 'Measured, no verified norm yet',
+    by: 'by {{sources}}',
+    sources: {
+      friend_2015_treadmill: 'FRIEND (VO₂max)',
+      who_bmi_adults: 'WHO (BMI)',
+      nice_ng246_whtr: 'NICE (waist-to-height)',
+      aasm_srs_2015: 'AASM (sleep ≥ 7 h)',
+    },
     coverage: {
       current: 'Assessed in the last 8 weeks',
       dated: 'Assessed more than 8 weeks ago',

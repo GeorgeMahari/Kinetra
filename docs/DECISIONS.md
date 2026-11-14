@@ -138,7 +138,7 @@ adds UX weight without new information in the MVP; it can be introduced without 
 The app hides tests above the user's intensity ceiling, and the API also rejects them (403
 `test_not_allowed`). The safety rule therefore doesn't depend on client correctness.
 
-### D29 — A coverage map instead of a performance radar
+### D29 — A coverage map instead of a performance radar (superseded by D40)
 The eight dimensions have no common scale: VO₂max bands, BMI categories and plank seconds can't
 share an axis. A performance radar would therefore invent a score, which is exactly what the product
 promises not to do. The eight-spoke figure shows how well each dimension is *known*: assessed
@@ -269,3 +269,20 @@ Status (2026-11-13):
 
   A screening stored before the fix therefore can't unlock maximal tests either. Unknown age is
   treated as not adult.
+
+### D40 — The profile map shows where you stand, from verified norms only (2026-11-14)
+Supersedes D29 at the product owner's request. Each spoke now places a point where the person
+stands: the centre means "not rated", next to the centre (0.2) is a norm's lowest band, and the rim
+(1.0) is its best band. The rated points, joined, form the pale area.
+
+- **Only verified norms place a point** (D26): FRIEND VO₂max bands (cardio), WHO BMI and NICE
+  waist-to-height categories (body), AASM/SRS ≥ 7 h of sleep (lifestyle, ages 18–60). A dimension that
+  was measured but has no verified norm (strength, endurance, mobility, balance, recovery) stays at the
+  centre, drawn differently from "not assessed". An unrecognised label is ignored, never guessed.
+- **Positions are steps along each norm's own ordered bands**, not a common score: there is still no
+  overall score, and dimensions are not compared or added. Several rated indicators in one dimension
+  (BMI and WHtR) sit at their mean.
+- **Binary norms are drawn halfway when not met** (sleep below 7 h → 0.5), because the norm does not
+  grade how far below.
+- The rule is server-side and pure (`insights.rules.standing`, `insights-2`); the app only draws it.
+  New verified norms extend the same table and appear on the map without app changes.

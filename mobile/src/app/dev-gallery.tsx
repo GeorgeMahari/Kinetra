@@ -65,7 +65,12 @@ export default function DevGallery() {
             <Card>
               <ProfileMap
                 items={['cardio', 'recovery', 'strength', 'muscularEndurance', 'mobility', 'balance', 'body', 'lifestyle'].map(
-                  (k, i) => ({ key: k, label: k, coverage: (['current', 'dated', 'reported', 'unknown'] as const)[i % 4]! }),
+                  (k, i) => ({
+                    key: k,
+                    label: k,
+                    coverage: (['current', 'dated', 'reported', 'unknown'] as const)[i % 4]!,
+                    level: [0.66, null, 0.43, null, 1, null, 0.8, 0.5][i] ?? null,
+                  }),
                 )}
               />
               <ProfileMapLegend />

@@ -1,12 +1,28 @@
 const insightsRo = {
   dashboard: {
-    mapTitle: 'Cât de bine este cunoscut profilul tău',
-    mapCaption: 'Fiecare spiță este o dimensiune. O spiță mai lungă înseamnă că este mai bine cunoscută — nu că este mai bună.',
+    mapTitle: 'Unde te afli',
+    mapCaption: 'Centrul înseamnă încă fără notă. Lângă centru e cel mai slab nivel al unei norme, marginea e valoarea ideală. Doar testele cu o normă științifică verificată primesc un punct.',
     mapCount: '{{known}} din {{total}} dimensiuni au informații',
     mapA11y: 'Harta profilului: {{known}} din {{total}} dimensiuni au informații.',
     mapScreenTitle: 'Harta profilului',
     mapOpen: 'Deschide harta',
-    mapKeyTitle: 'Ce reprezintă fiecare spiță',
+    mapKeyTitle: 'Fiecare spiță',
+    standCount: '{{rated}} din {{total}} dimensiuni au o notă după o normă',
+    standA11y: 'Harta profilului: {{rated}} din {{total}} dimensiuni au o notă după o normă verificată.',
+    legend: {
+      point: 'Unde te afli: lângă centru = slab, la margine = ideal',
+      unrated: 'Măsurată, dar încă fără o normă verificată',
+      unassessed: 'Neevaluată',
+    },
+    band: { high: 'Aproape de ideal', mid: 'La mijloc', low: 'Departe de ideal' },
+    unrated: 'Măsurată, încă fără normă verificată',
+    by: 'după {{sources}}',
+    sources: {
+      friend_2015_treadmill: 'FRIEND (VO₂max)',
+      who_bmi_adults: 'OMS (IMC)',
+      nice_ng246_whtr: 'NICE (talie/înălțime)',
+      aasm_srs_2015: 'AASM (somn ≥ 7 h)',
+    },
     coverage: {
       current: 'Evaluată în ultimele 8 săptămâni',
       dated: 'Evaluată acum mai mult de 8 săptămâni',

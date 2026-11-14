@@ -89,6 +89,9 @@ describe('signed-in navigation', () => {
     await fireEvent.press(await screen.findByTestId('open-profile-map'));
     await waitFor(() => expect(screen).toHavePathname('/profile-map'));
     expect(await screen.findByTestId('map-key-cardio')).toHaveTextContent(/Not assessed/);
+    // Lifestyle is rated by the AASM sleep norm, with a level meter.
+    expect(screen.getByTestId('map-key-lifestyle')).toHaveTextContent(/Close to ideal · by AASM \(sleep ≥ 7 h\)/);
+    expect(screen.getByTestId('map-level-lifestyle', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.getByTestId('map-badge-lifestyle')).toBeTruthy();
   });
 

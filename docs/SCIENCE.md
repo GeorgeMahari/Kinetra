@@ -129,7 +129,7 @@ Information gaps are worded as gaps ("not reported, worth measuring") and never 
   - Verification: the official page refuses automated access, so the values come from the page's
     search-indexed text and are consistent across clinical summaries. **Re-check manually before release.**
 
-## 5. Recommendations (`insights-1`)
+## 5. Recommendations (`insights-2`)
 
 | Rule | Fires when | Source |
 |---|---|---|
@@ -168,3 +168,17 @@ exists. The result is shown raw, with its personal trend, and a personal best co
 same variant. A dead hang was not chosen, because it measures grip endurance rather than pulling.
 The HRR clinical thresholds (for example Cole et al., NEJM 1999) come from laboratory exercise testing in patients
 and are not applied to a home step test.
+
+## 6. Profile map positions (`insights-2`, D40)
+
+Where a point sits on its spoke (0 = not rated, 0.2 = lowest band, 1 = best band):
+
+| Norm | Bands → position |
+|---|---|
+| FRIEND 2015 VO₂max percentiles (Cooper estimate) | below p5 = 0.2 … above p95 = 1.0, in 8 equal steps |
+| WHO adult BMI | obesity 0.2 · underweight or overweight 0.6 · healthy range 1.0 |
+| NICE NG246 waist-to-height | high 0.2 · increased 0.6 · healthy 1.0 |
+| AASM/SRS 2015 sleep, ages 18–60 | ≥ 7 h = 1.0 · below = 0.5 (single threshold, not graded) |
+
+Several rated indicators in one dimension sit at their mean. Tests without a verified norm (D26) get no
+position. The positions are display steps within one norm, never a score comparable across dimensions.

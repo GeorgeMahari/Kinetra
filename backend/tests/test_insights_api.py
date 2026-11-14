@@ -74,6 +74,30 @@ class TestDashboard:
         recs = [r["code"] for r in dash(api, h)["recommendations"]]
         assert "retest_sit_reach" in recs
 
+    def test_profile_map_places_points_only_from_verified_norms(self, api: TestClient) -> None:
+        h = auth(register_ok(api)["access_token"])
+        api.patch("/api/v1/me/profile", headers=h, json={"sex_for_norms": "male", "height_cm": 175})
+        onboard(api, h)  # reports 7.5 h of sleep
+        post(api, h, "cooper_12min", {"distance_m": 2500, "mode": "run"})
+        post(api, h, "body_measurements", {"weight_kg": 70, "waist_cm": 80})
+        post(api, h, "plank", {"seconds": 60})
+        m = {x["dimension"]: x for x in dash(api, h)["profile_map"]}
+        assert 0.2 <= m["cardio"]["standing"]["level"] <= 1
+        assert m["cardio"]["standing"]["basis"][0]["reference_id"] == "friend_2015_treadmill"
+        # BMI 22.9 (WHO normal) and WHtR 0.46 (NICE healthy): both at the rim.
+        assert m["body"]["standing"]["level"] == 1.0
+        assert {b["reference_id"] for b in m["body"]["standing"]["basis"]} == {
+            "who_bmi_adults",
+            "nice_ng246_whtr",
+        }
+        assert m["lifestyle"]["standing"] == {
+            "level": 1.0,
+            "basis": [{"indicator": "sleep_hours", "reference_id": "aasm_srs_2015", "label": "aasm_met"}],
+        }
+        # Measured, but no verified norm yet: no point (the centre), never a guess.
+        assert m["strength"]["coverage"] == "current" and m["strength"]["standing"] is None
+        assert m["balance"]["standing"] is None
+
 
 class TestProgress:
     def test_series_per_protocol_with_changes(self, api: TestClient) -> None:

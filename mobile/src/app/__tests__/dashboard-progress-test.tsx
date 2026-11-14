@@ -21,10 +21,10 @@ const routes = {
 
 beforeEach(() => i18n.changeLanguage('en'));
 
-it('Today shows the coverage map, labelled guidance and recommendations in priority order', async () => {
+it('Today shows the profile map, labelled guidance and recommendations in priority order', async () => {
   const backend = createFakeBackend({ status: 'completed' });
   await renderRouter(routes, { initialUrl: '/today', wrapper: providers(backend.request) });
-  expect(await screen.findByText('How well your profile is known')).toBeTruthy();
+  expect(await screen.findByText('Where you stand')).toBeTruthy();
   expect(screen.getByTestId('profile-map-count')).toHaveTextContent(/1 of 8/);
   expect(screen.getByText('General wellness guidance — not individual medical advice.')).toBeTruthy();
   const recs = screen.getAllByTestId(/^rec-/).map((n) => n.props.testID);
