@@ -1,13 +1,14 @@
 """Assessment routes. Every query is scoped to the authenticated user."""
 
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.modules.assessments import service
-from app.modules.assessments.schemas import Overview, ResultCreate, ResultOut, TestOut
+from app.modules.assessments.schemas import ActivityOut, Overview, ResultCreate, ResultOut, TestOut
 from app.modules.auth.deps import get_current_user
 from app.modules.users.models import User
 
@@ -35,6 +36,17 @@ def results(
     db: Session = Depends(get_db),
 ) -> list[ResultOut]:
     return service.list_results(db, user, test_code, limit)
+
+
+@router.get("/activity", response_model=list[ActivityOut])
+def activity(
+    since: datetime,
+    until: datetime,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[ActivityOut]:
+    """When results were recorded in a window of up to 400 days (times only, no values)."""
+    return service.activity(db, user, since, until)
 
 
 @router.get("/results/{result_id}", response_model=ResultOut)

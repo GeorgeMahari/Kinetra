@@ -87,3 +87,10 @@ class DimensionOverview(BaseModel):
 class Overview(BaseModel):
     intensity_ceiling: IntensityCeiling | None
     dimensions: list[DimensionOverview]
+
+
+class ActivityOut(BaseModel):
+    """When a result was recorded (no values): what the Progress calendar needs."""
+
+    performed_at: datetime
+    test_code: str

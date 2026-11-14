@@ -34,6 +34,7 @@ module.exports = {
   Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
   cancelAnimation: () => {},
   Easing: { bezier: () => id, out: id, in: id, inOut: id, cubic: id, linear: id },
+  FadeIn: builder,
   FadeInDown: builder,
   ZoomIn: builder,
   ReduceMotion: { System: 'system', Always: 'always', Never: 'never' },

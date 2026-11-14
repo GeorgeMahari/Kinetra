@@ -77,6 +77,14 @@ const insightsRo = {
     allDetails: 'Toți indicatorii',
     usedArms: 'cu brațele',
     noArms: 'brațe încrucișate',
+    calendar: {
+      previous: 'Luna anterioară',
+      next: 'Luna următoare',
+      activeDays: 'Zile cu date: {{count}}',
+      results: 'rezultate salvate: {{count}}',
+      noData: 'fără date',
+      legend: 'Verde: zi în care ai salvat cel puțin un rezultat. Atinge o zi verde ca să vezi ce ai făcut.',
+    },
   },
 };
 

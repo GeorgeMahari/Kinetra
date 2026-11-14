@@ -15,6 +15,7 @@ import { SectionHeader } from '@/components/ListRow';
 import { AchievementsList, LevelCard, PersonalBests, WeekCard } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
 import { useDashboard, useProgress } from '@/features/insights/useInsights';
+import { ActivityCalendar } from '@/features/progress/ActivityCalendar';
 import { useTheme } from '@/theme/ThemeProvider';
 
 function TestProgress({ code }: { code: TestCode }) {
@@ -86,6 +87,7 @@ export default function ProgressTab() {
           <AppText variant="title">{t('progress.title')}</AppText>
           <AppText color="textMuted">{t('progress.intro')}</AppText>
         </View>
+        <ActivityCalendar />
         {prog.data ? (
           <>
             {prog.data.newly_earned.map((c) => (

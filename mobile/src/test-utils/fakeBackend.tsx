@@ -228,6 +228,14 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
           throw new ApiError('not_found', 'x', 404);
         }
         if (method === 'GET' && path.startsWith('/assessments/results?')) return [];
+        if (method === 'GET' && path.startsWith('/assessments/activity?')) {
+          const q = new URLSearchParams(path.split('?')[1]);
+          const since = Date.parse(q.get('since') ?? '');
+          const until = Date.parse(q.get('until') ?? '');
+          return results
+            .filter((r) => Date.parse(r.performed_at) >= since && Date.parse(r.performed_at) <= until)
+            .map((r) => ({ performed_at: r.performed_at, test_code: r.test_code }));
+        }
         throw new Error(`fake backend: unexpected ${key}`);
     }
   });

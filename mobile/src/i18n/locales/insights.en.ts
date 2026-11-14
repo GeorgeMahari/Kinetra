@@ -77,6 +77,14 @@ const insightsEn = {
     allDetails: 'All indicators',
     usedArms: 'arms used',
     noArms: 'arms crossed',
+    calendar: {
+      previous: 'Previous month',
+      next: 'Next month',
+      activeDays: 'Days with data: {{count}}',
+      results: 'results saved: {{count}}',
+      noData: 'no data',
+      legend: 'Green: a day on which you saved at least one result. Tap a green day to see what you did.',
+    },
   },
 };
 

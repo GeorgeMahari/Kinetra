@@ -16,6 +16,7 @@ from app.modules.assessments.engine import references as refs
 from app.modules.assessments.engine.catalog import TESTS, Context, Indicator, allowed, protocol_key, run
 from app.modules.assessments.models import Measurement, TestResult
 from app.modules.assessments.schemas import (
+    ActivityOut,
     DimensionOverview,
     IndicatorOut,
     Overview,
@@ -191,6 +192,28 @@ def list_results(db: Session, user: User, test_code: str | None, limit: int) -> 
         q.order_by(TestResult.performed_at.desc(), TestResult.created_at.desc()).limit(limit)
     ).all()
     return [_to_out(r) for r in rows if r.test_code in TESTS]
+
+
+MAX_ACTIVITY_WINDOW = timedelta(days=400)
+
+
+def activity(db: Session, user: User, since: datetime, until: datetime) -> list[ActivityOut]:
+    """Result times in [since, until], oldest first. The app groups them into local calendar days."""
+    if since.tzinfo is None or until.tzinfo is None or until < since or until - since > MAX_ACTIVITY_WINDOW:
+        raise AppError(
+            "validation_error",
+            "The window must have time zones, end after it starts and span at most 400 days.",
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            [{"field": "since", "type": "out_of_range"}],
+        )
+    rows = db.execute(
+        select(TestResult.performed_at, TestResult.test_code)
+        .where(
+            TestResult.user_id == user.id, TestResult.performed_at >= since, TestResult.performed_at <= until
+        )
+        .order_by(TestResult.performed_at)
+    ).all()
+    return [ActivityOut(performed_at=at, test_code=code) for at, code in rows if code in TESTS]
 
 
 def _own(db: Session, user: User, result_id: uuid.UUID) -> TestResult:

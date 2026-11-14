@@ -78,6 +78,12 @@ export interface Overview {
   dimensions: DimensionOverview[];
 }
 
+/** When a result was recorded (no values), for the Progress calendar. */
+export interface ActivityItem {
+  performed_at: string;
+  test_code: TestCode;
+}
+
 type Request = <T>(path: string, options?: { method?: 'GET' | 'POST' | 'DELETE'; body?: unknown }) => Promise<T>;
 
 export function assessmentsApi(request: Request) {
@@ -92,6 +98,10 @@ export function assessmentsApi(request: Request) {
         method: 'POST',
         body: { test_code: testCode, inputs, stopped_early: stoppedEarly },
       }),
+    activity: (since: string, until: string) =>
+      request<ActivityItem[]>(
+        `/assessments/activity?since=${encodeURIComponent(since)}&until=${encodeURIComponent(until)}`,
+      ),
     remove: (id: string) => request<null>(`/assessments/results/${id}`, { method: 'DELETE' }),
   };
 }

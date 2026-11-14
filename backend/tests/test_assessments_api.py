@@ -168,3 +168,33 @@ class TestIsolation:
         with migrated_engine.connect() as conn:
             assert conn.execute(text("SELECT count(*) FROM test_results")).scalar_one() == 0
             assert conn.execute(text("SELECT count(*) FROM measurements")).scalar_one() == 0
+
+
+class TestActivity:
+    """When results were recorded, for the Progress calendar."""
+
+    def test_lists_only_this_users_results_in_the_window(self, api: TestClient, user: dict[str, str]) -> None:
+        now = datetime.now(UTC)
+        post(api, user, "plank", {"seconds": 60}, performed_at=(now - timedelta(days=2)).isoformat())
+        post(api, user, "plank", {"seconds": 70}, performed_at=(now - timedelta(days=40)).isoformat())
+        other = auth(register_ok(api, "other@example.com")["access_token"])
+        post(api, other, "body_measurements", {"weight_kg": 70})
+        since = (now - timedelta(days=30)).isoformat()
+        resp = api.get(
+            "/api/v1/assessments/activity", headers=user, params={"since": since, "until": now.isoformat()}
+        )
+        assert resp.status_code == 200, resp.text
+        days = resp.json()
+        assert [d["test_code"] for d in days] == ["plank"]
+        assert set(days[0]) == {"performed_at", "test_code"}
+
+    def test_rejects_a_window_longer_than_a_year_and_a_bit(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        now = datetime.now(UTC)
+        resp = api.get(
+            "/api/v1/assessments/activity",
+            headers=user,
+            params={"since": (now - timedelta(days=500)).isoformat(), "until": now.isoformat()},
+        )
+        assert resp.status_code == 422
