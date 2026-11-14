@@ -173,6 +173,12 @@ class TestRawOnlyTests:
             ("sit_reach", {"reach_cm": -4.5}, "sit_reach_cm", "chms_2019_sit_reach"),
             ("single_leg_stance", {"left_s": 40, "right_s": 42}, "stance_best_s", "springer_2007_upst"),
             ("resting_hr", {"bpm": 64, "method": "manual_pulse"}, "resting_hr", "nhanes_rhr_2011"),
+            (
+                "hrr_step",
+                {"recovery_mode": "passive_seated", "hr_end": 150, "hr_60": 120, "beats_first_minute": 105},
+                "recovery_beats_1min",
+                "ymca_3min_step",
+            ),
         ],
     )
     def test_engine_2_norms_are_marked_approximate(

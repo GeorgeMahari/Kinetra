@@ -29,6 +29,7 @@ export const FORMS: Record<TestCode, FormSpec> = {
       { name: 'hr_end', kind: 'int', min: 60, max: 230 },
       { name: 'hr_60', kind: 'int', min: 35, max: 230 },
       { name: 'hr_120', kind: 'int', min: 35, max: 230, optional: true },
+      { name: 'beats_first_minute', kind: 'int', min: 35, max: 230, optional: true },
     ],
     timer: { mode: 'countdown', seconds: 180 },
   },

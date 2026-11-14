@@ -87,3 +87,29 @@ class TestStance:
         # 60-69: mean 32.1 s -> the 50th percentile.
         assert pct(norms.stance_percentile(32, 20, 65)) == pytest.approx(49.8, abs=0.5)
         assert norms.stance_percentile(30, 30, 17) is None
+
+
+class TestYmcaStep:
+    @pytest.mark.parametrize(
+        ("beats", "label"),
+        [
+            (77, "ymca_excellent"),
+            (78, "ymca_good"),
+            (100, "ymca_average"),
+            (121, "ymca_poor"),
+            (122, "ymca_very_poor"),
+        ],
+    )
+    def test_men_18_25(self, beats: int, label: str) -> None:
+        i = norms.ymca_step_category(beats, "passive_seated", 21, "male")
+        assert i is not None and i.label == label
+
+    def test_women_and_older_groups_use_their_own_rows(self) -> None:
+        i = norms.ymca_step_category(82, "passive_seated", 30, "female")
+        assert i is not None and i.label == "ymca_excellent"
+        old = norms.ymca_step_category(83, "passive_seated", 70, "male")
+        assert old is not None and old.label == "ymca_excellent" and old.detail["age_group"] == "66+"
+
+    def test_only_the_seated_protocol_and_adults(self) -> None:
+        assert norms.ymca_step_category(80, "active_walking", 21, "male") is None
+        assert norms.ymca_step_category(80, "passive_seated", 16, "male") is None

@@ -239,3 +239,9 @@ def test_standing_percentile_and_category_norms() -> None:
     assert push is not None and push.level == 0.6
     # A percentile reference without a percentile is ignored, not guessed.
     assert standing([_b("nhanes_rhr_2011", "percentile")], sleep_hours=None, age=30) is None
+
+
+def test_standing_ymca_ratings_run_from_very_poor_to_excellent() -> None:
+    top = standing([_b("ymca_3min_step", "ymca_excellent")], sleep_hours=None, age=21)
+    low = standing([_b("ymca_3min_step", "ymca_very_poor")], sleep_hours=None, age=21)
+    assert top is not None and top.level == 1.0 and low is not None and low.level == 0.2

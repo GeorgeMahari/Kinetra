@@ -250,3 +250,51 @@ def stance_percentile(left_s: int, right_s: int, age: int | None) -> Interpretat
     best = min(max(left_s, right_s), SPRINGER_CAP_S)
     p = 100.0 if best >= SPRINGER_CAP_S else normal_percentile((best - mean) / sd)
     return _pct(refs.SPRINGER_2007.id, p, age_group=f"{group[0]}-{group[1]}", capped=best >= SPRINGER_CAP_S)
+
+
+# ------------------------------------------------------------------ 3-minute step test (YMCA)
+
+YMCA_STEP_LABELS = (
+    "ymca_excellent",
+    "ymca_good",
+    "ymca_above_average",
+    "ymca_average",
+    "ymca_below_average",
+    "ymca_poor",
+    "ymca_very_poor",
+)
+# Upper bound (beats in the first minute) of Excellent, Good, Above average, Average, Below average, Poor;
+# above the last bound is Very poor. Reprinted from the YMCA Fitness Testing and Assessment Manual.
+YMCA_STEP: dict[str, dict[tuple[int, int], tuple[int, int, int, int, int, int]]] = {
+    "male": {
+        (18, 25): (77, 85, 93, 100, 108, 121),
+        (26, 35): (77, 86, 94, 102, 111, 123),
+        (36, 45): (77, 88, 95, 106, 114, 126),
+        (46, 55): (84, 93, 101, 111, 119, 128),
+        (56, 65): (81, 95, 101, 109, 117, 129),
+        (66, 120): (83, 92, 102, 111, 119, 127),
+    },
+    "female": {
+        (18, 25): (82, 94, 102, 111, 120, 132),
+        (26, 35): (82, 93, 102, 111, 120, 131),
+        (36, 45): (86, 97, 105, 113, 121, 134),
+        (46, 55): (92, 102, 111, 118, 124, 134),
+        (56, 65): (94, 104, 111, 118, 127, 137),
+        (66, 120): (93, 102, 113, 121, 126, 133),
+    },
+}
+
+
+def ymca_step_category(beats: int, recovery_mode: str, age: int | None, sex: str) -> Interpretation | None:
+    """Beats counted for one full minute from 5 s after stepping, seated. Fewer beats rank higher."""
+    if recovery_mode != "passive_seated" or age is None or sex not in YMCA_STEP:
+        return None
+    row = _row(YMCA_STEP[sex], age)
+    if row is None:
+        return None
+    group, bounds = row
+    tier = next((i for i, upper in enumerate(bounds) if beats <= upper), len(bounds))
+    age_group = f"{group[0]}+" if group[1] == 120 else f"{group[0]}-{group[1]}"
+    return Interpretation(
+        refs.YMCA_STEP.id, "category", YMCA_STEP_LABELS[tier], {"age_group": age_group, "sex": sex}
+    )

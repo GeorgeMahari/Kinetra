@@ -123,6 +123,15 @@ _FRIEND_MID = {
     "above_p95": 97.5,
 }
 _THREE = (LOWEST, 0.6, 1.0)  # unhealthy / borderline / healthy range
+_YMCA = (
+    "ymca_excellent",
+    "ymca_good",
+    "ymca_above_average",
+    "ymca_average",
+    "ymca_below_average",
+    "ymca_poor",
+    "ymca_very_poor",
+)
 _CSEP = ("csep_needs_improvement", "csep_fair", "csep_good", "csep_very_good", "csep_excellent")
 
 LEVELS: dict[str, dict[str, float]] = {
@@ -135,6 +144,8 @@ LEVELS: dict[str, dict[str, float]] = {
     },
     "nice_ng246_whtr": {"nice_high": _THREE[0], "nice_increased": _THREE[1], "nice_healthy": _THREE[2]},
     "csep_path_pushups": {label: round(LOWEST + (1 - LOWEST) * i / 4, 3) for i, label in enumerate(_CSEP)},
+    # Seven YMCA ratings, very poor (0.2) to excellent (1.0).
+    "ymca_3min_step": {label: round(1 - (1 - LOWEST) * i / 6, 3) for i, label in enumerate(_YMCA)},
 }
 # Percentile norms place a point from `percentile`, whatever their reference.
 PERCENTILE_REFERENCES = frozenset(

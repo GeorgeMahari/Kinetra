@@ -299,9 +299,11 @@ instead of leaving results raw. `engine-2` rates each test against its age and s
 | Push-ups | CSEP-PATH 2019 categories (men on toes, women on knees) | read from the ACE reprint |
 | Sit-and-reach | Statistics Canada, CHMS 2016–17 percentiles | our zero is the toes; 26 cm added for the CSEP box |
 | Single-leg stance | Springer 2007, eyes open | hands on hips and 60 s here, arms crossed and 45 s there |
+| 3-min step test (recovery) | YMCA ratings (Golding 2000), 7 categories by age and sex | read from a reprint; needs the optional count of beats in the first seated minute |
 
 - **Never extrapolated.** Outside a table's ages, or for a sex it does not cover, the result stays raw.
 - **Still unrated:** pull-ups (the official USMC table refused automated access and no adult population
-  norm was found) and step-test heart rate recovery (published references come from maximal lab tests).
+  norm was found). The step test's drop at 60 s stays raw (references for it come from maximal lab tests);
+  only the YMCA one-minute count is rated.
 - Approximate norms carry the note `approximate_reference`, shown under the result.
 - Results stored under `engine-1` keep their indicators (D25) unless they are re-scored explicitly.

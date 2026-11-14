@@ -18,6 +18,7 @@ const insightsRu = {
     unrated: 'Измерено, проверенной нормы пока нет',
     by: 'по {{sources}}',
     sources: {
+      ymca_3min_step: 'YMCA (степ-тест 3 мин)',
       nhanes_rhr_2011: 'CDC NHANES (пульс)',
       tveter_2014_sts: 'Tveter 2014 (стул)',
       strand_2014_plank: 'Strand 2014 (планка)',

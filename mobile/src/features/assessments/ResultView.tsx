@@ -47,28 +47,26 @@ export function ProvenanceBadge({ provenance }: { provenance: Provenance }) {
 export function interpretationText(t: ReturnType<typeof useTranslation>['t'], i: Indicator): string | null {
   const it = i.interpretation;
   if (!it) return null;
+  // Keys built at runtime: typing them against the full resource tree is too deep for the i18next types.
+  const tr = t as unknown as (key: string, options?: Record<string, unknown>) => string;
+  const group = (age: unknown, sex: unknown) =>
+    age && sex
+      ? tr(sex === 'female' ? 'assess.interpretations.groupFemale' : 'assess.interpretations.groupMale', { age })
+      : age
+        ? tr('assess.interpretations.groupAge', { age })
+        : tr('assess.interpretations.groupProfile');
   if (it.scheme === 'percentile_band') {
-    const age = it.detail.age_group ?? '';
-    const group = t(it.detail.sex === 'female' ? 'assess.interpretations.groupFemale' : 'assess.interpretations.groupMale', { age });
-    return t('assess.interpretations.friendSentence', {
-      group,
-      band: t(`assess.interpretations.${it.label}` as 'assess.interpretations.p50_75'),
+    return tr('assess.interpretations.friendSentence', {
+      group: group(it.detail.age_group ?? '', it.detail.sex ?? 'male'),
+      band: tr(`assess.interpretations.${it.label}`),
     });
   }
   if (it.scheme === 'percentile') {
-    if (it.detail.capped === true) return t('assess.interpretations.stanceCap');
-    const age = it.detail.age_group;
-    const sex = it.detail.sex;
-    const group =
-      age && sex
-        ? t(sex === 'female' ? 'assess.interpretations.groupFemale' : 'assess.interpretations.groupMale', { age })
-        : age
-          ? t('assess.interpretations.groupAge', { age })
-          : t('assess.interpretations.groupProfile');
+    if (it.detail.capped === true) return tr('assess.interpretations.stanceCap');
     const p = Math.round(Number(it.detail.percentile));
-    return t('assess.interpretations.percentileSentence', { p, group });
+    return tr('assess.interpretations.percentileSentence', { p, group: group(it.detail.age_group, it.detail.sex) });
   }
-  return t(`assess.interpretations.${it.label}` as 'assess.interpretations.who_normal');
+  return tr(`assess.interpretations.${it.label}`);
 }
 
 function IndicatorRow({ indicator }: { indicator: Indicator }) {

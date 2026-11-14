@@ -18,6 +18,7 @@ const insightsRo = {
     unrated: 'Măsurată, încă fără normă verificată',
     by: 'după {{sources}}',
     sources: {
+      ymca_3min_step: 'YMCA (treaptă 3 min)',
       nhanes_rhr_2011: 'CDC NHANES (puls)',
       tveter_2014_sts: 'Tveter 2014 (scaun)',
       strand_2014_plank: 'Strand 2014 (planșă)',

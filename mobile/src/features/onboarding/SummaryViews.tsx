@@ -44,11 +44,13 @@ export function ReadinessCard({ readiness }: { readiness: Readiness }) {
 }
 
 function reasonText(t: ReturnType<typeof useTranslation>['t'], reason: string): string {
+  // Keys built at runtime: typing them against the full resource tree is too deep for the i18next types.
+  const tr = t as unknown as (key: string, options?: Record<string, unknown>) => string;
   if (reason.startsWith('goal_')) {
     const goal = reason.slice('goal_'.length);
-    return t('priorityReasons.goal', { goal: t(`goals.${goal}` as 'goals.know_baseline') });
+    return tr('priorityReasons.goal', { goal: tr(`goals.${goal}`) });
   }
-  return t(`priorityReasons.${reason}` as 'priorityReasons.gap_no_strength_training');
+  return tr(`priorityReasons.${reason}`);
 }
 
 /** The dimensions worth assessing first. `limit` shows only the top entries with a reason. */

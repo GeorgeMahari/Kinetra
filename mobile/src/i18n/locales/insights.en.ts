@@ -18,6 +18,7 @@ const insightsEn = {
     unrated: 'Measured, no verified norm yet',
     by: 'by {{sources}}',
     sources: {
+      ymca_3min_step: 'YMCA (3-min step)',
       nhanes_rhr_2011: 'CDC NHANES (pulse)',
       tveter_2014_sts: 'Tveter 2014 (chair)',
       strand_2014_plank: 'Strand 2014 (plank)',

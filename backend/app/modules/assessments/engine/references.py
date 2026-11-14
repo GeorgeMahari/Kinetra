@@ -154,6 +154,21 @@ SPRINGER_2007 = Reference(
     approximate=True,
 )
 
+YMCA_STEP = Reference(
+    id="ymca_3min_step",
+    citation=(
+        "Golding LA, ed. YMCA Fitness Testing and Assessment Manual, 4th ed. Champaign, IL: Human Kinetics; "
+        "2000. 3-minute step test ratings, as reprinted by TotalWellness (2018)."
+    ),
+    url="https://www.totalwellnesshealth.com/wp-content/uploads/2018/08/StepTestProcedure.pdf",
+    note=(
+        "30 cm (12 in) step, 24 steps a minute for 3 minutes, then seated; the score is the heart beats "
+        "counted for one full minute starting 5 s after stepping. Ages 18 and over, by sex. Read from a "
+        "reprint, not the manual itself."
+    ),
+    approximate=True,
+)
+
 ALL = {
     r.id: r
     for r in (
@@ -167,6 +182,7 @@ ALL = {
         CSEP_PUSHUPS,
         CHMS_SIT_REACH,
         SPRINGER_2007,
+        YMCA_STEP,
     )
 }
 

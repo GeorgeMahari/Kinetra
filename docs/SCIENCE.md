@@ -178,6 +178,7 @@ Where a point sits on its spoke (0 = not rated, 0.2 = lowest band, 1 = best band
 | FRIEND 2015 VO₂max percentiles (Cooper estimate) | each band at its midpoint percentile (below p5 = 2.5 … above p95 = 97.5) |
 | Percentile norms (NHANES pulse, Tveter chair, Strand plank, CHMS sit-and-reach, Springer stance) | 0.2 + 0.8 × percentile / 100 |
 | CSEP push-ups | needs improvement 0.2 · fair 0.4 · good 0.6 · very good 0.8 · excellent 1.0 |
+| YMCA step test | very poor 0.2 … excellent 1.0, in 6 equal steps |
 | WHO adult BMI | obesity 0.2 · underweight or overweight 0.6 · healthy range 1.0 |
 | NICE NG246 waist-to-height | high 0.2 · increased 0.6 · healthy 1.0 |
 | AASM/SRS 2015 sleep, ages 18–60 | ≥ 7 h = 1.0 · below = 0.5 (single threshold, not graded) |
@@ -196,3 +197,5 @@ See D41 for the source of each test and why it is approximate. Details that chan
 - **Sit-and-reach:** CHMS 2016–17 percentiles by sex and 5-year age group (14–69), after adding 26 cm.
 - **Single-leg stance:** better leg capped at 45 s; reaching the cap is the top; below it, a normal percentile
   around Springer's age-group mean and SD (eyes open, best of 3).
+- **3-minute step test:** the optional `beats_first_minute` (beats counted seated for a full minute from 5 s after
+  stepping) is rated with the YMCA table by age group (18–25 … 66+) and sex. Walking recovery is not rated.

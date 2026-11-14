@@ -66,6 +66,8 @@ class HrrStepIn(_In):
     hr_end: int = Field(ge=60, le=230)
     hr_60: int = Field(ge=35, le=230)
     hr_120: int | None = Field(default=None, ge=35, le=230)
+    # Beats counted for one full minute from 5 s after stepping (the YMCA score). Optional.
+    beats_first_minute: int | None = Field(default=None, ge=35, le=230)
 
     @model_validator(mode="after")
     def _plausible(self) -> "HrrStepIn":
@@ -218,6 +220,13 @@ def _hrr(d: HrrStepIn, ctx: Context, stopped: bool) -> list[Indicator]:
     ]
     if d.hr_120 is not None:
         out.append(Indicator("hrr_120", d.hr_end - d.hr_120, "bpm", Provenance.calculated, notes=notes))
+    if d.beats_first_minute is not None:
+        interp = norms.ymca_step_category(d.beats_first_minute, d.recovery_mode, ctx.age, ctx.sex_for_norms)
+        out.append(
+            _rated(
+                "recovery_beats_1min", d.beats_first_minute, "beats", Provenance.measured, interp, (), stopped
+            )
+        )
     return out
 
 
