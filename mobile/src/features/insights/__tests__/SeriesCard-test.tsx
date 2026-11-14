@@ -72,4 +72,20 @@ describe('ProfileMap', () => {
     );
     expect(screen.getByTestId('profile-map-count')).toHaveTextContent('3 of 4 dimensions have information');
   });
+
+  it('ends every dimension spoke in its trail blaze, so each spoke is named', async () => {
+    await render(
+      themed(
+        <ProfileMap
+          items={[
+            { key: 'cardio', label: 'Cardio', coverage: 'current' },
+            { key: 'balance', label: 'Balance', coverage: 'unknown' },
+          ]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId('map-badge-cardio')).toBeTruthy();
+    expect(screen.getByTestId('map-badge-balance')).toBeTruthy();
+  });
 });
+

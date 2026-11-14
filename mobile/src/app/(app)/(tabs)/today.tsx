@@ -8,8 +8,9 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { SectionHeader } from '@/components/ListRow';
+import { PressableScale } from '@/components/motion';
 import { Screen } from '@/components/Screen';
-import { ProfileMap, ProfileMapLegend } from '@/components/charts/ProfileMap';
+import { ProfileMap } from '@/components/charts/ProfileMap';
 import { headlineIndicator } from '@/api/assessments';
 import { formatValue } from '@/features/assessments/ResultView';
 import { RecommendationCard } from '@/features/insights/RecommendationCard';
@@ -60,17 +61,30 @@ export default function Today() {
         <OnboardingCard />
 
         {dashboard.data ? (
-          <Card>
-            <SectionHeader title={t('dashboard.mapTitle')} caption={t('dashboard.mapCaption')} />
-            <ProfileMap
-              items={dashboard.data.profile_map.map((m) => ({
-                key: m.dimension,
-                label: t(`dimensions.${m.dimension}.name`),
-                coverage: m.coverage,
-              }))}
-            />
-            <ProfileMapLegend />
-          </Card>
+          <PressableScale
+            testID="open-profile-map"
+            accessibilityRole="button"
+            accessibilityLabel={`${t('dashboard.mapTitle')}. ${t('dashboard.mapOpen')}`}
+            onPress={() => router.push('/profile-map')}
+          >
+            <Card>
+              <SectionHeader title={t('dashboard.mapTitle')} caption={t('dashboard.mapCaption')} />
+              <ProfileMap
+                size={200}
+                items={dashboard.data.profile_map.map((m) => ({
+                  key: m.dimension,
+                  label: t(`dimensions.${m.dimension}.name`),
+                  coverage: m.coverage,
+                }))}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}>
+                <AppText variant="label" color="brandText">
+                  {t('dashboard.mapOpen')}
+                </AppText>
+                <Icon name="chevronRight" size={16} color={colors.brandText} />
+              </View>
+            </Card>
+          </PressableScale>
         ) : null}
 
         {prog.data && prog.data.objectives.length > 0 ? (

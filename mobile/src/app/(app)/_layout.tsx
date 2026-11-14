@@ -22,7 +22,7 @@ export default function SignedInLayout() {
         screenOptions={{
           contentStyle: { backgroundColor: colors.background },
           headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.brand,
+          headerTintColor: colors.brandText,
           headerTitleStyle: { color: colors.text },
           headerShadowVisible: false,
           headerBackTitle: t('common.back'),
@@ -39,6 +39,10 @@ export default function SignedInLayout() {
         <Stack.Screen name="progress/[code]" options={{ title: '' }} />
         <Stack.Screen name="verify-email" options={{ title: t('auth.verifyTitle') }} />
         <Stack.Screen name="achievements" options={{ title: t('progression.achievementsTitle') }} />
+        <Stack.Screen
+          name="profile-map"
+          options={{ title: t('dashboard.mapScreenTitle'), animation: 'fade_from_bottom' }}
+        />
       </Stack>
     </View>
   );

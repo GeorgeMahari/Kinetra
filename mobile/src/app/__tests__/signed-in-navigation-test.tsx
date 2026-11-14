@@ -11,6 +11,7 @@ import { createFakeBackend, providers, TEST_USER } from '@/test-utils/fakeBacken
 
 import EditProfile from '../(app)/edit-profile';
 import Onboarding from '../(app)/onboarding';
+import ProfileMapScreen from '../(app)/profile-map';
 import TabsLayout from '../(app)/(tabs)/_layout';
 import ProfileTab from '../(app)/(tabs)/profile';
 import Today from '../(app)/(tabs)/today';
@@ -21,6 +22,7 @@ const routes = {
   '(tabs)/profile': ProfileTab,
   'edit-profile': EditProfile,
   onboarding: Onboarding,
+  'profile-map': ProfileMapScreen,
 };
 
 beforeEach(() => {
@@ -80,6 +82,14 @@ describe('signed-in navigation', () => {
   it('explains "not assessed" only while something is not assessed', async () => {
     await open();
     expect(await screen.findByText(/No measurements yet/)).toBeTruthy();
+  });
+
+  it('opens the profile map on its own page, with every spoke named', async () => {
+    await open();
+    await fireEvent.press(await screen.findByTestId('open-profile-map'));
+    await waitFor(() => expect(screen).toHavePathname('/profile-map'));
+    expect(await screen.findByTestId('map-key-cardio')).toHaveTextContent(/Not assessed/);
+    expect(screen.getByTestId('map-badge-lifestyle')).toBeTruthy();
   });
 
   it('shows the profile-completion card only while details are missing', async () => {

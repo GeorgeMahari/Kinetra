@@ -4,6 +4,9 @@ const insightsRo = {
     mapCaption: 'Fiecare spiță este o dimensiune. O spiță mai lungă înseamnă că este mai bine cunoscută — nu că este mai bună.',
     mapCount: '{{known}} din {{total}} dimensiuni au informații',
     mapA11y: 'Harta profilului: {{known}} din {{total}} dimensiuni au informații.',
+    mapScreenTitle: 'Harta profilului',
+    mapOpen: 'Deschide harta',
+    mapKeyTitle: 'Ce reprezintă fiecare spiță',
     coverage: {
       current: 'Evaluată în ultimele 8 săptămâni',
       dated: 'Evaluată acum mai mult de 8 săptămâni',

@@ -4,6 +4,9 @@ const insightsEn = {
     mapCaption: 'Each spoke is one dimension. A longer spoke means it is better known — not that it is better.',
     mapCount: '{{known}} of {{total}} dimensions have information',
     mapA11y: 'Profile map: {{known}} of {{total}} dimensions have information.',
+    mapScreenTitle: 'Profile map',
+    mapOpen: 'Open the map',
+    mapKeyTitle: 'Which spoke is which',
     coverage: {
       current: 'Assessed in the last 8 weeks',
       dated: 'Assessed more than 8 weeks ago',
