@@ -92,3 +92,16 @@ it('signing out lands on the welcome screen, not on an unmatched route', async (
   expect(screen.queryByText(/Unmatched Route/i)).toBeNull();
   expect(await tokenStorage.get()).toBeNull();
 });
+
+it.each(['/settings', '/profile-map'])('a cold-start link to %s opens it once the saved session loads', async (url) => {
+  await tokenStorage.set('r');
+  await renderRouter(APP_DIR, { initialUrl: url });
+  await waitFor(() => expect(screen).toHavePathname(url));
+  expect(screen.queryByText(/Unmatched Route/i)).toBeNull();
+});
+
+it('the same link without a session lands on the welcome screen, not on an unmatched route', async () => {
+  await renderRouter(APP_DIR, { initialUrl: '/settings' });
+  await waitFor(() => expect(screen).toHavePathname('/welcome'));
+  expect(screen.queryByText(/Unmatched Route/i)).toBeNull();
+});
