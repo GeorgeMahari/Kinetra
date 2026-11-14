@@ -107,6 +107,51 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
   let status: OnboardingStatus = { status: 'not_started', step: 0, draft: {}, completed_at: null, ...initial };
   let recommendations: unknown[] | null = null;
   let reportedSleep: { sleep_hours: number | null; sleep_quality: string | null } | null = null;
+  // A minimal improvement plan: a cardio focus with two tasks today and a target on the Cooper test.
+  let planStarted = false;
+  const planDone = new Set<string>();
+  const planView = (today: string) => {
+    const tasks = [
+      { code: 'steady_cardio', dimension: 'cardio', dose: 20, unit: 'min', sets: 1, points: 6 },
+      { code: 'mobility_flow', dimension: 'mobility', dose: 8, unit: 'min', sets: 1, points: 3 },
+    ].map((t) => ({ ...t, done: planDone.has(t.code) }));
+    const complete = tasks.every((t) => t.done);
+    const monday = new Date(`${today}T12:00:00`);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const week = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const isToday = day === today;
+      return {
+        day,
+        total: 2,
+        done: isToday ? tasks.filter((t) => t.done).length : 0,
+        status: isToday ? (complete ? 'done' : 'today') : day < today ? 'outside' : 'upcoming',
+      };
+    });
+    return {
+      today,
+      zones: [
+        { dimension: 'muscularEndurance', zone: 'attention', level: 0.4 },
+        { dimension: 'cardio', zone: 'fine', level: 0.6 },
+        { dimension: 'balance', zone: 'unknown', level: null },
+      ],
+      suggestion: { primary: 'cardio', secondary: 'strength' },
+      plan: planStarted
+        ? {
+            id: 'p1', version: 'plan-1', primary: 'cardio', secondary: 'strength', started_on: today,
+            ends_on: '2027-01-08', day_index: 0, week_index: 0, weeks: 8, today: tasks, week,
+            target: { dimension: 'cardio', test_code: 'cooper_12min', indicator: 'distance_12min', baseline: 2400,
+              target: 2660, unit: 'm', direction: 'up', reference_id: 'friend_2015_treadmill', latest: 2400, reached: false },
+          }
+        : null,
+      streak: planStarted && complete ? 1 : 0,
+      best_streak: planStarted && complete ? 1 : 0,
+      tasks_done: planDone.size,
+      perfect_days: complete ? 1 : 0,
+    };
+  };
 
   const request = jest.fn(async (path: string, options: { method?: string; body?: unknown } = {}) => {
     const method = options.method ?? 'GET';
@@ -212,6 +257,25 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
         };
       case 'GET /progression':
         return progression();
+      case 'POST /plan': {
+        planStarted = true;
+        return planView((options.body as { today: string }).today);
+      }
+      case 'PUT /plan/tasks': {
+        const b = options.body as { today: string; task_code: string; done: boolean };
+        const first = planDone.size === 0;
+        if (b.done) planDone.add(b.task_code);
+        else planDone.delete(b.task_code);
+        const view = planView(b.today);
+        const dayComplete = view.plan!.today.every((t) => t.done);
+        return {
+          view,
+          newly_earned: [...(b.done && first ? ['first_step'] : []), ...(dayComplete && b.done ? ['perfect_day'] : [])],
+          points: 100,
+          level: 3,
+          day_complete: dayComplete,
+        };
+      }
       case 'PUT /progression/checkin': {
         const b = options.body as { sessions: number; strength_sessions?: number | null; active_minutes?: number | null };
         checkin = { week_start: '2026-11-09', sessions: b.sessions, strength_sessions: b.strength_sessions ?? null,
@@ -228,6 +292,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
           throw new ApiError('not_found', 'x', 404);
         }
         if (method === 'GET' && path.startsWith('/assessments/results?')) return [];
+        if (method === 'GET' && path.startsWith('/plan?today=')) return planView(path.slice('/plan?today='.length));
         if (method === 'GET' && path.startsWith('/assessments/activity?')) {
           const q = new URLSearchParams(path.split('?')[1]);
           const since = Date.parse(q.get('since') ?? '');

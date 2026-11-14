@@ -7,7 +7,8 @@ import { PressableScale } from './motion';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  /** `onShell`: a white button on the forest-green shell panels. */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'onShell';
   loading?: boolean;
 }
 
@@ -15,8 +16,14 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
   const { colors, radius, spacing } = useTheme();
   const isDisabled = disabled || loading;
   const background =
-    variant === 'primary' ? colors.brand : variant === 'secondary' ? colors.brandSoft : 'transparent';
-  const textColor = variant === 'primary' ? 'onBrand' : 'brandText';
+    variant === 'primary'
+      ? colors.brand
+      : variant === 'secondary'
+        ? colors.brandSoft
+        : variant === 'onShell'
+          ? colors.onShell
+          : 'transparent';
+  const textColor = variant === 'primary' ? 'onBrand' : variant === 'onShell' ? 'shell' : 'brandText';
 
   return (
     <PressableScale
@@ -35,7 +42,7 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
       }}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.onBrand : colors.brand} />
+        <ActivityIndicator color={variant === 'primary' ? colors.onBrand : variant === 'onShell' ? colors.shell : colors.brand} />
       ) : (
         <AppText variant="label" color={textColor} style={{ fontSize: 16 }}>
           {label}

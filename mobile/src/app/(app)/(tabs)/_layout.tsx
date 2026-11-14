@@ -30,6 +30,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="plan"
+        options={{
+          title: t('plan.tab'),
+          tabBarButtonTestID: 'tab-plan',
+          tabBarIcon: ({ color, size, focused }) => <TabIcon name="trail" color={color} size={size} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="assess"
         options={{
           title: t('assess.tab'),

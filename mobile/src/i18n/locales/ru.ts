@@ -2,6 +2,7 @@ import assessRu from './assess.ru';
 import insightsRu from './insights.ru';
 import devicesRu from './devices.ru';
 import parentalConsentRu from './parentalConsent.ru';
+import planRu from './plan.ru';
 import progressionRu from './progression.ru';
 import type { TranslationResources } from './en';
 
@@ -11,6 +12,7 @@ const ru: TranslationResources = {
   ...devicesRu,
   ...parentalConsentRu,
   ...progressionRu,
+  ...planRu,
   brand: {
     name: 'Kinetra',
     tagline: 'Узнайте весь спектр возможностей своего тела.',

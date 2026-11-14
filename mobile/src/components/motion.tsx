@@ -22,11 +22,15 @@ import Animated, {
 
 import { motion } from '@/theme/tokens';
 
-export type HapticKind = 'tap' | 'select' | 'none';
+export type HapticKind = 'tap' | 'select' | 'success' | 'none';
 
 /** A light, platform-appropriate tick. Fire-and-forget: haptics may be unavailable or disabled. */
 export function haptic(kind: HapticKind = 'tap'): void {
   if (kind === 'none' || Platform.OS === 'web') return;
+  if (kind === 'success') {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+    return;
+  }
   const p =
     Platform.OS === 'android'
       ? Haptics.performAndroidHapticsAsync(

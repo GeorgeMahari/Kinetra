@@ -14,7 +14,7 @@ from typing import Any
 
 from app.modules.onboarding.vocab import IntensityCeiling
 
-PROGRESSION_VERSION = "progression-1"
+PROGRESSION_VERSION = "progression-2"
 
 # Performance indicators where a higher value is unambiguously better. Resting heart rate, heart-rate
 # recovery, weight, BMI and waist are excluded: their "better" direction is context-dependent.
@@ -40,8 +40,11 @@ POINTS = {
     "objectives_met_week": 5,
     "personal_best": 5,
 }
-# Total points needed to reach level N (index N-1).
-LEVEL_THRESHOLDS = (0, 30, 75, 140, 225, 330, 460, 620, 810, 1030)
+# Total points needed to reach level N (index N-1). Levels 1-10 as before; plan tasks earn steadily, so
+# levels 11-40 keep going with steps that grow by 40 points each.
+LEVEL_THRESHOLDS = (0, 30, 75, 140, 225, 330, 460, 620, 810, 1030) + tuple(
+    1030 + sum(260 + 40 * k for k in range(1, n + 1)) for n in range(1, 31)
+)
 
 ACHIEVEMENTS = (
     "profile_set_up",
@@ -53,6 +56,14 @@ ACHIEVEMENTS = (
     "steady_progress",
     "four_week_streak",
     "twelve_week_streak",
+    # Improvement plans (D42)
+    "first_step",
+    "perfect_day",
+    "streak_7",
+    "perfect_week",
+    "streak_30",
+    "plan_complete",
+    "target_reached",
 )
 
 
@@ -215,13 +226,28 @@ def _objectives_met_weeks(checkins: Sequence[Checkin], x: ObjectiveInputs) -> in
     return n
 
 
+@dataclass(frozen=True)
+class PlanProgress:
+    """What the improvement plans contribute (computed by the plans module)."""
+
+    points: int = 0
+    tasks_done: int = 0
+    perfect_days: int = 0
+    longest_streak: int = 0
+    perfect_weeks: int = 0
+    plan_completed: bool = False
+    target_reached: bool = False
+
+
 def evaluate(
     results: Sequence[Result],
     checkins: Sequence[Checkin],
     onboarding_completed: bool,
     objective_inputs: ObjectiveInputs,
     today: date,
+    plan: PlanProgress | None = None,
 ) -> Progression:
+    plan = plan or PlanProgress()
     pbs, records = personal_bests(results)
     dims = {r.dimension for r in results}
     series: dict[tuple[str, str], list[Result]] = {}
@@ -252,6 +278,7 @@ def evaluate(
         + POINTS["checkin_week"] * sum(1 for c in checkins if c.sessions > 0)
         + POINTS["objectives_met_week"] * _objectives_met_weeks(checkins, objective_inputs)
         + POINTS["personal_best"] * records
+        + plan.points
     )
     level = max(i + 1 for i, t in enumerate(LEVEL_THRESHOLDS) if points >= t)
     nxt = LEVEL_THRESHOLDS[level] if level < len(LEVEL_THRESHOLDS) else None
@@ -266,5 +293,12 @@ def evaluate(
         "steady_progress": steady,
         "four_week_streak": longest >= 4,
         "twelve_week_streak": longest >= 12,
+        "first_step": plan.tasks_done >= 1,
+        "perfect_day": plan.perfect_days >= 1,
+        "streak_7": plan.longest_streak >= 7,
+        "perfect_week": plan.perfect_weeks >= 1,
+        "streak_30": plan.longest_streak >= 30,
+        "plan_complete": plan.plan_completed,
+        "target_reached": plan.target_reached,
     }
     return Progression(points, level, LEVEL_THRESHOLDS[level - 1], nxt, earned, pbs, streak)

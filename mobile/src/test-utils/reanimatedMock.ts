@@ -7,7 +7,7 @@
 const RN = require('react-native');
 
 const builder: Record<string, unknown> = {};
-for (const m of ['duration', 'delay', 'springify', 'damping', 'stiffness', 'reduceMotion', 'easing']) {
+for (const m of ['duration', 'delay', 'springify', 'damping', 'stiffness', 'reduceMotion', 'easing', 'withInitialValues', 'randomDelay', 'build']) {
   builder[m] = () => builder;
 }
 const id = <T>(c: T): T => c;
@@ -27,6 +27,8 @@ module.exports = {
   withTiming: id,
   withRepeat: id,
   withSequence: (...v: unknown[]) => v[v.length - 1],
+  withDelay: (_d: number, v: unknown) => v,
+  runOnJS: <F>(f: F) => f,
   useAnimatedScrollHandler: () => () => {},
   useAnimatedProps: () => ({}),
   interpolate: (_v: number, _i: number[], out: number[]) => out[0],
@@ -36,6 +38,13 @@ module.exports = {
   Easing: { bezier: () => id, out: id, in: id, inOut: id, cubic: id, linear: id },
   FadeIn: builder,
   FadeInDown: builder,
+  FadeInUp: builder,
+  FadeOut: builder,
+  FadeOutUp: builder,
+  SlideInDown: builder,
+  SlideInUp: builder,
   ZoomIn: builder,
+  ZoomOut: builder,
+  LinearTransition: builder,
   ReduceMotion: { System: 'system', Always: 'always', Never: 'never' },
 };

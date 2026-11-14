@@ -20,6 +20,7 @@ from app.modules.health.router import router as health_router
 from app.modules.insights.router import router as insights_router
 from app.modules.onboarding.router import catalog_router
 from app.modules.onboarding.router import router as onboarding_router
+from app.modules.plans.router import router as plans_router
 from app.modules.progression.router import router as progression_router
 from app.modules.users.router import router as users_router
 
@@ -71,6 +72,7 @@ def create_app(background_jobs: bool = True) -> FastAPI:
         assessments_router,
         insights_router,
         progression_router,
+        plans_router,
         devices_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)

@@ -30,6 +30,13 @@ const progressionRo = {
     notYet: 'Încă nu',
     newlyEarned: 'Realizare nouă: {{name}}',
     achievements: {
+      first_step: { name: 'Primul pas', body: 'Ai bifat prima sarcină din plan.' },
+      perfect_day: { name: 'Zi completă', body: 'Ai bifat toate sarcinile unei zile.' },
+      streak_7: { name: 'O săptămână la rând', body: 'Șapte zile complete la rând.' },
+      perfect_week: { name: 'Săptămână perfectă', body: 'Toate zilele unei săptămâni din plan, complete.' },
+      streak_30: { name: 'Treizeci de zile', body: 'Treizeci de zile complete la rând.' },
+      plan_complete: { name: 'Traseu încheiat', body: 'Ai dus la capăt un plan de 8 săptămâni, cu cel puțin 80% din sarcini.' },
+      target_reached: { name: 'Ținta atinsă', body: 'Un retest a atins ținta planului.' },
       profile_set_up: { name: 'Configurat', body: 'Ai finalizat configurarea profilului.' },
       first_assessment: { name: 'Prima măsurătoare', body: 'Ai înregistrat prima evaluare.' },
       three_dimensions: { name: 'Trei dimensiuni', body: 'Ai măsurat trei dimensiuni diferite.' },

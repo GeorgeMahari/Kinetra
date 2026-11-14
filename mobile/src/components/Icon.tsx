@@ -27,7 +27,9 @@ export type IconName =
   | 'device'
   | 'globe'
   | 'shield'
-  | 'info';
+  | 'info'
+  | 'trail'
+  | 'flame';
 
 const PATHS: Record<IconName, (c: ColorValue) => React.ReactNode> = {
   today: (c) => (
@@ -150,6 +152,20 @@ const PATHS: Record<IconName, (c: ColorValue) => React.ReactNode> = {
       <Path d="M12 11v5.5" stroke={c} />
       <Circle cx={12} cy={7.8} r={0.6} fill={c} stroke="none" />
     </>
+  ),
+  // A summit with a flag: the plan is a trail you climb.
+  trail: (c) => (
+    <>
+      <Path d="M2.5 20.5 9 9.5l3.2 5.2 2.3-3.4 7 9.2z" stroke={c} />
+      <Path d="M14.5 11.3V3.5" stroke={c} />
+      <Path d="M14.5 3.5h5l-1.4 1.9 1.4 1.9h-5" stroke={c} />
+    </>
+  ),
+  flame: (c) => (
+    <Path
+      d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.3 2.4-5.4 3.6-8 .6 1.6 1.3 2.5 2.2 3.1.2-2.6 1.5-5 3.4-6.9.4 2.8 1.6 4.4 2.8 6 1 1.4 1.9 3 1.9 5.2C19.4 18.3 16.1 21 12 21zm0 0c-1.6 0-2.8-1.2-2.8-2.8 0-1.5 1-2.4 1.9-3.6.4.8.9 1.2 1.5 1.4.3-1 .9-1.8 1.6-2.5.3 1.2.8 1.9 1.3 2.7.3.5.5 1 .5 1.8 0 1.7-1.2 3-3 3"
+      stroke={c}
+    />
   ),
 };
 

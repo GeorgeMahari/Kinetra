@@ -8,6 +8,7 @@ from app.modules.assessments import service as assessments_service
 from app.modules.assessments.engine.catalog import TESTS
 from app.modules.assessments.models import TestResult
 from app.modules.onboarding import service as onboarding_service
+from app.modules.plans import queries as plan_queries
 from app.modules.progression import rules
 from app.modules.progression.models import ActivityCheckin, UserAchievement
 from app.modules.progression.schemas import (
@@ -105,7 +106,17 @@ def progression(db: Session, user: User) -> ProgressionOut:
     assessed_this_week = sum(1 for r in results if rules.week_start(r.performed_at.date()) == this_week)
     objectives = rules.weekly_objectives(oi, current, assessed_this_week)
 
-    p = rules.evaluate(results, checkins, status.status == "completed", oi, today)
+    ps, reached = plan_queries.plan_stats(db, user, today)
+    plan = rules.PlanProgress(
+        points=ps.points,
+        tasks_done=ps.tasks_done,
+        perfect_days=ps.perfect_days,
+        longest_streak=ps.longest_streak,
+        perfect_weeks=ps.perfect_weeks,
+        plan_completed=ps.plan_completed,
+        target_reached=reached,
+    )
+    p = rules.evaluate(results, checkins, status.status == "completed", oi, today, plan)
 
     # Persist newly earned achievements once; earned_at never changes afterwards.
     stored = {

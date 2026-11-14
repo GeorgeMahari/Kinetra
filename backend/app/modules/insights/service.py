@@ -9,7 +9,7 @@ from app.core.errors import AppError
 from app.modules.assessments import service as assessments_service
 from app.modules.assessments.engine.catalog import TESTS, allowed
 from app.modules.assessments.models import TestResult
-from app.modules.assessments.schemas import DimensionOverview
+from app.modules.assessments.schemas import DimensionOverview, Overview
 from app.modules.insights import rules
 from app.modules.insights.schemas import (
     CoverageOut,
@@ -24,6 +24,7 @@ from app.modules.insights.schemas import (
     StandingOut,
 )
 from app.modules.onboarding import service as onboarding_service
+from app.modules.onboarding.service import ActivitySnapshot
 from app.modules.users.models import User
 from app.shared.age import age_on
 
@@ -84,17 +85,13 @@ def _age(user: User) -> int | None:
     return age_on(dob, datetime.now(UTC).date()) if dob else None
 
 
-def dashboard(db: Session, user: User) -> DashboardOut:
-    now = datetime.now(UTC)
-    ov = assessments_service.overview(db, user)
-    status_ = onboarding_service.get_status(db, user)
-    completed = status_.status == "completed"
-    priorities = (
-        [p.dimension.value for p in onboarding_service.get_summary(db, user).priorities] if completed else []
-    )
-    snapshot = onboarding_service.latest_activity_snapshot(db, user)
-
-    latest_at = {d.dimension.value: (d.latest[0].performed_at if d.latest else None) for d in ov.dimensions}
+def standings(
+    db: Session, user: User, ov: Overview | None = None, snapshot: ActivitySnapshot | None = None
+) -> dict[str, StandingOut | None]:
+    """Where the person stands on each dimension (the profile map's points), by dimension code."""
+    ov = ov or assessments_service.overview(db, user)
+    if snapshot is None:
+        snapshot = onboarding_service.latest_activity_snapshot(db, user)
     age = _age(user)
 
     def standing_of(d: DimensionOverview) -> StandingOut | None:
@@ -116,12 +113,28 @@ def dashboard(db: Session, user: User) -> DashboardOut:
             return None
         return StandingOut(level=s.level, basis=[StandingBasisOut(**asdict(b)) for b in s.basis])
 
+    return {d.dimension.value: standing_of(d) for d in ov.dimensions}
+
+
+def dashboard(db: Session, user: User) -> DashboardOut:
+    now = datetime.now(UTC)
+    ov = assessments_service.overview(db, user)
+    status_ = onboarding_service.get_status(db, user)
+    completed = status_.status == "completed"
+    priorities = (
+        [p.dimension.value for p in onboarding_service.get_summary(db, user).priorities] if completed else []
+    )
+    snapshot = onboarding_service.latest_activity_snapshot(db, user)
+
+    latest_at = {d.dimension.value: (d.latest[0].performed_at if d.latest else None) for d in ov.dimensions}
+    levels = standings(db, user, ov, snapshot)
+
     profile_map = [
         CoverageOut(
             dimension=d.dimension,
             coverage=rules.coverage(d.status, latest_at[d.dimension.value], now),
             latest_at=latest_at[d.dimension.value],
-            standing=standing_of(d),
+            standing=levels[d.dimension.value],
         )
         for d in ov.dimensions
     ]

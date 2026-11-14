@@ -30,6 +30,13 @@ const progressionEn = {
     notYet: 'Not yet',
     newlyEarned: 'New achievement: {{name}}',
     achievements: {
+      first_step: { name: 'First step', body: 'You ticked your first plan task.' },
+      perfect_day: { name: 'Day complete', body: 'You ticked every task of a day.' },
+      streak_7: { name: 'A week in a row', body: 'Seven complete days in a row.' },
+      perfect_week: { name: 'Perfect week', body: 'Every day of a plan week, complete.' },
+      streak_30: { name: 'Thirty days', body: 'Thirty complete days in a row.' },
+      plan_complete: { name: 'Trail finished', body: 'You finished an 8-week plan with at least 80% of its tasks.' },
+      target_reached: { name: 'Target reached', body: "A retest reached the plan's target." },
       profile_set_up: { name: 'Set up', body: 'Completed your profile setup.' },
       first_assessment: { name: 'First measurement', body: 'Recorded your first assessment.' },
       three_dimensions: { name: 'Three dimensions', body: 'Measured three different dimensions.' },
