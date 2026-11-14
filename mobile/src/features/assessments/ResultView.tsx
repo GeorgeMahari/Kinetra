@@ -55,6 +55,19 @@ export function interpretationText(t: ReturnType<typeof useTranslation>['t'], i:
       band: t(`assess.interpretations.${it.label}` as 'assess.interpretations.p50_75'),
     });
   }
+  if (it.scheme === 'percentile') {
+    if (it.detail.capped === true) return t('assess.interpretations.stanceCap');
+    const age = it.detail.age_group;
+    const sex = it.detail.sex;
+    const group =
+      age && sex
+        ? t(sex === 'female' ? 'assess.interpretations.groupFemale' : 'assess.interpretations.groupMale', { age })
+        : age
+          ? t('assess.interpretations.groupAge', { age })
+          : t('assess.interpretations.groupProfile');
+    const p = Math.round(Number(it.detail.percentile));
+    return t('assess.interpretations.percentileSentence', { p, group });
+  }
   return t(`assess.interpretations.${it.label}` as 'assess.interpretations.who_normal');
 }
 

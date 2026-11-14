@@ -6,7 +6,7 @@ export type Coverage = 'current' | 'dated' | 'reported' | 'unknown';
 /** 0.2 = a norm's lowest band … 1 = its best. `basis` names the norms that placed the point. */
 export interface Standing {
   level: number;
-  basis: { indicator: string; reference_id: string; label: string }[];
+  basis: { indicator: string; reference_id: string; label: string; percentile?: number | null }[];
 }
 
 export interface Recommendation {

@@ -63,13 +63,20 @@ def list_tests(db: Session, user: User) -> list[TestOut]:
     return out
 
 
-def _context(user: User, on: datetime) -> Context:
+def _context(db: Session, user: User, on: datetime) -> Context:
     p = user.profile
     dob = p.date_of_birth if p else None
+    weight = db.scalar(
+        select(Measurement.value)
+        .where(Measurement.user_id == user.id, Measurement.kind == "weight_kg", Measurement.measured_at <= on)
+        .order_by(Measurement.measured_at.desc())
+        .limit(1)
+    )
     return Context(
         age=age_on(dob, on.date()) if dob else None,
         sex_for_norms=p.sex_for_norms.value if p else "not_specified",
         height_cm=float(p.height_cm) if p and p.height_cm is not None else None,
+        weight_kg=float(weight) if weight is not None else None,
     )
 
 
@@ -129,7 +136,7 @@ def record_result(db: Session, user: User, body: ResultCreate) -> ResultOut:
         )
 
     try:
-        inputs, indicators = run(test, body.inputs, _context(user, performed_at), body.stopped_early)
+        inputs, indicators = run(test, body.inputs, _context(db, user, performed_at), body.stopped_early)
     except ValidationError as exc:
         raise AppError(
             "validation_error",

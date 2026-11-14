@@ -98,6 +98,7 @@ const assessEn = {
     required: 'Required.',
   },
   indicators: {
+    stance_best_s: 'Better leg',
     resting_hr: 'Resting heart rate',
     hr_end: 'Heart rate at the end',
     hrr_60: 'Recovery after 60 s',
@@ -118,6 +119,7 @@ const assessEn = {
     whtr: 'Waist-to-height ratio',
   },
   notes: {
+    approximate_reference: 'Approximate norm: the home protocol differs slightly from the study, so treat this as a guide.',
     method_manual_pulse: 'Measured by hand.',
     method_device: 'Measured with a device.',
     recovery_passive_seated: 'Recovery: seated.',
@@ -142,6 +144,15 @@ const assessEn = {
     bmi_limitations: 'BMI doesn’t distinguish muscle from fat or show where fat is stored.',
   },
   interpretations: {
+    percentileSentence: 'Percentile {{p}}: better than about {{p}}% of {{group}}.',
+    groupAge: 'people aged {{age}}',
+    groupProfile: 'people of your age and sex',
+    stanceCap: 'You reached the reference test’s 45 s cap: the best result it can measure.',
+    csep_needs_improvement: 'CSEP: needs improvement for your age and sex.',
+    csep_fair: 'CSEP: fair for your age and sex.',
+    csep_good: 'CSEP: good for your age and sex.',
+    csep_very_good: 'CSEP: very good for your age and sex.',
+    csep_excellent: 'CSEP: excellent for your age and sex.',
     below_p5: 'below the 5th percentile',
     p5_10: 'between the 5th and 10th percentiles',
     p10_25: 'between the 10th and 25th percentiles',

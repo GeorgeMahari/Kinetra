@@ -154,12 +154,9 @@ class TestRawOnlyTests:
     @pytest.mark.parametrize(
         ("code", "inputs", "indicator"),
         [
-            ("pushups", {"variant": "toes", "reps": 25}, "pushup_reps"),
+            # No adult pull-up norm could be verified (D41): still raw.
             ("pulls", {"variant": "pullup", "reps": 8}, "pull_reps"),
             ("pulls", {"variant": "inverted_row", "reps": 0}, "pull_reps"),
-            ("chair_stand_30s", {"reps": 14}, "chair_stand_reps"),
-            ("plank", {"seconds": 75}, "plank_seconds"),
-            ("sit_reach", {"reach_cm": -4.5}, "sit_reach_cm"),
         ],
     )
     def test_no_invented_classification(self, code: str, inputs: dict[str, object], indicator: str) -> None:
@@ -167,6 +164,33 @@ class TestRawOnlyTests:
         i = by_code(ind)[indicator]
         assert i.interpretation is None and "no_validated_reference" in i.notes
         assert i.provenance is Provenance.measured
+
+    @pytest.mark.parametrize(
+        ("code", "inputs", "indicator", "reference"),
+        [
+            ("pushups", {"variant": "toes", "reps": 25}, "pushup_reps", "csep_path_pushups"),
+            ("chair_stand_30s", {"reps": 14}, "chair_stand_reps", "tveter_2014_sts"),
+            ("sit_reach", {"reach_cm": -4.5}, "sit_reach_cm", "chms_2019_sit_reach"),
+            ("single_leg_stance", {"left_s": 40, "right_s": 42}, "stance_best_s", "springer_2007_upst"),
+            ("resting_hr", {"bpm": 64, "method": "manual_pulse"}, "resting_hr", "nhanes_rhr_2011"),
+        ],
+    )
+    def test_engine_2_norms_are_marked_approximate(
+        self, code: str, inputs: dict[str, object], indicator: str, reference: str
+    ) -> None:
+        _, ind = run(TESTS[code], inputs, MAN_30)
+        i = by_code(ind)[indicator]
+        assert i.interpretation is not None and i.interpretation.reference_id == reference
+        assert i.reference_ids == (reference,)
+        assert ("approximate_reference" in i.notes) == (reference != "nhanes_rhr_2011")
+
+    def test_plank_norm_only_covers_college_ages(self) -> None:
+        _, ind = run(TESTS["plank"], {"seconds": 75}, MAN_30)
+        assert by_code(ind)["plank_seconds"].interpretation is None
+
+    def test_stopped_early_is_never_rated(self) -> None:
+        _, ind = run(TESTS["pushups"], {"variant": "toes", "reps": 25}, MAN_30, stopped_early=True)
+        assert by_code(ind)["pushup_reps"].interpretation is None
 
     def test_stance_asymmetry(self) -> None:
         _, ind = run(TESTS["single_leg_stance"], {"left_s": 60, "right_s": 42}, MAN_30)

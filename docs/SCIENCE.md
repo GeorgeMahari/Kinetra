@@ -169,16 +169,30 @@ same variant. A dead hang was not chosen, because it measures grip endurance rat
 The HRR clinical thresholds (for example Cole et al., NEJM 1999) come from laboratory exercise testing in patients
 and are not applied to a home step test.
 
-## 6. Profile map positions (`insights-2`, D40)
+## 6. Profile map positions (`insights-3`, D40, D41)
 
 Where a point sits on its spoke (0 = not rated, 0.2 = lowest band, 1 = best band):
 
 | Norm | Bands → position |
 |---|---|
-| FRIEND 2015 VO₂max percentiles (Cooper estimate) | below p5 = 0.2 … above p95 = 1.0, in 8 equal steps |
+| FRIEND 2015 VO₂max percentiles (Cooper estimate) | each band at its midpoint percentile (below p5 = 2.5 … above p95 = 97.5) |
+| Percentile norms (NHANES pulse, Tveter chair, Strand plank, CHMS sit-and-reach, Springer stance) | 0.2 + 0.8 × percentile / 100 |
+| CSEP push-ups | needs improvement 0.2 · fair 0.4 · good 0.6 · very good 0.8 · excellent 1.0 |
 | WHO adult BMI | obesity 0.2 · underweight or overweight 0.6 · healthy range 1.0 |
 | NICE NG246 waist-to-height | high 0.2 · increased 0.6 · healthy 1.0 |
 | AASM/SRS 2015 sleep, ages 18–60 | ≥ 7 h = 1.0 · below = 0.5 (single threshold, not graded) |
 
 Several rated indicators in one dimension sit at their mean. Tests without a verified norm (D26) get no
 position. The positions are display steps within one norm, never a score comparable across dimensions.
+
+## 7. Approximate norms (`engine-2`, D41)
+
+See D41 for the source of each test and why it is approximate. Details that change a result:
+- **Resting pulse:** percentile of the pulse within NHANES 1999–2008 (ages 12–79), reversed so a lower pulse ranks higher.
+- **Chair stand:** Tveter 2014, under 50 `25.14 + 2.85 × sex`, 50+ `50.61 − 0.36 × age − 0.10 × weight + 3.81 × sex`;
+  SD = prediction-interval half-width / 1.96 (6.2 and 4.9 reps). Using the arms means no rating.
+- **Plank:** Strand 2014 Table 2 percentiles by sex; above the 90th percentile counts as 95.
+- **Push-ups:** CSEP-PATH health benefit rating, ages 15–69.
+- **Sit-and-reach:** CHMS 2016–17 percentiles by sex and 5-year age group (14–69), after adding 26 cm.
+- **Single-leg stance:** better leg capped at 45 s; reaching the cap is the top; below it, a normal percentile
+  around Springer's age-group mean and SD (eyes open, best of 3).

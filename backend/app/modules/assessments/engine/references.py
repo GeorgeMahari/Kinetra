@@ -13,6 +13,8 @@ class Reference:
     citation: str
     url: str
     note: str
+    # True when our home protocol differs from the source's, so the comparison is an approximation.
+    approximate: bool = False
 
 
 FRIEND_2015 = Reference(
@@ -60,7 +62,113 @@ NICE_WHTR = Reference(
     note="Adults with BMI under 35 kg/m2, both sexes and all ethnicities.",
 )
 
-ALL = {r.id: r for r in (FRIEND_2015, COOPER_1968, WHO_BMI, NICE_WHTR)}
+NHANES_RHR = Reference(
+    id="nhanes_rhr_2011",
+    citation=(
+        "Ostchega Y, Porter KS, Hughes J, Dillon CF, Nwankwo T. Resting pulse rate reference data for "
+        "children, adolescents, and adults: United States, 1999-2008. National Health Statistics Reports "
+        "no. 41. Hyattsville, MD: NCHS; 2011. Tables 2 and 3."
+    ),
+    url="https://www.cdc.gov/nchs/data/nhsr/nhsr041.pdf",
+    note=(
+        "Seated radial pulse counted for 30 s and doubled, after about 4-5 minutes of rest; US population "
+        "without conditions or medicines that affect the pulse. A lower pulse ranks higher here. Ages 12-79; "
+        "the 80+ rows are incomplete in the source, so they are not used."
+    ),
+)
+
+TVETER_2014 = Reference(
+    id="tveter_2014_sts",
+    citation=(
+        "Tveter AT, Dagfinrud H, Moseng T, Holm I. Health-related physical fitness measures: reference "
+        "values and reference equations for use in clinical practice. Arch Phys Med Rehabil. "
+        "2014;95(7):1366-1373. "
+        "Table 3 (30-s sit-to-stand)."
+    ),
+    url="https://doi.org/10.1016/j.apmr.2014.02.016",
+    note=(
+        "Arms folded across the chest, chair 44-45 cm, 370 Norwegian adults 18-90. Under 50: "
+        "25.14 + 2.85 x sex; 50 and over: 50.61 - 0.36 x age - 0.10 x weight + 3.81 x sex "
+        "(95% prediction interval +/-12.2 and "
+        "+/-9.6). The percentile assumes a normal spread around the prediction."
+    ),
+    approximate=True,
+)
+
+STRAND_2014 = Reference(
+    id="strand_2014_plank",
+    citation=(
+        "Strand SL, Hjelm J, Shoepe TC, Fajardo MA. Norms for an isometric muscle endurance test. "
+        "J Hum Kinet. 2014;40:93-102. Table 2."
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC4096102/",
+    note=(
+        "Forearm plank held to fatigue or loss of form, 471 US college students (mean age 20). Used for ages "
+        "17-25 only: no source with age-specific plank norms for older adults was found."
+    ),
+    approximate=True,
+)
+
+CSEP_PUSHUPS = Reference(
+    id="csep_path_pushups",
+    citation=(
+        "Canadian Society for Exercise Physiology (2019). CSEP Physical Activity Training for Health "
+        "(CSEP-PATH) Resource Manual, 2nd ed. Push-up health benefit rating, as reprinted by ACE."
+    ),
+    url="https://contentcdn.eacefitness.com/assets/certification/ace-answers/forms/pt/36_Push-up_Assessment_Protocol.pdf",
+    note=(
+        "Consecutive push-ups to fatigue, chest to a fist-height block. Men on toes, women on knees; other "
+        "variants are not rated. Ages 15-69. Read from the ACE reprint, not the CSEP manual itself."
+    ),
+    approximate=True,
+)
+
+CHMS_SIT_REACH = Reference(
+    id="chms_2019_sit_reach",
+    citation=(
+        "Hoffmann MD, Colley RC, Doyon CY, Wong SL, Tomkinson GR, Lang JJ. Normative-referenced percentile "
+        "values for physical fitness among Canadians. Health Reports. 2019;30(10):14-22. Table 3."
+    ),
+    url="https://www150.statcan.gc.ca/n1/pub/82-003-x/2019010/article/00002/tbl/tbl03-eng.htm",
+    note=(
+        "Canadian Health Measures Survey 2016-2017, CSEP sit-and-reach box. Our reach is measured "
+        "from the toes; 26 cm is added to match the CSEP box, whose zero is 26 cm before the toes. "
+        "Ages 14-69 used."
+    ),
+    approximate=True,
+)
+
+SPRINGER_2007 = Reference(
+    id="springer_2007_upst",
+    citation=(
+        "Springer BA, Marin R, Cyhan T, Roberts H, Gill NW. Normative values for the unipedal stance test "
+        "with eyes open and closed. J Geriatr Phys Ther. 2007;30(1):8-15. Table 1."
+    ),
+    url="https://geriatrictoolkit.missouri.edu/balance/Normative_Values_for_the_Unipedal_Stance_Test_Springer-JGPT.pdf",
+    note=(
+        "Eyes open, arms crossed on the chest, best of 3 trials capped at 45 s, 549 adults 18-99; no sex "
+        "difference. Our test uses hands on hips and a 60 s cap, so the better leg is capped at 45 s "
+        "and compared with the age group's mean and spread (the table's column says SE, but the "
+        "values are SDs)."
+    ),
+    approximate=True,
+)
+
+ALL = {
+    r.id: r
+    for r in (
+        FRIEND_2015,
+        COOPER_1968,
+        WHO_BMI,
+        NICE_WHTR,
+        NHANES_RHR,
+        TVETER_2014,
+        STRAND_2014,
+        CSEP_PUSHUPS,
+        CHMS_SIT_REACH,
+        SPRINGER_2007,
+    )
+}
 
 # --- FRIEND 2015, Table 3, FRIEND rows. Percentiles 5,10,25,50,75,90,95 (mL O2/kg/min).
 FRIEND_PERCENTILES = (5, 10, 25, 50, 75, 90, 95)

@@ -1,7 +1,7 @@
 const insightsRo = {
   dashboard: {
     mapTitle: 'Unde te afli',
-    mapCaption: 'Centrul înseamnă încă fără notă. Lângă centru e cel mai slab nivel al unei norme, marginea e valoarea ideală. Doar testele cu o normă științifică verificată primesc un punct.',
+    mapCaption: 'Centrul înseamnă încă fără notă. Lângă centru e cel mai slab nivel al unei norme, marginea e valoarea ideală. Doar testele cu o normă științifică primesc un punct; unele norme sunt aproximative.',
     mapCount: '{{known}} din {{total}} dimensiuni au informații',
     mapA11y: 'Harta profilului: {{known}} din {{total}} dimensiuni au informații.',
     mapScreenTitle: 'Harta profilului',
@@ -18,6 +18,12 @@ const insightsRo = {
     unrated: 'Măsurată, încă fără normă verificată',
     by: 'după {{sources}}',
     sources: {
+      nhanes_rhr_2011: 'CDC NHANES (puls)',
+      tveter_2014_sts: 'Tveter 2014 (scaun)',
+      strand_2014_plank: 'Strand 2014 (planșă)',
+      csep_path_pushups: 'CSEP (flotări)',
+      chms_2019_sit_reach: 'Statistica Canada (flexibilitate)',
+      springer_2007_upst: 'Springer 2007 (echilibru)',
       friend_2015_treadmill: 'FRIEND (VO₂max)',
       who_bmi_adults: 'OMS (IMC)',
       nice_ng246_whtr: 'NICE (talie/înălțime)',

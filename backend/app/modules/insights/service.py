@@ -99,7 +99,12 @@ def dashboard(db: Session, user: User) -> DashboardOut:
 
     def standing_of(d: DimensionOverview) -> StandingOut | None:
         judged = [
-            rules.StandingBasis(i.code, i.interpretation.reference_id, i.interpretation.label)
+            rules.StandingBasis(
+                i.code,
+                i.interpretation.reference_id,
+                i.interpretation.label,
+                i.interpretation.detail.get("percentile"),
+            )
             for r in d.latest
             if r.status == "completed"
             for i in r.indicators

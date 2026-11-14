@@ -125,7 +125,7 @@ safety text must be reviewed by native speakers before public release (see SCIEN
 Each result keeps the indicators exactly as computed, plus the `engine_version`. Correcting a
 reference or formula later creates a new engine version, so old results never change silently.
 
-### D26 — Raw-only beats unverified norms
+### D26 — Raw-only beats unverified norms (relaxed by D41)
 A norm is used only if its numbers were read in the primary source or an official page. Where only
 secondary reproductions were reachable (push-ups, chair stand), the result is shown raw with a note.
 This is worse for engagement and better for trust; the norms can be enabled once verified.
@@ -286,3 +286,22 @@ stands: the centre means "not rated", next to the centre (0.2) is a norm's lowes
   grade how far below.
 - The rule is server-side and pure (`insights.rules.standing`, `insights-2`); the app only draws it.
   New verified norms extend the same table and appear on the map without app changes.
+
+### D41 — Approximate, age- and sex-specific norms for every test that has a source (2026-11-14)
+Relaxes D26 at the product owner's request: norms are approximated as objectively as possible
+instead of leaving results raw. `engine-2` rates each test against its age and sex group:
+
+| Test | Source | Why it is approximate |
+|---|---|---|
+| Resting pulse | CDC NHANES 1999–2008 percentiles (Ostchega 2011) | not approximate: same method (seated, 30 s × 2) |
+| 30-s chair stand | Tveter 2014 reference equations (age, sex, weight over 50) | normal spread assumed around the prediction |
+| Forearm plank | Strand 2014 percentiles (college students) | used for ages 17–25 only |
+| Push-ups | CSEP-PATH 2019 categories (men on toes, women on knees) | read from the ACE reprint |
+| Sit-and-reach | Statistics Canada, CHMS 2016–17 percentiles | our zero is the toes; 26 cm added for the CSEP box |
+| Single-leg stance | Springer 2007, eyes open | hands on hips and 60 s here, arms crossed and 45 s there |
+
+- **Never extrapolated.** Outside a table's ages, or for a sex it does not cover, the result stays raw.
+- **Still unrated:** pull-ups (the official USMC table refused automated access and no adult population
+  norm was found) and step-test heart rate recovery (published references come from maximal lab tests).
+- Approximate norms carry the note `approximate_reference`, shown under the result.
+- Results stored under `engine-1` keep their indicators (D25) unless they are re-scored explicitly.

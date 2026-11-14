@@ -37,6 +37,7 @@ class StandingBasisOut(BaseModel):
     indicator: str
     reference_id: str
     label: str
+    percentile: float | None = None
 
 
 class StandingOut(BaseModel):

@@ -65,6 +65,40 @@ describe('ResultView', () => {
     expect(screen.getByTestId('no-comparison')).toBeTruthy();
   });
 
+  it('places a percentile-norm result within its group and flags an approximate norm', async () => {
+    const sitReach: TestResult = {
+      ...COOPER,
+      id: 's1',
+      test_code: 'sit_reach',
+      dimension: 'mobility',
+      inputs: { reach_cm: 6 },
+      indicators: [
+        {
+          code: 'sit_reach_cm',
+          value: 6,
+          unit: 'cm',
+          provenance: 'measured',
+          interpretation: {
+            reference_id: 'chms_2019_sit_reach',
+            scheme: 'percentile',
+            label: 'percentile',
+            detail: { percentile: 75.2, age_group: '20-24', sex: 'male' },
+          },
+          notes: ['approximate_reference'],
+          reference_ids: ['chms_2019_sit_reach'],
+        },
+      ],
+      headline: 'sit_reach_cm',
+      engine_version: 'engine-2',
+      references: [],
+    };
+    await render(themed(<ResultView result={sitReach} />));
+    expect(screen.getByTestId('interpretation-sit_reach_cm')).toHaveTextContent(
+      'Percentile 75: better than about 75% of men aged 20-24.',
+    );
+    expect(screen.getByText(/Approximate norm/)).toBeTruthy();
+  });
+
   it('formats numbers for the language', () => {
     expect(formatNumber(44.6, 'ro', 'mL/kg/min')).toBe('44,6');
     expect(formatNumber(0.46, 'en', 'ratio')).toBe('0.46');

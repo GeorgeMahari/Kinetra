@@ -201,8 +201,8 @@ def test_standing_friend_bands_run_from_near_centre_to_the_rim() -> None:
     mid = standing([_b("friend_2015_treadmill", "p50_75")], sleep_hours=None, age=30)
     top = standing([_b("friend_2015_treadmill", "above_p95")], sleep_hours=None, age=30)
     assert low is not None and mid is not None and top is not None
-    assert low.level == 0.2  # worst sits next to the centre, never on it (the centre means unknown)
-    assert low.level < mid.level < top.level == 1.0
+    # Each band sits at its midpoint percentile: the worst next to the centre, never on it.
+    assert low.level == 0.22 and mid.level == 0.7 and top.level == 0.98
 
 
 def test_standing_categories_put_the_healthy_range_at_the_rim() -> None:
@@ -228,3 +228,14 @@ def test_standing_sleep_uses_aasm_only_for_adults_18_to_60() -> None:
     assert short is not None and short.level == 0.5
     assert standing([], sleep_hours=6, age=70) is None
     assert standing([], sleep_hours=6, age=None) is None
+
+
+def test_standing_percentile_and_category_norms() -> None:
+    hr = standing(
+        [StandingBasis("resting_hr", "nhanes_rhr_2011", "percentile", 50)], sleep_hours=None, age=30
+    )
+    assert hr is not None and hr.level == 0.6
+    push = standing([_b("csep_path_pushups", "csep_good")], sleep_hours=None, age=30)
+    assert push is not None and push.level == 0.6
+    # A percentile reference without a percentile is ignored, not guessed.
+    assert standing([_b("nhanes_rhr_2011", "percentile")], sleep_hours=None, age=30) is None

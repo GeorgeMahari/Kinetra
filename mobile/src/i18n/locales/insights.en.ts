@@ -1,7 +1,7 @@
 const insightsEn = {
   dashboard: {
     mapTitle: 'Where you stand',
-    mapCaption: "The centre means not rated yet. Next to the centre is a norm's lowest level; the rim is the ideal. Only tests with a verified scientific norm get a point.",
+    mapCaption: "The centre means not rated yet. Next to the centre is a norm's lowest level; the rim is the ideal. Only tests with a scientific norm get a point; some norms are approximate.",
     mapCount: '{{known}} of {{total}} dimensions have information',
     mapA11y: 'Profile map: {{known}} of {{total}} dimensions have information.',
     mapScreenTitle: 'Profile map',
@@ -18,6 +18,12 @@ const insightsEn = {
     unrated: 'Measured, no verified norm yet',
     by: 'by {{sources}}',
     sources: {
+      nhanes_rhr_2011: 'CDC NHANES (pulse)',
+      tveter_2014_sts: 'Tveter 2014 (chair)',
+      strand_2014_plank: 'Strand 2014 (plank)',
+      csep_path_pushups: 'CSEP (push-ups)',
+      chms_2019_sit_reach: 'Statistics Canada (flexibility)',
+      springer_2007_upst: 'Springer 2007 (balance)',
       friend_2015_treadmill: 'FRIEND (VO₂max)',
       who_bmi_adults: 'WHO (BMI)',
       nice_ng246_whtr: 'NICE (waist-to-height)',

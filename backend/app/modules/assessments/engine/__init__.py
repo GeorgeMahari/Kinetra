@@ -5,4 +5,4 @@ measured in, it returns indicators tagged with provenance and — only where a c
 covers the person — an interpretation. See docs/SCIENCE.md.
 """
 
-ENGINE_VERSION = "engine-1"
+ENGINE_VERSION = "engine-2"

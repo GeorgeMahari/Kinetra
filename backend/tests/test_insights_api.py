@@ -92,7 +92,14 @@ class TestDashboard:
         }
         assert m["lifestyle"]["standing"] == {
             "level": 1.0,
-            "basis": [{"indicator": "sleep_hours", "reference_id": "aasm_srs_2015", "label": "aasm_met"}],
+            "basis": [
+                {
+                    "indicator": "sleep_hours",
+                    "reference_id": "aasm_srs_2015",
+                    "label": "aasm_met",
+                    "percentile": None,
+                }
+            ],
         }
         # Measured, but no verified norm yet: no point (the centre), never a guess.
         assert m["strength"]["coverage"] == "current" and m["strength"]["standing"] is None

@@ -98,6 +98,7 @@ const assessRo = {
     required: 'Obligatoriu.',
   },
   indicators: {
+    stance_best_s: 'Cel mai bun picior',
     resting_hr: 'Puls în repaus',
     hr_end: 'Pulsul la final',
     hrr_60: 'Recuperare după 60 s',
@@ -118,6 +119,7 @@ const assessRo = {
     whtr: 'Raport talie/înălțime',
   },
   notes: {
+    approximate_reference: 'Normă aproximativă: protocolul de acasă diferă puțin de cel al studiului, așa că rezultatul e orientativ.',
     method_manual_pulse: 'Măsurat cu mâna.',
     method_device: 'Măsurat cu un dispozitiv.',
     recovery_passive_seated: 'Recuperare: așezat(ă).',
@@ -142,6 +144,15 @@ const assessRo = {
     bmi_limitations: 'IMC nu deosebește mușchii de grăsime și nu arată unde este depozitată grăsimea.',
   },
   interpretations: {
+    percentileSentence: 'Percentila {{p}}: mai bine decât aproximativ {{p}}% dintre {{group}}.',
+    groupAge: 'persoanele cu vârsta {{age}}',
+    groupProfile: 'persoanele de vârsta și sexul tău',
+    stanceCap: 'Ai atins plafonul testului de referință (45 s): cel mai bun rezultat pe care îl poate măsura.',
+    csep_needs_improvement: 'CSEP: de îmbunătățit pentru vârsta și sexul tău.',
+    csep_fair: 'CSEP: acceptabil pentru vârsta și sexul tău.',
+    csep_good: 'CSEP: bine pentru vârsta și sexul tău.',
+    csep_very_good: 'CSEP: foarte bine pentru vârsta și sexul tău.',
+    csep_excellent: 'CSEP: excelent pentru vârsta și sexul tău.',
     below_p5: 'sub percentila 5',
     p5_10: 'între percentilele 5 și 10',
     p10_25: 'între percentilele 10 și 25',

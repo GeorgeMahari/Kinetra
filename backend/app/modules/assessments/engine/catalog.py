@@ -12,7 +12,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.modules.assessments.engine import norms
 from app.modules.assessments.engine import references as refs
+from app.modules.assessments.engine.catalog_types import Interpretation
 from app.modules.onboarding.vocab import Dimension, IntensityCeiling
 
 # ------------------------------------------------------------------ result types
@@ -22,14 +24,6 @@ class Provenance(StrEnum):
     measured = "measured"  # entered from a direct measurement or test
     calculated = "calculated"  # exact arithmetic on measured values
     estimated = "estimated"  # model/regression output with known error
-
-
-@dataclass(frozen=True)
-class Interpretation:
-    reference_id: str
-    scheme: str  # e.g. "percentile_band", "category"
-    label: str  # stable code translated in the app, e.g. "p50_75", "who_overweight"
-    detail: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -50,6 +44,7 @@ class Context:
     age: int | None
     sex_for_norms: Literal["female", "male", "not_specified"]
     height_cm: float | None
+    weight_kg: float | None = None  # latest recorded body weight, if any
 
 
 # ------------------------------------------------------------------ input models
@@ -190,8 +185,27 @@ def nice_whtr_category(whtr: float, age: int | None, bmi: float) -> Interpretati
 Compute = Callable[[Any, Context, bool], list[Indicator]]
 
 
+def _rated(
+    code: str,
+    value: float,
+    unit: str,
+    provenance: Provenance,
+    interp: Interpretation | None,
+    notes: tuple[str, ...],
+    stopped: bool,
+) -> Indicator:
+    """An indicator judged against an engine-2 norm when one covers the person, raw otherwise."""
+    stop = ("stopped_early",) if stopped else ()
+    if interp is None or stopped:
+        return Indicator(code, value, unit, provenance, notes=("no_reference_for_profile",) + notes + stop)
+    ref = refs.ALL[interp.reference_id]
+    extra = ("approximate_reference",) if ref.approximate else ()
+    return Indicator(code, value, unit, provenance, interp, extra + notes, (ref.id,))
+
+
 def _resting_hr(d: RestingHrIn, ctx: Context, stopped: bool) -> list[Indicator]:
-    return [Indicator("resting_hr", d.bpm, "bpm", Provenance.measured, notes=(f"method_{d.method}",))]
+    interp = norms.resting_hr_percentile(d.bpm, ctx.age, ctx.sex_for_norms)
+    return [_rated("resting_hr", d.bpm, "bpm", Provenance.measured, interp, (f"method_{d.method}",), stopped)]
 
 
 def _hrr(d: HrrStepIn, ctx: Context, stopped: bool) -> list[Indicator]:
@@ -269,7 +283,10 @@ def _raw(code: str, unit: str, extra_notes: tuple[str, ...] = ()) -> Callable[[i
 
 
 def _pushups(d: PushUpIn, ctx: Context, stopped: bool) -> list[Indicator]:
-    return [_raw("pushup_reps", "reps", (f"variant_{d.variant}",))(d.reps, stopped)]
+    interp = norms.pushup_category(d.reps, d.variant, ctx.age, ctx.sex_for_norms)
+    return [
+        _rated("pushup_reps", d.reps, "reps", Provenance.measured, interp, (f"variant_{d.variant}",), stopped)
+    ]
 
 
 def _pulls(d: PullIn, ctx: Context, stopped: bool) -> list[Indicator]:
@@ -278,15 +295,19 @@ def _pulls(d: PullIn, ctx: Context, stopped: bool) -> list[Indicator]:
 
 def _chair(d: ChairStandIn, ctx: Context, stopped: bool) -> list[Indicator]:
     extra = ("used_arms_protocol_deviation",) if d.used_arms else ()
-    return [_raw("chair_stand_reps", "reps", extra)(d.reps, stopped)]
+    interp = norms.chair_stand_percentile(d.reps, ctx.age, ctx.sex_for_norms, ctx.weight_kg, d.used_arms)
+    return [_rated("chair_stand_reps", d.reps, "reps", Provenance.measured, interp, extra, stopped)]
 
 
 def _plank(d: PlankIn, ctx: Context, stopped: bool) -> list[Indicator]:
-    return [_raw("plank_seconds", "s")(d.seconds, stopped)]
+    interp = norms.plank_percentile(d.seconds, ctx.age, ctx.sex_for_norms)
+    return [_rated("plank_seconds", d.seconds, "s", Provenance.measured, interp, (), stopped)]
 
 
 def _sit_reach(d: SitReachIn, ctx: Context, stopped: bool) -> list[Indicator]:
-    return [_raw("sit_reach_cm", "cm")(float(d.reach_cm), stopped)]
+    reach = float(d.reach_cm)
+    interp = norms.sit_reach_percentile(reach, ctx.age, ctx.sex_for_norms)
+    return [_rated("sit_reach_cm", reach, "cm", Provenance.measured, interp, (), stopped)]
 
 
 def _stance(d: SingleLegStanceIn, ctx: Context, stopped: bool) -> list[Indicator]:
@@ -300,6 +321,15 @@ def _stance(d: SingleLegStanceIn, ctx: Context, stopped: bool) -> list[Indicator
             "s",
             Provenance.calculated,
             notes=("no_validated_reference",) + capped,
+        ),
+        _rated(
+            "stance_best_s",
+            max(d.left_s, d.right_s),
+            "s",
+            Provenance.calculated,
+            norms.stance_percentile(d.left_s, d.right_s, ctx.age),
+            (),
+            stopped,
         ),
     ]
 
