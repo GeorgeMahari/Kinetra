@@ -199,3 +199,38 @@ See D41 for the source of each test and why it is approximate. Details that chan
   around Springer's age-group mean and SD (eyes open, best of 3).
 - **3-minute step test:** the optional `beats_first_minute` (beats counted seated for a full minute from 5 s after
   stepping) is rated with the YMCA table by age group (18–25 … 66+) and sex. Walking recovery is not rated.
+
+## 8. Plans: zones, focus, tasks and targets (`plan-1`, D42)
+
+**Evidence behind the focus order** (cited in the app under "Why it matters"; all observational
+associations, shown as such):
+- Cardiorespiratory fitness: RR 0.87 for all-cause mortality per 1 MET (Kodama et al., JAMA 2009;301:2024).
+- Resting heart rate: RR 1.09 per +10 bpm (Zhang et al., CMAJ 2016;188:E53).
+- Push-up capacity: far fewer CVD events above 40 than below 10 push-ups, men only (Yang et al., JAMA Netw Open 2019).
+- One-leg stance: HR 1.84 for death when unable to stand 10 s, ages 51-75 (Araújo et al., BJSM 2022;56:975).
+- Strength on 2+ days a week (WHO 2020); sleep of 7+ hours (AASM/SRS 2015); waist-to-height under 0.5 (NICE 2025).
+
+**Zones** from the map standing: attention < 0.45 <= fine < 0.85 <= strength.
+
+**Tasks and starting doses** (attention / fine / strength), growing 1% per plan day, capped:
+
+| Task | Dimension | Start | Cap | Lowest ceiling |
+|---|---|---|---|---|
+| Brisk walk | cardio | 20 / 25 / 30 min | 60 min | non-exertional |
+| Steady cardio | cardio | 15 / 20 / 30 min | 60 min | submaximal |
+| Intervals (1 min hard, 1 min easy) | cardio | 4 / 6 / 8 | 12 | maximal |
+| Sit-to-stands, 3 sets | strength | 8 / 10 / 15 reps | 25 | submaximal |
+| Plank, 3 sets | strength | 20 / 30 / 45 s | 120 s | submaximal |
+| Push-ups, 3 sets | muscular endurance | 4 / 8 / 12 reps | 30 | submaximal |
+| One-leg balance, 3 sets a leg | balance | 20 / 30 / 40 s | 60 s | non-exertional |
+| Mobility routine | mobility | 5 / 8 / 10 min | 20 min | non-exertional |
+| Daily steps | body | 5000 / 7000 / 8000 | 12000 | non-exertional |
+| Evening wind-down | lifestyle | 20 / 30 / 30 min | 30 min | non-exertional |
+
+**Week**: Monday, Wednesday, Friday the primary session (Friday intervals for an aerobic focus when
+allowed); Tuesday and Thursday the secondary; Saturday a walk or steps; Sunday rest. Every day adds one
+small habit (mobility; balance for a mobility focus; wind-down for a lifestyle focus).
+
+**Target**: the value on the focus test at the group's median (when below it), else the 75th, then the
+90th percentile or the next category; 45 s for one-leg stance; a waist of 0.49 x height when the
+waist-to-height ratio is 0.5 or more. Retest at the end of the 8 weeks.

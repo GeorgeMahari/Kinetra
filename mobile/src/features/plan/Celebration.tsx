@@ -90,9 +90,11 @@ export function Celebration({
               <AppText variant="heading" color="onShell">
                 {dayComplete ? t('plan.dayCompleteTitle') : t('plan.newAchievements')}
               </AppText>
-              <AppText variant="caption" color="onShellMuted">
-                {message}
-              </AppText>
+              {dayComplete ? (
+                <AppText variant="caption" color="onShellMuted">
+                  {message}
+                </AppText>
+              ) : null}
             </View>
           </View>
           {achievements.map((code, i) => (

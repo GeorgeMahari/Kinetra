@@ -43,3 +43,30 @@ it('opens how to do a task when its text is tapped', async () => {
   await fireEvent.press(await screen.findByTestId('task-steady_cardio'));
   expect(screen.getByTestId('task-how-steady_cardio')).toHaveTextContent(/steady pace/);
 });
+
+it('two quick ticks both stick, even when the first answer arrives last', async () => {
+  const backend = createFakeBackend({ status: 'completed' });
+  let puts = 0;
+  let answered = 0;
+  // The server applies each tick at once, but the first answer travels slowly; without serialising,
+  // it would land after the second and wipe that tick off the screen.
+  const request = (async (path: string, options?: { method?: string }) => {
+    const answer = await backend.request(path, options as never);
+    if (options?.method === 'PUT') {
+      puts += 1;
+      await new Promise((r) => setTimeout(r, puts === 1 ? 120 : 0));
+      answered += 1;
+    }
+    return answer;
+  }) as typeof backend.request;
+  await renderRouter(routes, { initialUrl: '/plan', wrapper: providers(request) });
+  await fireEvent.press(await screen.findByTestId('plan-start-button'));
+  await screen.findByTestId('plan-hero');
+
+  await fireEvent.press(screen.getByTestId('task-check-steady_cardio'));
+  await fireEvent.press(screen.getByTestId('task-check-mobility_flow'));
+  await waitFor(() => expect(answered).toBe(2));
+  await waitFor(() => expect(screen.getByTestId('plan-today-count')).toHaveTextContent('2 of 2'));
+  expect(screen.getByTestId('task-check-steady_cardio')).toHaveProp('accessibilityState', { checked: true });
+  expect(screen.getByTestId('task-check-mobility_flow')).toHaveProp('accessibilityState', { checked: true });
+});

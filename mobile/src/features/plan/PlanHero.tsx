@@ -59,7 +59,8 @@ export function PlanHero({
   const walked = Math.min(1, (plan.day_index + 1) / totalDays);
 
   // A climbing trail: weeks as waypoints, gently rising with a little terrain.
-  const pad = 18;
+  // Room at both ends for today's marker and its pulsing ring.
+  const pad = 30;
   const pts = Array.from({ length: plan.weeks + 1 }, (_, i) => {
     const f = i / plan.weeks;
     const wobble = [0, 0.06, -0.03, 0.05, -0.02, 0.04, -0.03, 0.02, 0][i] ?? 0;
@@ -117,8 +118,9 @@ export function PlanHero({
         {width ? (
           <>
             <Svg width={width} height={HEIGHT}>
+              {/* The hillside under the trail: flat out to both edges, then down. */}
               <Path
-                d={`${d} L${width} ${HEIGHT} L0 ${HEIGHT} Z`.replace('M', `M0 ${HEIGHT} L`)}
+                d={`M0 ${HEIGHT} L0 ${pts[0]!.y} ${d.replace('M', 'L')} L${width} ${pts[pts.length - 1]!.y} L${width} ${HEIGHT} Z`}
                 fill={colors.onShell}
                 fillOpacity={0.08}
               />
