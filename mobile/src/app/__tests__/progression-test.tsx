@@ -18,7 +18,8 @@ beforeEach(() => i18n.changeLanguage('en'));
 it('shows level, points to next level and the point rules', async () => {
   const backend = createFakeBackend({ status: 'completed' });
   await renderRouter(routes, { initialUrl: '/progress', wrapper: providers(backend.request) });
-  expect(await screen.findByText('Level 1')).toBeTruthy();
+  // The level is a big figure on the hero; screen readers get the full phrase.
+  expect(await screen.findByTestId('level-number')).toHaveProp('accessibilityLabel', 'Level 1');
   expect(screen.getByTestId('level-points')).toHaveTextContent('10 points · 20 to level 2');
   expect(screen.getByText(/never from comparison with other people/)).toBeTruthy();
 });

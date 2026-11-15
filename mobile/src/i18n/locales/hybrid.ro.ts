@@ -90,6 +90,14 @@ const hybridRo = {
     count: 'Realizări deblocate: {{earned}} din {{total}}',
     caption: 'Fiecare insignă vine din ce faci: teste, retestări, zile complete, traseul dus la capăt.',
   },
+  progressView: {
+    levelLabel: 'NIVEL',
+    trends: 'Tendințe',
+    trendsCaption: 'Fiecare test în timp. Trage cu degetul pe grafic ca să citești fiecare punct.',
+    measurements: 'MĂSURĂTORI',
+    span: 'PERIOADĂ',
+    retest: 'Repetă testul',
+  },
   body: {
     title: 'Harta corpului',
     intro: 'Ce zone ale corpului folosește fiecare test, colorate cu zona de sănătate a dimensiunii alese.',

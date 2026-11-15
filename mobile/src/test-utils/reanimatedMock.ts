@@ -42,6 +42,8 @@ module.exports = {
   runOnJS: <F>(f: F) => f,
   useAnimatedScrollHandler: () => () => {},
   useAnimatedProps: () => ({}),
+  // Gesture Handler 3 checks gesture config values with this.
+  isSharedValue: (v: unknown) => typeof v === 'object' && v !== null && 'value' in v,
   interpolate: (_v: number, _i: number[], out: number[]) => out[0],
   interpolateColor: (_v: number, _i: number[], out: string[]) => out[0],
   Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },

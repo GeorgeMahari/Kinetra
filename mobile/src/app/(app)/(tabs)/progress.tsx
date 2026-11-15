@@ -16,6 +16,7 @@ import { AchievementsList, LevelCard, PersonalBests, WeekCard } from '@/features
 import { useProgression } from '@/features/progression/useProgression';
 import { useDashboard, useProgress } from '@/features/insights/useInsights';
 import { ActivityCalendar } from '@/features/progress/ActivityCalendar';
+import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { useTheme } from '@/theme/ThemeProvider';
 
 function TestProgress({ code }: { code: TestCode }) {
@@ -34,27 +35,38 @@ function TestProgress({ code }: { code: TestCode }) {
   const headline = progress.data.indicators[0];
   const series = headline?.series[0];
   if (!headline || !series) return null;
+  const testName = t(`assess.tests.${code}.name`);
+  const indicatorName = t(`assess.indicators.${headline.indicator}` as 'assess.indicators.bmi');
   return (
-    <View style={{ gap: spacing.xs }}>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.push({ pathname: '/progress/[code]', params: { code } })}
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        <AppText variant="heading">{t(`assess.tests.${code}.name`)}</AppText>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <AppText variant="caption" color="brandText">{t('progress.allDetails')}</AppText>
-          <Icon name="chevronRight" size={16} color={colors.brand} />
-        </View>
-      </Pressable>
-      <SeriesCard
-        testID={`progress-${code}`}
-        title={t(`assess.indicators.${headline.indicator}` as 'assess.indicators.bmi')}
-        unit={headline.unit}
-        provenance={headline.provenance}
-        series={series}
-      />
-    </View>
+    <SeriesCard
+      testID={`progress-${code}`}
+      title={indicatorName}
+      showTitle={indicatorName !== testName}
+      unit={headline.unit}
+      provenance={headline.provenance}
+      series={series}
+      header={
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push({ pathname: '/progress/[code]', params: { code } })}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            minHeight: 44,
+          }}
+        >
+          {isPictogram(code) ? <Pictogram name={code} size={36} /> : null}
+          <View style={{ flex: 1, gap: 2 }}>
+            <AppText variant="heading">{testName}</AppText>
+            <AppText variant="caption" color="brandText">
+              {t('progress.allDetails')}
+            </AppText>
+          </View>
+          <Icon name="chevronRight" size={18} color={colors.brand} />
+        </Pressable>
+      }
+    />
   );
 }
 
@@ -87,18 +99,45 @@ export default function ProgressTab() {
           <AppText variant="title">{t('progress.title')}</AppText>
           <AppText color="textMuted">{t('progress.intro')}</AppText>
         </View>
-        <ActivityCalendar />
         {prog.data ? (
           <>
             {prog.data.newly_earned.map((c) => (
               <Notice
                 key={c}
                 tone="success"
-                message={t('progression.newlyEarned', { name: t(`progression.achievements.${c}.name`) })}
+                message={t('progression.newlyEarned', {
+                  name: t(`progression.achievements.${c}.name`),
+                })}
               />
             ))}
             <LevelCard p={prog.data} />
             <WeekCard p={prog.data} />
+          </>
+        ) : prog.isError ? (
+          <ErrorState error={prog.error} onRetry={() => void prog.refetch()} />
+        ) : null}
+        <ActivityCalendar />
+
+        {tested.length === 0 ? (
+          <EmptyState
+            icon="today"
+            title={t('progress.empty')}
+            action={{
+              label: t('progress.emptyAction'),
+              onPress: () => router.push('/assess'),
+            }}
+          />
+        ) : (
+          <View style={{ gap: spacing.md }}>
+            <SectionHeader title={t('progressView.trends')} caption={t('progressView.trendsCaption')} />
+            {tested.map((code) => (
+              <TestProgress key={code} code={code} />
+            ))}
+          </View>
+        )}
+
+        {prog.data ? (
+          <>
             <PersonalBests p={prog.data} />
             <View style={{ gap: spacing.sm }}>
               <SectionHeader title={t('progression.achievementsTitle')} />
@@ -106,19 +145,7 @@ export default function ProgressTab() {
               <Button variant="ghost" label={t('progression.viewAll')} onPress={() => router.push('/achievements')} />
             </View>
           </>
-        ) : prog.isError ? (
-          <ErrorState error={prog.error} onRetry={() => void prog.refetch()} />
         ) : null}
-
-        {tested.length === 0 ? (
-          <EmptyState
-            icon="today"
-            title={t('progress.empty')}
-            action={{ label: t('progress.emptyAction'), onPress: () => router.push('/assess') }}
-          />
-        ) : (
-          tested.map((code) => <TestProgress key={code} code={code} />)
-        )}
       </View>
     </Screen>
   );

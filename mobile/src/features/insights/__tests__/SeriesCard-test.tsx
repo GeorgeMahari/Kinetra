@@ -1,6 +1,7 @@
 import '@/i18n';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ProfileMap } from '@/components/charts/ProfileMap';
 import i18n from '@/i18n';
@@ -8,7 +9,12 @@ import { ThemeProvider } from '@/theme/ThemeProvider';
 
 import { SeriesCard } from '../SeriesCard';
 
-const themed = (ui: React.ReactElement) => <ThemeProvider scheme="dark">{ui}</ThemeProvider>;
+// The chart scrubs with a pan gesture, which needs the root view the app layout provides.
+const themed = (ui: React.ReactElement) => (
+  <GestureHandlerRootView>
+    <ThemeProvider scheme="dark">{ui}</ThemeProvider>
+  </GestureHandlerRootView>
+);
 
 beforeEach(() => i18n.changeLanguage('en'));
 

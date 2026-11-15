@@ -25,29 +25,74 @@ import { useSaveCheckin } from './useProgression';
 
 export function LevelCard({ p }: { p: Progression }) {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const span = p.next_level_at != null ? p.next_level_at - p.level_floor : 1;
   const into = p.next_level_at != null ? p.points - p.level_floor : 1;
+  // The trail-head panel: the level as a big figure on the forest shell, the streak as a chip.
   return (
-    <Card>
-      <View testID="level-card" style={{ gap: spacing.sm }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <AppText variant="title">{t('progression.level', { level: p.level })}</AppText>
-          <AppText variant="caption" color="textMuted">
+    <Animated.View
+      entering={FadeInDown.duration(320).reduceMotion(ReduceMotion.System)}
+      testID="level-card"
+      style={{
+        backgroundColor: colors.shell,
+        borderRadius: radius.xl,
+        padding: spacing.lg,
+        gap: spacing.md,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: spacing.md,
+        }}
+      >
+        <View accessible accessibilityLabel={t('progression.level', { level: p.level })} testID="level-number">
+          <AppText variant="micro" color="onShellMuted">
+            {t('progressView.levelLabel')}
+          </AppText>
+          <AppText variant="metric" color="onShell">
+            {p.level}
+          </AppText>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingVertical: 6,
+            paddingHorizontal: spacing.md,
+            borderRadius: radius.pill,
+            backgroundColor: 'rgba(255,255,255,0.14)',
+          }}
+        >
+          <Icon name="flame" size={16} color={colors.onShell} />
+          <AppText variant="caption" color="onShell">
             {t('progression.streak', { count: p.streak_weeks })}
           </AppText>
         </View>
-        <Meter value={into} max={span} label={t('progression.level', { level: p.level })} testID="level-meter" />
-        <AppText variant="caption" color="textMuted" testID="level-points">
-          {p.next_level_at != null
-            ? t('progression.toNext', { points: p.points, remaining: p.next_level_at - p.points, next: p.level + 1 })
-            : t('progression.maxLevel', { points: p.points })}
-        </AppText>
-        <AppText variant="caption" color="textMuted">
-          {t('progression.pointsHelp')}
-        </AppText>
       </View>
-    </Card>
+      <Meter
+        tone="shell"
+        value={into}
+        max={span}
+        label={t('progression.level', { level: p.level })}
+        testID="level-meter"
+      />
+      <AppText variant="caption" color="onShell" testID="level-points">
+        {p.next_level_at != null
+          ? t('progression.toNext', {
+              points: p.points,
+              remaining: p.next_level_at - p.points,
+              next: p.level + 1,
+            })
+          : t('progression.maxLevel', { points: p.points })}
+      </AppText>
+      <AppText variant="caption" color="onShellMuted">
+        {t('progression.pointsHelp')}
+      </AppText>
+    </Animated.View>
   );
 }
 
@@ -60,12 +105,23 @@ export function ObjectivesList({ p }: { p: Progression }) {
         const label = t(`progression.objectives.${o.code}`);
         return (
           <View key={o.code} testID={`objective-${o.code}`} style={{ gap: spacing.xs }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <AppText variant="label">{label}</AppText>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 {o.met ? <Icon name="check" size={16} color={colors.progress} /> : null}
                 <AppText variant="caption" color="textMuted">
-                  {o.met ? t('progression.met') : t('progression.progressOf', { current: o.current, target: o.target })}
+                  {o.met
+                    ? t('progression.met')
+                    : t('progression.progressOf', {
+                        current: o.current,
+                        target: o.target,
+                      })}
                 </AppText>
               </View>
             </View>
@@ -84,7 +140,10 @@ export function WeekCard({ p }: { p: Progression }) {
   const [sessions, setSessions] = useState<number | null>(p.checkin?.sessions ?? null);
   const [strength, setStrength] = useState<number | null>(p.checkin?.strength_sessions ?? null);
   const [minutes, setMinutes] = useState<number | null>(p.checkin?.active_minutes ?? null);
-  const [msg, setMsg] = useState<{ tone: 'success' | 'error'; message: string } | null>(null);
+  const [msg, setMsg] = useState<{
+    tone: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const showStrength = p.objectives.some((o) => o.code === 'strength_sessions');
 
@@ -107,7 +166,12 @@ export function WeekCard({ p }: { p: Progression }) {
           <AppText variant="caption" color="textMuted">
             {t('progression.checkinHint')}
           </AppText>
-          <Stepper testID="checkin-sessions" label={t('progression.sessions')} value={sessions} onChange={setSessions} />
+          <Stepper
+            testID="checkin-sessions"
+            label={t('progression.sessions')}
+            value={sessions}
+            onChange={setSessions}
+          />
           {showStrength ? (
             <Stepper
               testID="checkin-strength"
@@ -137,7 +201,11 @@ export function WeekCard({ p }: { p: Progression }) {
               setBusy(true);
               setMsg(null);
               try {
-                await save({ sessions: sessions ?? 0, strength_sessions: strength, active_minutes: minutes });
+                await save({
+                  sessions: sessions ?? 0,
+                  strength_sessions: strength,
+                  active_minutes: minutes,
+                });
                 setMsg({ tone: 'success', message: t('progression.saved') });
               } catch (err) {
                 setMsg({ tone: 'error', message: errorMessage(t, err) });
@@ -167,7 +235,15 @@ export function PersonalBests({ p }: { p: Progression }) {
           {p.personal_bests.map((b) => {
             const protocol = protocolLabel(t, b.protocol_key);
             const value = formatValue(
-              { code: b.indicator, value: b.value, unit: b.unit, provenance: 'measured', interpretation: null, notes: [], reference_ids: [] },
+              {
+                code: b.indicator,
+                value: b.value,
+                unit: b.unit,
+                provenance: 'measured',
+                interpretation: null,
+                notes: [],
+                reference_ids: [],
+              },
               i18n.resolvedLanguage,
             );
             return (
@@ -175,7 +251,12 @@ export function PersonalBests({ p }: { p: Progression }) {
                 key={`${b.test_code}-${b.protocol_key}-${b.indicator}`}
                 testID={`pb-${b.indicator}`}
                 accessibilityRole="button"
-                onPress={() => router.push({ pathname: '/result/[id]', params: { id: b.result_id } })}
+                onPress={() =>
+                  router.push({
+                    pathname: '/result/[id]',
+                    params: { id: b.result_id },
+                  })
+                }
                 highlight={{ base: colors.surface, active: colors.brandSoft }}
                 style={{
                   flexBasis: '47%',
@@ -187,7 +268,13 @@ export function PersonalBests({ p }: { p: Progression }) {
                   borderColor: colors.border,
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   {isPictogram(b.test_code) ? <Pictogram name={b.test_code} size={34} /> : null}
                   <Icon name="flame" size={16} color={colors.dataInk} />
                 </View>
@@ -198,7 +285,9 @@ export function PersonalBests({ p }: { p: Progression }) {
                   {t(`assess.indicators.${b.indicator}` as 'assess.indicators.bmi')}
                 </AppText>
                 <AppText variant="micro" color="textMuted" numberOfLines={2}>
-                  {[protocol, new Date(b.performed_at).toLocaleDateString(i18n.resolvedLanguage)].filter(Boolean).join(' · ')}
+                  {[protocol, new Date(b.performed_at).toLocaleDateString(i18n.resolvedLanguage)]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </AppText>
               </PressableScale>
             );
@@ -223,7 +312,9 @@ export function AchievementsList({ p, limit }: { p: Progression; limit?: number 
         return (
           <Animated.View
             key={a.code}
-            entering={FadeInDown.delay(Math.min(i, 10) * 40).duration(300).reduceMotion(ReduceMotion.System)}
+            entering={FadeInDown.delay(Math.min(i, 10) * 40)
+              .duration(300)
+              .reduceMotion(ReduceMotion.System)}
             style={{ flexBasis: '47%', flexGrow: 1 }}
           >
             <View

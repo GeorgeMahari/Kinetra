@@ -90,6 +90,14 @@ const hybridEn = {
     count: 'Achievements unlocked: {{earned}} of {{total}}',
     caption: 'Every badge comes from what you do: tests, retests, complete days, a trail finished.',
   },
+  progressView: {
+    levelLabel: 'LEVEL',
+    trends: 'Trends',
+    trendsCaption: 'Each test over time. Drag across a chart to read every point.',
+    measurements: 'MEASUREMENTS',
+    span: 'PERIOD',
+    retest: 'Repeat this test',
+  },
   body: {
     title: 'Body map',
     intro: 'Which body areas each test uses, coloured with the health zone of the dimension you pick.',

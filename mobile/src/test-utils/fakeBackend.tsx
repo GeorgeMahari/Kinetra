@@ -4,6 +4,7 @@
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import type { Me } from '@/api/auth';
@@ -341,13 +342,15 @@ export function providers(
   };
   return function Providers({ children }: { children: ReactNode }) {
     return (
-      <SafeAreaProvider initialMetrics={METRICS}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider scheme="dark">
-            <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider initialMetrics={METRICS}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider scheme="dark">
+              <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     );
   };
 }
