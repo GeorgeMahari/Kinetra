@@ -1,10 +1,15 @@
 import { Pressable, View } from 'react-native';
+import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { useTheme } from '@/theme/ThemeProvider';
+import { iconSize } from '@/theme/tokens';
 
 import { AppText } from './AppText';
+import { Icon } from './Icon';
+import { haptic } from './motion';
 
+/** A square checkbox: the mark pops in when ticked (static under Reduce Motion). */
 export function Checkbox({
   checked,
   onChange,
@@ -26,16 +31,27 @@ export function Checkbox({
         accessibilityRole="checkbox"
         accessibilityState={{ checked }}
         accessibilityLabel={label}
-        onPress={() => onChange(!checked)}
-        style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}
+        onPress={() => {
+          haptic('select');
+          onChange(!checked);
+        }}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          gap: spacing.md,
+          alignItems: 'flex-start',
+          padding: spacing.md,
+          borderRadius: radius.md,
+          borderWidth: 1,
+          borderColor: error ? colors.danger : checked ? colors.brand : colors.hairline,
+          backgroundColor: checked ? colors.brandSoft : pressed ? colors.surfaceSunken : colors.surface,
+        })}
       >
         <View
           style={{
-            width: 24,
-            height: 24,
-            marginTop: 1,
+            width: 26,
+            height: 26,
             borderRadius: radius.sm - 2,
-            borderWidth: 1.5,
+            borderWidth: 2,
             borderColor: error ? colors.danger : checked ? colors.brand : colors.border,
             backgroundColor: checked ? colors.brand : colors.surface,
             alignItems: 'center',
@@ -43,9 +59,11 @@ export function Checkbox({
           }}
         >
           {checked ? (
-            <Svg width={14} height={14} viewBox="0 0 24 24">
-              <Path d="M4 12.5l5 5L20 6.5" stroke={colors.onBrand} strokeWidth={3} fill="none" />
-            </Svg>
+            <Animated.View entering={ZoomIn.springify().damping(12).reduceMotion(ReduceMotion.System)}>
+              <Svg width={16} height={16} viewBox="0 0 24 24">
+                <Path d="M4 12.5l5 5L20 6.5" stroke={colors.onBrand} strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </Svg>
+            </Animated.View>
           ) : null}
         </View>
         <AppText variant="caption" style={{ flex: 1 }}>
@@ -53,9 +71,12 @@ export function Checkbox({
         </AppText>
       </Pressable>
       {error ? (
-        <AppText variant="caption" color="danger">
-          {error}
-        </AppText>
+        <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start' }}>
+          <Icon name="alert" size={iconSize.sm} color={colors.danger} />
+          <AppText variant="caption" color="danger" style={{ flex: 1 }}>
+            {error}
+          </AppText>
+        </View>
       ) : null}
     </View>
   );

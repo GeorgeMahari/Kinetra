@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { authApi } from '@/api/auth';
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AuthHeader } from '@/components/auth/AuthHeader';
 import { Button } from '@/components/Button';
-import { LogoMark } from '@/components/Logo';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
@@ -20,7 +20,7 @@ import { useTheme } from '@/theme/ThemeProvider';
  */
 export default function ForgotPassword() {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const [step, setStep] = useState<'email' | 'reset' | 'done'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -65,11 +65,11 @@ export default function ForgotPassword() {
   return (
     <Screen>
       <View style={{ gap: spacing.xl }}>
-        <LogoMark size={48} />
-        <View style={{ gap: spacing.sm }}>
-          <AppText variant="title">{t('auth.forgotTitle')}</AppText>
-          {step === 'email' ? <AppText color="textMuted">{t('auth.forgotSubtitle')}</AppText> : null}
-        </View>
+        <AuthHeader
+          title={t('auth.forgotTitle')}
+          subtitle={step === 'email' ? t('auth.forgotSubtitle') : undefined}
+          aside={<Pictogram name="wind_down" size={52} variant="bare" color={colors.onShell} />}
+        />
         {formError ? <Notice tone="error" message={formError} testID="forgot-error" /> : null}
 
         {step === 'email' ? (
@@ -99,6 +99,7 @@ export default function ForgotPassword() {
               autoComplete="one-time-code"
               textContentType="oneTimeCode"
               maxLength={6}
+              style={{ fontSize: 26, letterSpacing: 10, textAlign: 'center', fontVariant: ['tabular-nums'] }}
               error={errors.code}
             />
             <TextField

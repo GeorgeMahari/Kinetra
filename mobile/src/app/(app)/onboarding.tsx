@@ -1,6 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import type { FollowUpQuestion, OnboardingDraft, OnboardingSummary } from '@/api/onboarding';
@@ -9,6 +10,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import {
@@ -30,6 +32,7 @@ import {
   SportsStep,
 } from '@/features/onboarding/Steps';
 import { PriorityList, ReadinessCard } from '@/features/onboarding/SummaryViews';
+import { TrailRail } from '@/features/onboarding/TrailRail';
 import {
   useInvalidateOnboarding,
   useOnboardingApi,
@@ -41,7 +44,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function Onboarding() {
   const { t } = useTranslation();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing, radius, motion } = useTheme();
   const { api } = useOnboardingApi();
   const { user } = useAuth();
   const questions = readinessQuestions(user?.profile.sex_for_norms);
@@ -157,8 +160,13 @@ export default function Onboarding() {
       case 'summary':
         return summary ? (
           <View style={{ gap: spacing.xl }}>
-            <AppText variant="title">{t('onboarding.summaryTitle')}</AppText>
-            <AppText color="textMuted">{t('onboarding.summaryBody')}</AppText>
+            <View style={{ backgroundColor: colors.shell, borderRadius: radius.xl, padding: spacing.lg, gap: spacing.sm }}>
+              <Pictogram name="single_leg_stance" size={52} variant="bare" color={colors.onShell} />
+              <AppText variant="title" color="onShell">
+                {t('onboarding.summaryTitle')}
+              </AppText>
+              <AppText color="onShellMuted">{t('onboarding.summaryBody')}</AppText>
+            </View>
             {summary.readiness ? <ReadinessCard readiness={summary.readiness} /> : null}
             <AppText variant="heading">{t('onboarding.priorityTitle')}</AppText>
             <PriorityList priorities={summary.priorities} />
@@ -205,17 +213,12 @@ export default function Onboarding() {
       <Stack.Screen options={{ title: counted ? t('onboarding.stepOf', { current: step, total: COUNTED_STEPS }) : '' }} />
       <Screen header footer={footer}>
         <View style={{ gap: spacing.xl }}>
-          {counted ? (
-            <View
-              accessibilityRole="progressbar"
-              accessibilityValue={{ min: 0, max: COUNTED_STEPS, now: step }}
-              style={{ height: 4, borderRadius: radius.pill, backgroundColor: colors.border, overflow: 'hidden' }}
-            >
-              <View style={{ width: `${(step / COUNTED_STEPS) * 100}%`, height: '100%', backgroundColor: colors.brand }} />
-            </View>
-          ) : null}
+          {counted ? <TrailRail current={step} total={COUNTED_STEPS} /> : null}
           {error ? <Notice tone="error" message={error} testID="onboarding-error" /> : null}
-          {body}
+          {/* Each step arrives with a short rise (static under Reduce Motion). */}
+          <Animated.View key={name} entering={FadeInDown.duration(motion.duration.slow).reduceMotion(ReduceMotion.System)}>
+            {body}
+          </Animated.View>
         </View>
       </Screen>
     </>

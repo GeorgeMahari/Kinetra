@@ -8,13 +8,14 @@ import { useAuth } from '@/auth/AuthProvider';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function VerifyEmail() {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const { user, request, refreshUser } = useAuth();
   const [code, setCode] = useState('');
   const [msg, setMsg] = useState<{ tone: 'error' | 'success' | 'info'; message: string } | null>(null);
@@ -37,7 +38,21 @@ export default function VerifyEmail() {
   return (
     <Screen header>
       <View style={{ gap: spacing.xl }}>
-        <AppText color="textMuted">{t('auth.verifyBody', { email: user.email })}</AppText>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: spacing.md,
+            alignItems: 'center',
+            padding: spacing.lg,
+            borderRadius: radius.lg,
+            backgroundColor: colors.shell,
+          }}
+        >
+          <Pictogram name="resting_hr" size={48} variant="bare" color={colors.onShell} />
+          <AppText color="onShell" style={{ flex: 1 }}>
+            {t('auth.verifyBody', { email: user.email })}
+          </AppText>
+        </View>
         {msg ? <Notice tone={msg.tone} message={msg.message} testID="verify-msg" /> : null}
         <TextField
           testID="verify-code"
@@ -49,6 +64,7 @@ export default function VerifyEmail() {
           autoComplete="one-time-code"
           textContentType="oneTimeCode"
           maxLength={6}
+          style={{ fontSize: 26, letterSpacing: 10, textAlign: 'center', fontVariant: ['tabular-nums'] }}
         />
         <Button
           testID="verify-submit"

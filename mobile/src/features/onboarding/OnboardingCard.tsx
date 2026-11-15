@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { ErrorState, Skeleton } from '@/components/States';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -20,7 +21,7 @@ export function resetOnboardingAutoOpen() {
 
 export function OnboardingCard({ autoOpen = true }: { autoOpen?: boolean }) {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const status = useOnboardingStatus();
   const completed = status.data?.status === 'completed';
   const summary = useOnboardingSummary(completed);
@@ -51,17 +52,23 @@ export function OnboardingCard({ autoOpen = true }: { autoOpen?: boolean }) {
   if (!completed) {
     const started = status.data.status === 'in_progress';
     return (
-      <Card>
-        <AppText variant="heading">{t(started ? 'onboarding.cardTitleContinue' : 'onboarding.cardTitleStart')}</AppText>
-        <AppText variant="caption" color="textMuted">
+      <View style={{ backgroundColor: colors.shell, borderRadius: radius.xl, padding: spacing.lg, gap: spacing.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <Pictogram name={started ? 'brisk_walk' : 'single_leg_stance'} size={52} variant="bare" color={colors.onShell} />
+          <AppText variant="heading" color="onShell" style={{ flex: 1 }}>
+            {t(started ? 'onboarding.cardTitleContinue' : 'onboarding.cardTitleStart')}
+          </AppText>
+        </View>
+        <AppText variant="caption" color="onShellMuted">
           {t(started ? 'onboarding.cardBodyContinue' : 'onboarding.cardBodyStart')}
         </AppText>
         <Button
           testID="onboarding-open"
+          variant="onShell"
           label={t(started ? 'onboarding.cardContinue' : 'onboarding.cardStart')}
           onPress={() => router.push('/onboarding')}
         />
-      </Card>
+      </View>
     );
   }
 

@@ -3,28 +3,30 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AuthHeader } from '@/components/auth/AuthHeader';
 import { Button } from '@/components/Button';
-import { LogoMark } from '@/components/Logo';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { SignUpForm } from '@/features/auth/SignUpForm';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function SignUp() {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const { signUp } = useAuth();
 
   return (
     <Screen>
       <View style={{ gap: spacing.xl }}>
-        <LogoMark size={48} />
-        <View style={{ gap: spacing.sm }}>
-          <AppText variant="title">{t('auth.signUpTitle')}</AppText>
-          <AppText color="textMuted">{t('auth.signUpSubtitle')}</AppText>
-        </View>
+        <AuthHeader
+          title={t('auth.signUpTitle')}
+          subtitle={t('auth.signUpSubtitle')}
+          aside={<Pictogram name="cooper_12min" size={52} variant="bare" color={colors.onShell} />}
+        />
         <SignUpForm onSubmit={signUp} />
-        <Button variant="ghost" label={t('auth.haveAccount')} onPress={() => router.replace('/sign-in')} />
+        <View style={{ paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.hairline }}>
+          <Button variant="ghost" label={t('auth.haveAccount')} onPress={() => router.replace('/sign-in')} />
+        </View>
       </View>
     </Screen>
   );

@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { errorMessage } from '@/api/errorMessage';
 import { useAuth } from '@/auth/AuthProvider';
 import { AppText } from '@/components/AppText';
+import { AuthHeader } from '@/components/auth/AuthHeader';
+import { Icon } from '@/components/Icon';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Notice } from '@/components/Notice';
@@ -18,6 +20,7 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { TextField } from '@/components/TextField';
 import { useTheme } from '@/theme/ThemeProvider';
+import { iconSize } from '@/theme/tokens';
 
 export interface ConsentStatus {
   status: 'not_required' | 'pending' | 'granted';
@@ -30,7 +33,7 @@ type Message = { tone: 'error' | 'success' | 'info'; message: string } | null;
 
 export default function ParentalConsent() {
   const { t, i18n } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const { request, user, refreshUser, signOut, deleteAccount } = useAuth();
   const qc = useQueryClient();
   const key = ['parental-consent', user?.id];
@@ -76,18 +79,40 @@ export default function ParentalConsent() {
   return (
     <Screen>
       <View style={{ gap: spacing.xl }}>
-        <Card>
-          <AppText variant="title" testID="consent-title">
-            {t('parentalConsent.title')}
-          </AppText>
-          <AppText testID="consent-body">
+        <AuthHeader
+          title={t('parentalConsent.title')}
+          titleTestID="consent-title"
+          aside={
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                paddingVertical: 4,
+                paddingHorizontal: spacing.sm,
+                borderRadius: radius.pill,
+                borderWidth: 1,
+                borderColor: colors.onShellMuted,
+              }}
+            >
+              <Icon name="shield" size={iconSize.sm} color={colors.onShell} />
+              <AppText variant="micro" color="onShell">
+                {t('redesignAuth.waitingParent')}
+              </AppText>
+            </View>
+          }
+        >
+          <AppText color="onShell" testID="consent-body">
             {t('parentalConsent.body', { email: c.parent_email_masked ?? '—' })}
           </AppText>
           {c.expires_at ? (
-            <AppText variant="caption" color="textMuted" testID="consent-deadline">
+            <AppText variant="caption" color="onShellMuted" testID="consent-deadline">
               {t('parentalConsent.deadline', { date: date(c.expires_at) })}
             </AppText>
           ) : null}
+        </AuthHeader>
+
+        <Card>
           <AppText variant="caption" color="textMuted">
             {t('parentalConsent.noEmail')}
           </AppText>
