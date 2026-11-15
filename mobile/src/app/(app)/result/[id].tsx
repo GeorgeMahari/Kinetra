@@ -56,7 +56,6 @@ export default function ResultScreen() {
       <Stack.Screen options={{ title: t(`assess.tests.${r.test_code}.name`) }} />
       <Screen header>
         <View style={{ gap: spacing.xl }}>
-          <AppText variant="title">{t('assess.resultTitle')}</AppText>
           <ResultView result={r} />
           {fresh === '1' ? <AfterSaveActions done={r.test_code} /> : null}
           {error ? <Notice tone="error" message={error} /> : null}

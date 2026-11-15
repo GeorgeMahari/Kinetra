@@ -1,6 +1,6 @@
 import '@/i18n';
 
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import type { TestResult } from '@/api/assessments';
 import i18n from '@/i18n';
@@ -47,6 +47,12 @@ describe('ResultView', () => {
     expect(screen.getByTestId('interpretation-vo2max_estimated')).toHaveTextContent(
       'Compared with men aged 30-39 in the FRIEND reference: between the 50th and 75th percentiles.',
     );
+    // The FRIEND band is drawn as its eight percentile bands, the person's one active.
+    expect(screen.getByTestId('bands-vo2max_estimated')).toHaveProp('accessibilityLabel', expect.stringContaining('p50–75: step 5 of 8'));
+    expect(screen.getByTestId('result-headline')).toHaveTextContent('44.6');
+    // Sources open on demand.
+    expect(screen.queryByText('Kaminsky LA et al. 2015')).toBeNull();
+    await fireEvent.press(screen.getByTestId('result-sources-toggle'));
     expect(screen.getByText('Kaminsky LA et al. 2015')).toBeTruthy();
     expect(screen.queryByTestId('no-comparison')).toBeNull();
   });

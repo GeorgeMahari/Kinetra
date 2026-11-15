@@ -1,26 +1,78 @@
+/**
+ * A test, as a trail card: hero with the trail-sign pictogram, purpose and intensity; equipment;
+ * the protocol as a trail of numbered waypoints; the safety note; your trend on the latest protocol
+ * (real results only); history; limits on demand. The action to record stays pinned at the bottom.
+ */
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type TestCode } from '@/api/assessments';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { LineChart } from '@/components/charts/LineChart';
+import { IntensityMeter } from '@/components/data/IntensityMeter';
 import { Icon } from '@/components/Icon';
 import { Notice } from '@/components/Notice';
+import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { FORMS } from '@/features/assessments/forms';
-import { formatValue, ProvenanceBadge } from '@/features/assessments/ResultView';
+import { formatNumber, formatValue, ProvenanceBadge, unitLabel } from '@/features/assessments/ResultView';
 import { useResults, useTests } from '@/features/assessments/useAssessments';
 import { useTheme } from '@/theme/ThemeProvider';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+
+function Section({ title, children, testID }: { title: string; children: ReactNode; testID?: string }) {
   const { spacing } = useTheme();
   return (
-    <View style={{ gap: spacing.sm }}>
+    <View style={{ gap: spacing.sm }} testID={testID}>
       <AppText variant="heading">{title}</AppText>
       {children}
+    </View>
+  );
+}
+
+/** The protocol as waypoints on a dashed trail line. */
+function StepTrail({ steps }: { steps: string[] }) {
+  const { t } = useTranslation();
+  const { colors, spacing } = useTheme();
+  return (
+    <View>
+      {steps.map((s, i) => (
+        <Animated.View
+          key={i}
+          entering={FadeInDown.delay(80 + i * 70).duration(300).reduceMotion(ReduceMotion.System)}
+          style={{ flexDirection: 'row', gap: spacing.md }}
+          accessible
+          accessibilityLabel={`${t('assessView.stepOf', { n: i + 1, total: steps.length })}. ${s}`}
+        >
+          <View style={{ alignItems: 'center', width: 30 }}>
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                transform: [{ rotate: '45deg' }],
+                backgroundColor: colors.shell,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 2,
+              }}
+            >
+              <AppText variant="label" color="onShell" style={{ transform: [{ rotate: '-45deg' }] }}>
+                {i + 1}
+              </AppText>
+            </View>
+            {i < steps.length - 1 ? (
+              <View style={{ flex: 1, width: 0, borderLeftWidth: 2, borderStyle: 'dashed', borderColor: colors.border, marginVertical: 4 }} />
+            ) : null}
+          </View>
+          <AppText style={{ flex: 1, paddingBottom: spacing.lg, paddingTop: 4 }}>{s}</AppText>
+        </Animated.View>
+      ))}
     </View>
   );
 }
@@ -28,10 +80,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function TestDetail() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const { t, i18n } = useTranslation();
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const tests = useTests();
   const testCode = code as TestCode;
   const results = useResults(testCode);
+  const [limitsOpen, setLimitsOpen] = useState(false);
+  const locale = i18n.resolvedLanguage;
 
   if (tests.isPending) return <LoadingState />;
   if (tests.isError) return <ErrorState error={tests.error} onRetry={() => void tests.refetch()} />;
@@ -39,6 +93,17 @@ export default function TestDetail() {
   if (!test || !(testCode in FORMS)) return <ErrorState error={new Error('unknown test')} />;
 
   const steps = t(`assess.tests.${testCode}.steps`, { returnObjects: true }) as unknown as string[];
+
+  // Trend: completed results of the most recent protocol, with a numeric headline value.
+  const rows = results.data ?? [];
+  const protocol = rows[0]?.protocol_key;
+  const trend = rows
+    .filter((r) => r.status === 'completed' && r.protocol_key === protocol)
+    .map((r) => ({ r, h: headlineIndicator(r) }))
+    .filter((x): x is { r: (typeof rows)[number]; h: NonNullable<ReturnType<typeof headlineIndicator>> } => x.h?.value != null)
+    .slice(0, 12)
+    .reverse();
+  const unit = trend[0] ? trend[0].h.unit : '';
 
   return (
     <>
@@ -58,37 +123,68 @@ export default function TestDetail() {
         }
       >
         <View style={{ gap: spacing.xl }}>
-          <AppText variant="caption" color="textMuted">
-            {t(`assess.intensity.${test.intensity}`)}
-          </AppText>
-          <Section title={t('assess.sections.purpose')}>
-            <AppText>{t(`assess.tests.${testCode}.purpose`)}</AppText>
-          </Section>
-          <Section title={t('assess.sections.equipment')}>
-            {test.equipment.map((e) => (
-              <AppText key={e}>• {t(`assess.equipment.${e}` as 'assess.equipment.timer')}</AppText>
-            ))}
-          </Section>
-          <Section title={t('assess.sections.howTo')}>
-            {steps.map((s, i) => (
-              <View key={i} style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <AppText variant="label" color="brandText" style={{ width: 20 }}>
-                  {i + 1}
-                </AppText>
-                <AppText style={{ flex: 1 }}>{s}</AppText>
+          <Animated.View
+            entering={FadeInDown.duration(360).reduceMotion(ReduceMotion.System)}
+            style={{ backgroundColor: colors.shell, borderRadius: radius.xl, padding: spacing.lg, gap: spacing.md }}
+            testID="test-hero"
+          >
+            <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+              <View style={{ borderRadius: radius.md, borderWidth: 1, borderColor: colors.onShellMuted }}>
+                <Pictogram name={testCode} size={72} />
               </View>
-            ))}
-          </Section>
-          <Card style={{ borderColor: colors.warning }}>
-            <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-              <Icon name="alert" color={colors.warning} />
-              <AppText variant="heading">{t('assess.sections.safety')}</AppText>
+              <View style={{ flex: 1, gap: spacing.xs }}>
+                <AppText variant="title" color="onShell" numberOfLines={2}>
+                  {t(`assess.tests.${testCode}.name`)}
+                </AppText>
+                <IntensityMeter intensity={test.intensity} onShell />
+              </View>
             </View>
-            <AppText testID="safety-text">{t(`assess.tests.${testCode}.safety`)}</AppText>
-          </Card>
-          <Section title={t('assess.sections.limitations')}>
-            <AppText color="textMuted">{t(`assess.tests.${testCode}.limitations`)}</AppText>
+            <AppText color="onShellMuted">{t(`assess.tests.${testCode}.purpose`)}</AppText>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+              {test.equipment.map((e) => (
+                <View key={e} style={{ paddingVertical: 4, paddingHorizontal: spacing.sm, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.14)' }}>
+                  <AppText variant="caption" color="onShell">
+                    {t(`assess.equipment.${e}` as 'assess.equipment.timer')}
+                  </AppText>
+                </View>
+              ))}
+            </View>
+          </Animated.View>
+
+          <Section title={t('assess.sections.howTo')}>
+            <StepTrail steps={steps} />
           </Section>
+
+          <View
+            style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg, borderRadius: radius.lg, backgroundColor: colors.zoneAttentionSoft }}
+          >
+            <Icon name="alert" color={colors.zoneAttention} />
+            <View style={{ flex: 1, gap: spacing.xs }}>
+              <AppText variant="label">{t('assess.sections.safety')}</AppText>
+              <AppText variant="caption" testID="safety-text">
+                {t(`assess.tests.${testCode}.safety`)}
+              </AppText>
+            </View>
+          </View>
+
+          {trend.length >= 2 ? (
+            <Section title={t('assessView.trend')} testID="test-trend">
+              <AppText variant="caption" color="textMuted">
+                {t('assessView.trendCaption')}
+                {unit ? ` · ${unitLabel(unit)}` : ''}
+              </AppText>
+              <View style={{ padding: spacing.md, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}>
+                <LineChart
+                  points={trend.map(({ r, h }) => ({ id: r.id, date: new Date(r.performed_at), value: h.value as number }))}
+                  format={(v) => `${formatNumber(v, locale, unit)} ${unitLabel(unit)}`.trim()}
+                  formatTick={(v) => formatNumber(v, locale, unit)}
+                  formatDate={(d) => d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                  accessibilityLabel={t('assessView.trend')}
+                />
+              </View>
+            </Section>
+          ) : null}
+
           <Section title={t('assess.sections.history')}>
             {results.isPending ? (
               <LoadingState />
@@ -97,31 +193,63 @@ export default function TestDetail() {
             ) : results.data.length === 0 ? (
               <AppText color="textMuted">{t('assess.noHistory')}</AppText>
             ) : (
-              results.data.map((r) => {
-                const h = headlineIndicator(r);
-                return (
-                  <Pressable
-                    key={r.id}
-                    testID={`history-${r.id}`}
-                    accessibilityRole="button"
-                    onPress={() => router.push({ pathname: '/result/[id]', params: { id: r.id } })}
-                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.md }}
-                  >
-                    <View style={{ gap: 2 }}>
-                      <AppText variant="caption" color="textMuted">
-                        {new Date(r.performed_at).toLocaleDateString(i18n.resolvedLanguage)}
-                        {r.status === 'stopped_early' ? ` · ${t('assess.incomplete')}` : ''}
-                      </AppText>
-                      {h ? <ProvenanceBadge provenance={h.provenance} /> : null}
+              <View style={{ borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }}>
+                {results.data.slice(0, 20).map((r, i) => {
+                  const h = headlineIndicator(r);
+                  return (
+                    <View key={r.id}>
+                      {i > 0 ? <View style={{ height: 1, backgroundColor: colors.hairline, marginLeft: spacing.lg }} /> : null}
+                      <Pressable
+                        testID={`history-${r.id}`}
+                        accessibilityRole="button"
+                        onPress={() => router.push({ pathname: '/result/[id]', params: { id: r.id } })}
+                        style={({ pressed }) => ({
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: spacing.md,
+                          padding: spacing.md,
+                          paddingHorizontal: spacing.lg,
+                          backgroundColor: pressed ? colors.brandSoft : 'transparent',
+                        })}
+                      >
+                        <View style={{ gap: 4 }}>
+                          <AppText variant="caption" color="textMuted">
+                            {new Date(r.performed_at).toLocaleDateString(locale)}
+                            {r.status === 'stopped_early' ? ` · ${t('assess.incomplete')}` : ''}
+                          </AppText>
+                          {h ? <ProvenanceBadge provenance={h.provenance} /> : null}
+                        </View>
+                        <AppText variant="metricSm" color={h?.value != null ? 'text' : 'unknown'} style={{ fontSize: 22, lineHeight: 26 }}>
+                          {(h && formatValue(h, locale)) ?? '—'}
+                        </AppText>
+                      </Pressable>
                     </View>
-                    <AppText variant="heading" color={h?.value != null ? 'text' : 'unknown'}>
-                      {(h && formatValue(h, i18n.resolvedLanguage)) ?? '—'}
-                    </AppText>
-                  </Pressable>
-                );
-              })
+                  );
+                })}
+              </View>
             )}
           </Section>
+
+          <View style={{ gap: spacing.sm }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: limitsOpen }}
+              onPress={() => setLimitsOpen((o) => !o)}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}
+              testID="test-limits-toggle"
+            >
+              <AppText variant="label">{t('assessView.moreAbout')}</AppText>
+              <View style={{ transform: [{ rotate: limitsOpen ? '90deg' : '0deg' }] }}>
+                <Icon name="chevronRight" size={18} color={colors.brandText} />
+              </View>
+            </Pressable>
+            {limitsOpen ? (
+              <Animated.View entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}>
+                <AppText color="textMuted">{t(`assess.tests.${testCode}.limitations`)}</AppText>
+              </Animated.View>
+            ) : null}
+          </View>
         </View>
       </Screen>
     </>
