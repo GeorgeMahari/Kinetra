@@ -78,6 +78,14 @@ const hybridEn = {
     trendCaption: 'Latest results, same protocol',
     moreAbout: 'Limits and accuracy',
   },
+  todayView: {
+    planTitle: "Today's step",
+    startTitle: 'Start an 8-week trail',
+    allDone: 'Day complete. Well done!',
+    openPlan: 'Open the plan',
+    moreRecs: '{{count}} more recommendations',
+    fewerRecs: 'Show fewer',
+  },
   body: {
     title: 'Body map',
     intro: 'Which body areas each test uses, coloured with the health zone of the dimension you pick.',

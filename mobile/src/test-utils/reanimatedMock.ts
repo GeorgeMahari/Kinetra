@@ -49,6 +49,7 @@ module.exports = {
   Easing: { bezier: () => id, out: id, in: id, inOut: id, cubic: id, linear: id },
   FadeIn: builder,
   FadeInDown: builder,
+  FadeInRight: builder,
   FadeInUp: builder,
   FadeOut: builder,
   FadeOutUp: builder,

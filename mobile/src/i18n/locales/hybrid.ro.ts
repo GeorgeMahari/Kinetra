@@ -78,6 +78,14 @@ const hybridRo = {
     trendCaption: 'Ultimele rezultate, cu același protocol',
     moreAbout: 'Limite și precizie',
   },
+  todayView: {
+    planTitle: 'Pasul de azi',
+    startTitle: 'Pornește un traseu de 8 săptămâni',
+    allDone: 'Ziua e completă. Bravo!',
+    openPlan: 'Deschide planul',
+    moreRecs: 'Încă {{count}} recomandări',
+    fewerRecs: 'Arată mai puține',
+  },
   body: {
     title: 'Harta corpului',
     intro: 'Ce zone ale corpului folosește fiecare test, colorate cu zona de sănătate a dimensiunii alese.',
