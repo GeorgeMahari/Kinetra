@@ -954,6 +954,24 @@ TESTS: dict[str, TestDefinition] = {
     )
 }
 
+# The general battery (engine-1/2). Generic rules (suggested tests, "assess this dimension", 8-week
+# retests) use only these, exactly as before engine-3; the sport and goal modules are offered by the
+# personalisation engine instead.
+CORE_TESTS = frozenset(
+    {
+        "resting_hr",
+        "hrr_step",
+        "cooper_12min",
+        "pushups",
+        "pulls",
+        "chair_stand_30s",
+        "plank",
+        "sit_reach",
+        "single_leg_stance",
+        "body_measurements",
+    }
+)
+
 INTENSITY_ORDER = {
     IntensityCeiling.non_exertional: 0,
     IntensityCeiling.submaximal: 1,

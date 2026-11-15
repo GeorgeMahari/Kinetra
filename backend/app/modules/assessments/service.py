@@ -13,7 +13,15 @@ from sqlalchemy.orm import Session
 from app.core.errors import AppError
 from app.modules.assessments.engine import ENGINE_VERSION
 from app.modules.assessments.engine import references as refs
-from app.modules.assessments.engine.catalog import TESTS, Context, Indicator, allowed, protocol_key, run
+from app.modules.assessments.engine.catalog import (
+    CORE_TESTS,
+    TESTS,
+    Context,
+    Indicator,
+    allowed,
+    protocol_key,
+    run,
+)
 from app.modules.assessments.models import Measurement, TestResult
 from app.modules.assessments.schemas import (
     ActivityOut,
@@ -256,7 +264,8 @@ def overview(db: Session, user: User) -> Overview:
         suggested = [
             t.code
             for t in tests
-            if allowed(t, ceiling)
+            if t.code in CORE_TESTS
+            and allowed(t, ceiling)
             and (t.code not in latest_by_test or now - latest_by_test[t.code].performed_at > RETEST_AFTER)
         ]
         state = (

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
 from app.modules.assessments import service as assessments_service
-from app.modules.assessments.engine.catalog import TESTS, allowed
+from app.modules.assessments.engine.catalog import CORE_TESTS, TESTS, allowed
 from app.modules.assessments.models import TestResult
 from app.modules.assessments.schemas import DimensionOverview, Overview
 from app.modules.insights import rules
@@ -141,7 +141,7 @@ def dashboard(db: Session, user: User) -> DashboardOut:
 
     allowed_by_dim: dict[str, list[str]] = {}
     for t in TESTS.values():
-        if allowed(t, ov.intensity_ceiling):
+        if t.code in CORE_TESTS and allowed(t, ov.intensity_ceiling):
             allowed_by_dim.setdefault(t.dimension.value, []).append(t.code)
     # Prefer the least strenuous allowed test first when suggesting a first assessment.
     order = {"non_exertional": 0, "submaximal": 1, "maximal": 2}
@@ -153,7 +153,9 @@ def dashboard(db: Session, user: User) -> DashboardOut:
         (
             c
             for c, r in latest_results.items()
-            if now - r.performed_at > rules.RETEST_AFTER and allowed(TESTS[c], ov.intensity_ceiling)
+            if c in CORE_TESTS
+            and now - r.performed_at > rules.RETEST_AFTER
+            and allowed(TESTS[c], ov.intensity_ceiling)
         ),
         key=lambda c: latest_results[c].performed_at,
     )

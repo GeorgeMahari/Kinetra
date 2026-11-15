@@ -60,7 +60,9 @@ class TestKnowledgeTables:
             assert all(1 <= w <= 3 for w in caps.values())
 
     def test_the_core_battery_is_the_ten_original_tests(self) -> None:
-        assert {c for c, t in TEST_PROFILES.items() if t.core} == ORIGINAL_TEN
+        from app.modules.assessments.engine.catalog import CORE_TESTS
+
+        assert {c for c, t in TEST_PROFILES.items() if t.core} == ORIGINAL_TEN == CORE_TESTS
 
     def test_evidence_matches_the_scoring_engine(self) -> None:
         # pulls has no validated reference in the engine; every other core test is rated by a norm.

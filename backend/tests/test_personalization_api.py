@@ -180,3 +180,31 @@ class TestBattery:
         b = tiers(api, h)
         assert b["cooper_12min"]["allowed"] is False
         assert b["cooper_12min"]["tier"] == "core"
+
+
+class TestGeneralRulesStayAsBefore:
+    """engine-3 modules must not leak into the generic rules (regression found while adding them)."""
+
+    def test_overview_suggests_only_the_core_battery(self, api: TestClient, user: dict[str, str]) -> None:
+        from app.modules.assessments.engine.catalog import CORE_TESTS
+
+        ov = api.get("/api/v1/assessments/overview", headers=user).json()
+        suggested = {c for d in ov["dimensions"] for c in d["suggested_tests"]}
+        assert suggested and suggested <= CORE_TESTS
+
+    def test_assess_recommendations_name_core_tests(self, api: TestClient, user: dict[str, str]) -> None:
+        from app.modules.assessments.engine.catalog import CORE_TESTS
+
+        recs = api.get("/api/v1/dashboard", headers=user).json()["recommendations"]
+        assess = [r for r in recs if r["kind"] == "assess"]
+        assert assess and all(r["test_code"] in CORE_TESTS for r in assess)
+
+    def test_a_module_result_is_still_recorded_and_listed(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        resp = post(api, user, "broad_jump", {"attempt_1_cm": 205, "attempt_2_cm": 212})
+        assert resp.status_code == 201, resp.text
+        body = resp.json()
+        assert body["engine_version"] == "engine-3"
+        headline = next(i for i in body["indicators"] if i["code"] == "broad_jump_cm")
+        assert headline["value"] == 212 and headline["interpretation"] is None
