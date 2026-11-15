@@ -11,6 +11,7 @@ for (const m of ['duration', 'delay', 'springify', 'damping', 'stiffness', 'redu
   builder[m] = () => builder;
 }
 const id = <T>(c: T): T => c;
+const motionState = { reduced: true };
 const Animated = { View: RN.View, Text: RN.Text, ScrollView: RN.ScrollView, createAnimatedComponent: id, call: () => {} };
 
 module.exports = {
@@ -22,7 +23,17 @@ module.exports = {
     return sv;
   },
   useAnimatedStyle: () => ({}),
-  useReducedMotion: () => true,
+  useReducedMotion: () => motionState.reduced,
+  /** Tests can turn motion on to exercise loops: `require('react-native-reanimated').__setReducedMotion(false)`. */
+  __setReducedMotion: (v: boolean) => {
+    motionState.reduced = v;
+  },
+  useAnimatedRef: () => {
+    const ref = () => {};
+    return ref;
+  },
+  useAnimatedReaction: () => {},
+  measure: () => null,
   withSpring: id,
   withTiming: id,
   withRepeat: id,
@@ -34,7 +45,7 @@ module.exports = {
   interpolate: (_v: number, _i: number[], out: number[]) => out[0],
   interpolateColor: (_v: number, _i: number[], out: string[]) => out[0],
   Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
-  cancelAnimation: () => {},
+  cancelAnimation: jest.fn(),
   Easing: { bezier: () => id, out: id, in: id, inOut: id, cubic: id, linear: id },
   FadeIn: builder,
   FadeInDown: builder,

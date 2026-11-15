@@ -3,15 +3,11 @@
  * half-filled one, a missed day a faint ring, today a pulsing ring, and the days ahead dashed.
  * Shape and fill carry the state, not colour alone; each day also says it to screen readers.
  */
-import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
 import { View } from 'react-native';
 import Animated, {
-  cancelAnimation,
   Easing,
   ReduceMotion,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -22,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import type { PlanDay } from '@/api/plan';
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
+import { useVisibleLoop } from '@/components/visibleLoop';
 import { weekdayNames } from '@/features/progress/calendar';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -106,19 +103,16 @@ function TodayMark({
   testID: string;
 }) {
   const { colors } = useTheme();
-  const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
-  useFocusEffect(
-    useCallback(() => {
-      if (reduced) return undefined;
-      pulse.set(withRepeat(withTiming(1, { duration: 1500, easing: Easing.out(Easing.cubic) }), -1));
-      return () => cancelAnimation(pulse);
-    }, [reduced, pulse]),
+  // Pulses only while Plan is focused and this day is on screen (see `useVisibleLoop`).
+  const { ref } = useVisibleLoop(pulse, () =>
+    withRepeat(withTiming(1, { duration: 1500, easing: Easing.out(Easing.cubic) }), -1),
   );
   const ring = useAnimatedStyle(() => ({ opacity: 0.6 * (1 - pulse.value), transform: [{ scale: 1 + 0.45 * pulse.value }] }));
   return (
     <View {...rest} style={{ ...base, borderWidth: 2.5, borderColor: colors.brandText }}>
       <Animated.View
+        ref={ref}
         pointerEvents="none"
         style={[{ position: 'absolute', width: SIZE, height: SIZE, borderRadius: SIZE / 2, borderWidth: 2, borderColor: colors.brandText }, ring]}
       />

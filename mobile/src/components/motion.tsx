@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { Platform, Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
+  cancelAnimation,
   createAnimatedComponent,
   FadeInDown,
   interpolateColor,
@@ -138,13 +139,17 @@ export function FadeInItem({ index = 0, children, style }: { index?: number; chi
   );
 }
 
-/** A soft breathing opacity for placeholders while content loads. Static under Reduce Motion. */
+/**
+ * A soft breathing opacity for placeholders while content loads. Static under Reduce Motion.
+ * The loop is cancelled when the placeholder unmounts (content arrived), so it never outlives it.
+ */
 export function useShimmer() {
   const reduced = useReducedMotion();
   const v = useSharedValue(0.55);
   useEffect(() => {
-    if (reduced) return;
+    if (reduced) return undefined;
     v.set(withRepeat(withSequence(withTiming(1, { duration: 700 }), withTiming(0.55, { duration: 700 })), -1));
+    return () => cancelAnimation(v);
   }, [reduced, v]);
   return useAnimatedStyle(() => ({ opacity: v.value }));
 }

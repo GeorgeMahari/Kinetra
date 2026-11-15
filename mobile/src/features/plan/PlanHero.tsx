@@ -6,11 +6,9 @@
  * Arrival: the walked part draws itself, the streak flame flickers gently, the level bar fills.
  * All movement stops under Reduce Motion; the states stay.
  */
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
-  cancelAnimation,
   createAnimatedComponent,
   Easing,
   ReduceMotion,
@@ -31,6 +29,7 @@ import type { Plan } from '@/api/plan';
 import { AppText } from '@/components/AppText';
 import { Blaze } from '@/components/Blaze';
 import { Icon } from '@/components/Icon';
+import { useVisibleLoop } from '@/components/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/theme/ThemeProvider';
 import { blazeColors } from '@/theme/tokens';
@@ -176,18 +175,16 @@ export function PlanHero({
   );
 }
 
-/** Today's position: a solid marker with a slow ring around it, only while the screen is focused. */
+/**
+ * Today's position: a solid marker with a slow ring around it. The ring pulses only while Plan is
+ * focused and the trail is on screen (see `useVisibleLoop`).
+ */
 function Here({ x, y }: { x: number; y: number }) {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
-  useFocusEffect(
-    useCallback(() => {
-      if (reduced) return undefined;
-      pulse.set(0);
-      pulse.set(withRepeat(withTiming(1, { duration: 1700, easing: Easing.out(Easing.cubic) }), -1));
-      return () => cancelAnimation(pulse);
-    }, [reduced, pulse]),
+  const { ref } = useVisibleLoop(pulse, () =>
+    withRepeat(withTiming(1, { duration: 1700, easing: Easing.out(Easing.cubic) }), -1),
   );
   const ring = useAnimatedStyle(() => ({
     opacity: reduced ? 0.5 : 0.8 * (1 - pulse.value),
@@ -196,6 +193,7 @@ function Here({ x, y }: { x: number; y: number }) {
   return (
     <>
       <Animated.View
+        ref={ref}
         pointerEvents="none"
         style={[
           { position: 'absolute', left: x - 11, top: y - 11, width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.onShell },
@@ -216,12 +214,12 @@ function Streak({ streak, best }: { streak: number; best: number }) {
   const reduced = useReducedMotion();
   const flicker = useSharedValue(0);
   const pop = useSharedValue(1);
-  useFocusEffect(
-    useCallback(() => {
-      if (reduced || streak === 0) return undefined;
-      flicker.set(withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 1100 })), -1));
-      return () => cancelAnimation(flicker);
-    }, [reduced, streak, flicker]),
+  // Flickers only with a streak, while Plan is focused and the flame is on screen.
+  const { ref } = useVisibleLoop(
+    flicker,
+    () => withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 1100 })), -1),
+    0,
+    streak > 0,
   );
   useEffect(() => {
     if (reduced || streak === 0) return;
@@ -237,7 +235,7 @@ function Streak({ streak, best }: { streak: number; best: number }) {
       accessibilityLabel={t('plan.streakA11y', { count: streak, best })}
       testID="plan-streak"
     >
-      <Animated.View style={[{ opacity: streak ? 1 : 0.45 }, flame]}>
+      <Animated.View ref={ref} style={[{ opacity: streak ? 1 : 0.45 }, flame]}>
         <Icon name="flame" size={34} color={streak ? blazeColors.yellow : colors.onShellMuted} />
       </Animated.View>
       <View>

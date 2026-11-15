@@ -1,8 +1,6 @@
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
-  cancelAnimation,
   createAnimatedComponent,
   Easing,
   Extrapolation,
@@ -24,6 +22,7 @@ import type { DimensionCode } from '@/api/onboarding';
 import { AppText } from '@/components/AppText';
 import { Logo } from '@/components/Logo';
 import { useScreenScroll } from '@/components/Screen';
+import { useVisibleLoop } from '@/components/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -164,18 +163,16 @@ export function TrailHead({
   );
 }
 
-/** A slow ring that widens and fades around the next waypoint. Runs only while Today is focused. */
+/**
+ * A slow ring that widens and fades around the next waypoint. Runs only while Today is focused and
+ * the hero is on screen (see `useVisibleLoop`).
+ */
 function Beacon({ x, y }: { x: number; y: number }) {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
-  useFocusEffect(
-    useCallback(() => {
-      if (reduced) return undefined;
-      pulse.set(0);
-      pulse.set(withRepeat(withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) }), -1));
-      return () => cancelAnimation(pulse);
-    }, [reduced, pulse]),
+  const { ref } = useVisibleLoop(pulse, () =>
+    withRepeat(withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) }), -1),
   );
   const style = useAnimatedStyle(() => ({
     opacity: reduced ? 0.5 : 0.7 * (1 - pulse.value),
@@ -184,6 +181,7 @@ function Beacon({ x, y }: { x: number; y: number }) {
   const size = 22;
   return (
     <Animated.View
+      ref={ref}
       pointerEvents="none"
       style={[
         {
