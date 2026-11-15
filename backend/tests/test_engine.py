@@ -234,7 +234,21 @@ class TestEligibility:
             "sit_reach",
             "single_leg_stance",
             "body_measurements",
+            # engine-3 modules that involve no exertion
+            "ruler_drop",
+            "back_scratch",
+            "circumferences",
         }
+        # Maximal-effort modules are never offered below the maximal ceiling.
+        for code in (
+            "broad_jump",
+            "vertical_jump",
+            "agility_505",
+            "sprint_20m",
+            "single_leg_hop",
+            "swim_12min",
+        ):
+            assert code not in offered(IntensityCeiling.submaximal)
         # No screening yet: same as non-exertional.
         assert offered(None) == offered(IntensityCeiling.non_exertional)
 

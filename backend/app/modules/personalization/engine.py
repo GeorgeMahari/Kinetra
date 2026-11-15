@@ -181,12 +181,16 @@ def battery(
     last_done: Mapping[str, date],
     allowed: Callable[[str], bool],
     tests: Mapping[str, AssessmentSpec] = TEST_PROFILES,
+    sports: frozenset[str] = frozenset(),
 ) -> list[BatteryItem]:
-    """All tests, tiered and ordered: priority, core, additional, inactive; by relevance inside a tier."""
+    """All tests, tiered and ordered: priority, core, additional, inactive; by relevance inside a tier.
+    A test restricted to some sports (`only_for_sports`) has no relevance for anyone else."""
     by_cap = {cw.capacity: cw for cw in weights}
     scored = []
     for code, t in tests.items():
         rel, why = relevance(t, by_cap)
+        if t.only_for_sports and not (t.only_for_sports & sports):
+            rel, why = 0.0, ()
         scored.append((code, t, rel, why))
 
     # Priority: the most relevant allowed tests, core or not, that clear the activation bar.

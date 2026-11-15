@@ -36,6 +36,8 @@ class AssessmentSpec:
     evidence: Evidence
     retest_weeks: int
     core: bool = False  # the general battery everyone sees (today's tests)
+    # Only relevant to people who practise one of these sports (e.g. the swim test). Empty = anyone.
+    only_for_sports: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -73,28 +75,26 @@ GOAL_CAPACITIES: dict[str, dict[C, int]] = {
 # to performance, so only the user's own goal or priority can make it relevant.
 
 SPORT_REFERENCES: dict[str, str] = {
-    "acsm_resistance_2009": "American College of Sports Medicine. Position stand: Progression models in "
-    "resistance training for healthy adults. Med Sci Sports Exerc. 2009;41(3):687-708. "
-    "doi:10.1249/MSS.0b013e3181915670",
-    "kovacs_tennis_2007": "Kovacs MS. Tennis physiology: training the competitive athlete. Sports Med. "
-    "2007;37(3):189-198. doi:10.2165/00007256-200737030-00001",
-    "lidor_ziv_volleyball_2010": "Lidor R, Ziv G. Physical and physiological attributes of female volleyball "
-    "players: a review. J Strength Cond Res. 2010;24(7):1963-1973. doi:10.1519/JSC.0b013e3181ddf835",
-    "stolen_soccer_2005": "Stolen T, Chamari K, Castagna C, Wisloff U. Physiology of soccer: an update. "
-    "Sports Med. 2005;35(6):501-536. doi:10.2165/00007256-200535060-00004",
-    "ziv_lidor_basketball_2009": "Ziv G, Lidor R. Physical attributes, physiological characteristics, "
-    "on-court "
-    "performances and nutritional strategies of female and male basketball players. Sports Med. "
-    "2009;39(7):547-568. doi:10.2165/00007256-200939070-00003",
-    "faria_cycling_2005": "Faria EW, Parker DL, Faria IE. The science of cycling: factors affecting "
-    "performance - part 2. Sports Med. 2005;35(4):313-337. doi:10.2165/00007256-200535040-00003",
-    "joyner_coyle_running_2008": "Joyner MJ, Coyle EF. Endurance exercise performance: the physiology of "
-    "champions. J Physiol. 2008;586(1):35-44. doi:10.1113/jphysiol.2007.143834",
-    "pyne_sharp_swimming_2014": "Pyne DB, Sharp RL. Physical and energy requirements of competitive swimming "
-    "events. Int J Sport Nutr Exerc Metab. 2014;24(4):351-359. doi:10.1123/ijsnem.2014-0047 "
-    "(abstract names no capacity list: weak support)",
-    "chaabene_boxing_2015": "Chaabene H, et al. Amateur boxing: physical and physiological attributes. "
-    "Sports Med. 2015;45(3):337-352. doi:10.1007/s40279-014-0274-7",
+    # Authors, journal, year and DOI as read; the bracket describes the subject (not the article title).
+    "acsm_resistance_2009": "American College of Sports Medicine. Med Sci Sports Exerc. 2009. "
+    "doi:10.1249/mss.0b013e3181915670 [position stand, resistance training progression]",
+    "kovacs_tennis_2007": "Kovacs MS. Sports Med. 2007. doi:10.2165/00007256-200737030-00001 "
+    "[tennis physiology]",
+    "lidor_ziv_volleyball_2010": "Lidor R, Ziv G. J Strength Cond Res. 2010. "
+    "doi:10.1519/jsc.0b013e3181ddf835 "
+    "[physical attributes of volleyball players]",
+    "stolen_soccer_2005": "Stolen T, et al. Sports Med. 2005. doi:10.2165/00007256-200535060-00004 "
+    "[physiology of soccer]",
+    "ziv_lidor_basketball_2009": "Ziv G, Lidor R. Sports Med. 2009. doi:10.2165/00007256-200939070-00003 "
+    "[physical attributes of basketball players]",
+    "faria_cycling_2005": "Faria EW, et al. Sports Med. 2005. doi:10.2165/00007256-200535040-00003 "
+    "[science of cycling, part 2]",
+    "joyner_coyle_running_2008": "Joyner MJ, Coyle EF. J Physiol. 2008. doi:10.1113/jphysiol.2007.143834 "
+    "[endurance performance physiology]",
+    "pyne_sharp_swimming_2014": "Pyne DB, Sharp RL. Int J Sport Nutr Exerc Metab. 2014. "
+    "doi:10.1123/ijsnem.2014-0047 [demands of competitive swimming; abstract gives no capacity list: weak]",
+    "chaabene_boxing_2015": "Chaabene H, et al. Sports Med. 2015. doi:10.1007/s40279-014-0274-7 "
+    "[amateur boxing attributes]",
 }
 
 # Category defaults: design choices mirroring onboarding.rules.SPORT_PERFORMANCE_DIMENSIONS.
@@ -189,5 +189,29 @@ TEST_PROFILES: dict[str, AssessmentSpec] = {
     "single_leg_stance": AssessmentSpec({C.balance: Role.primary}, Evidence.validated_norms, 8, core=True),
     "body_measurements": AssessmentSpec(
         {C.body_composition: Role.primary}, Evidence.validated_norms, 8, core=True
+    ),
+    # --- engine-3 modules. None is rated against a norm: self-comparison, or a documented flag.
+    "broad_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6),
+    "vertical_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6),
+    "agility_505": AssessmentSpec(
+        {C.agility: Role.primary, C.speed: Role.secondary}, Evidence.self_comparison, 6
+    ),
+    "sprint_20m": AssessmentSpec(
+        {C.speed: Role.primary, C.power: Role.secondary}, Evidence.self_comparison, 6
+    ),
+    "ruler_drop": AssessmentSpec({C.reaction: Role.primary}, Evidence.self_comparison, 6),
+    "back_scratch": AssessmentSpec({C.mobility: Role.primary}, Evidence.self_comparison, 8),
+    "anterior_reach": AssessmentSpec({C.balance: Role.primary}, Evidence.documented_threshold, 8),
+    "single_leg_hop": AssessmentSpec(
+        {C.power: Role.primary, C.balance: Role.secondary}, Evidence.documented_threshold, 8
+    ),
+    "circumferences": AssessmentSpec(
+        {C.hypertrophy: Role.primary, C.body_composition: Role.secondary}, Evidence.self_comparison, 6
+    ),
+    "swim_12min": AssessmentSpec(
+        {C.aerobic_endurance: Role.primary},
+        Evidence.self_comparison,
+        8,
+        only_for_sports=frozenset({"swimming", "triathlon"}),
     ),
 }

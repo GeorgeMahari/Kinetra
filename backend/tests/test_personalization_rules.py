@@ -16,6 +16,18 @@ from app.modules.personalization.knowledge import (
 )
 
 TODAY = date(2026, 11, 16)
+ORIGINAL_TEN = {
+    "resting_hr",
+    "hrr_step",
+    "cooper_12min",
+    "pushups",
+    "pulls",
+    "chair_stand_30s",
+    "plank",
+    "sit_reach",
+    "single_leg_stance",
+    "body_measurements",
+}
 ALL_ALLOWED = lambda code: True  # noqa: E731
 
 
@@ -47,10 +59,8 @@ class TestKnowledgeTables:
         for caps in GOAL_CAPACITIES.values():
             assert all(1 <= w <= 3 for w in caps.values())
 
-    def test_the_core_battery_is_todays_ten_tests(self) -> None:
-        from app.modules.assessments.engine.catalog import TESTS
-
-        assert {c for c, t in TEST_PROFILES.items() if t.core} == set(TESTS)
+    def test_the_core_battery_is_the_ten_original_tests(self) -> None:
+        assert {c for c, t in TEST_PROFILES.items() if t.core} == ORIGINAL_TEN
 
     def test_evidence_matches_the_scoring_engine(self) -> None:
         # pulls has no validated reference in the engine; every other core test is rated by a norm.
@@ -121,7 +131,38 @@ class TestBattery:
 
     def test_empty_profile_is_exactly_todays_battery(self) -> None:
         b = self.tiers(e.Profile())
-        assert {c: i.tier for c, i in b.items()} == dict.fromkeys(TEST_PROFILES, e.Tier.core)
+        assert {c for c, i in b.items() if i.tier is e.Tier.core} == ORIGINAL_TEN
+        assert all(i.tier is e.Tier.inactive for c, i in b.items() if c not in ORIGINAL_TEN)
+
+    def test_a_sport_restricted_test_stays_inactive_for_other_sports(self) -> None:
+        cyclist = e.Profile(
+            sports=(e.SportEntry("cycling", 5, None, "endurance"),), goals=("improve_endurance",)
+        )
+        items = e.battery(e.capacity_weights(cyclist), TODAY, {}, ALL_ALLOWED, sports=frozenset({"cycling"}))
+        assert next(i for i in items if i.test_code == "swim_12min").tier is e.Tier.inactive
+        swimmer = e.Profile(
+            sports=(e.SportEntry("swimming", 5, None, "endurance"),), goals=("improve_endurance",)
+        )
+        items = e.battery(e.capacity_weights(swimmer), TODAY, {}, ALL_ALLOWED, sports=frozenset({"swimming"}))
+        assert next(i for i in items if i.test_code == "swim_12min").tier is not e.Tier.inactive
+
+    def test_hypertrophy_goal_activates_circumferences(self) -> None:
+        b = self.tiers(e.Profile(goals=("build_muscle",), goals_ranked=True))
+        assert b["circumferences"].tier is e.Tier.priority
+        assert b["circumferences"].evidence is Evidence.self_comparison
+
+    def test_volleyball_activates_jump_tests_but_not_reaction_time(self) -> None:
+        p = e.Profile(sports=(e.SportEntry("volleyball", 3, None, "team"),), goals=("sport_performance",))
+        b = self.tiers(p)
+        jumps = {b["vertical_jump"].tier, b["broad_jump"].tier}
+        assert e.Tier.priority in jumps and e.Tier.inactive not in jumps
+        assert b["ruler_drop"].tier is e.Tier.inactive
+
+    def test_tennis_activates_agility_and_speed(self) -> None:
+        p = e.Profile(sports=(e.SportEntry("tennis", 4, None, "racket"),), goals=("sport_performance",))
+        b = self.tiers(p)
+        assert b["agility_505"].tier is e.Tier.priority and b["sprint_20m"].tier is e.Tier.priority
+        assert {(r.source, r.code) for r in b["agility_505"].why} == {("sport", "tennis")}
 
     def test_goal_promotes_relevant_tests_with_reasons(self) -> None:
         b = self.tiers(e.Profile(goals=("build_muscle",), goals_ranked=True))

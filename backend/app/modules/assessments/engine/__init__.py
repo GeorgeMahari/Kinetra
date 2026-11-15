@@ -5,4 +5,5 @@ measured in, it returns indicators tagged with provenance and — only where a c
 covers the person — an interpretation. See docs/SCIENCE.md.
 """
 
-ENGINE_VERSION = "engine-2"
+# engine-3: ten sport and goal test modules (self-comparison or documented thresholds; no new norms).
+ENGINE_VERSION = "engine-3"

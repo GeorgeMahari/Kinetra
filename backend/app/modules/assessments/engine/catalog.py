@@ -4,6 +4,7 @@ Each test declares its dimension, intensity, input model and a pure `compute` fu
 Inputs are validated by Pydantic before `compute` runs; `compute` never guesses missing data.
 """
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -120,6 +121,96 @@ class SingleLegStanceIn(_In):
 class BodyIn(_In):
     weight_kg: Decimal = Field(ge=25, le=350, decimal_places=1)
     waist_cm: Decimal | None = Field(default=None, ge=40, le=250, decimal_places=1)
+
+
+# --- engine-3: sport and goal test modules. Ranges are plausibility limits, not targets.
+
+
+class BroadJumpIn(_In):
+    """Standing long jump: two jumps, both recorded; the best counts."""
+
+    attempt_1_cm: int = Field(ge=20, le=400)
+    attempt_2_cm: int | None = Field(default=None, ge=20, le=400)
+
+
+class VerticalJumpIn(_In):
+    """Jump-and-reach against a wall: standing reach, then the best of up to three jump reaches."""
+
+    standing_reach_cm: int = Field(ge=100, le=300)
+    jump_reach_cm: int = Field(ge=100, le=420)
+
+    @model_validator(mode="after")
+    def _plausible(self) -> "VerticalJumpIn":
+        if not 0 < self.jump_reach_cm - self.standing_reach_cm <= 120:
+            raise ValueError("jump reach must be above standing reach, by at most 120 cm")
+        return self
+
+
+class Agility505In(_In):
+    """505 change of direction, turning on each leg; times in seconds."""
+
+    left_s: Decimal = Field(ge=1, le=8, decimal_places=2)
+    right_s: Decimal = Field(ge=1, le=8, decimal_places=2)
+    start: Literal["flying", "standing"]
+    timing: Literal["video_app", "stopwatch"]
+
+
+class Sprint20In(_In):
+    """20 m sprint from a standing start, 0.5 m behind the line. Hand timing is not accepted."""
+
+    seconds: Decimal = Field(ge=2, le=8, decimal_places=2)
+    timing: Literal["video_app", "timing_gates"]
+
+
+class RulerDropIn(_In):
+    """Five recorded catches of a 60 cm ruler dropped by a helper; 61 = not caught."""
+
+    drops_cm: list[Decimal] = Field(min_length=5, max_length=5)
+
+    @model_validator(mode="after")
+    def _range(self) -> "RulerDropIn":
+        if any(d < 0 or d > 61 for d in self.drops_cm):
+            raise ValueError("each drop is between 0 and 61 cm (61 = not caught)")
+        return self
+
+
+class BackScratchIn(_In):
+    """Distance between the middle fingers, cm: positive = overlap, negative = gap. Named by the top hand."""
+
+    right_over_cm: Decimal = Field(ge=-50, le=30, decimal_places=1)
+    left_over_cm: Decimal = Field(ge=-50, le=30, decimal_places=1)
+
+
+class AnteriorReachIn(_In):
+    """Anterior reach on one leg along a tape line (Star Excursion style), best of 3 per stance leg."""
+
+    left_cm: Decimal = Field(ge=10, le=150, decimal_places=1)
+    right_cm: Decimal = Field(ge=10, le=150, decimal_places=1)
+    leg_length_cm: Decimal | None = Field(default=None, ge=50, le=130, decimal_places=1)
+
+
+class SingleLegHopIn(_In):
+    """Single-leg hop for distance, best per leg, landing on the same leg."""
+
+    left_cm: int = Field(ge=10, le=350)
+    right_cm: int = Field(ge=10, le=350)
+
+
+class CircumferencesIn(_In):
+    """Girths in cm at ISAK sites, each the median of 2-3 measurements. Arms required, the rest optional."""
+
+    arm_left_cm: Decimal = Field(ge=15, le=70, decimal_places=1)
+    arm_right_cm: Decimal = Field(ge=15, le=70, decimal_places=1)
+    thigh_left_cm: Decimal | None = Field(default=None, ge=30, le=100, decimal_places=1)
+    thigh_right_cm: Decimal | None = Field(default=None, ge=30, le=100, decimal_places=1)
+    calf_left_cm: Decimal | None = Field(default=None, ge=20, le=70, decimal_places=1)
+    calf_right_cm: Decimal | None = Field(default=None, ge=20, le=70, decimal_places=1)
+    chest_cm: Decimal | None = Field(default=None, ge=60, le=180, decimal_places=1)
+
+
+class Swim12In(_In):
+    distance_m: int = Field(ge=50, le=1500)
+    stroke: Literal["freestyle", "mixed"]
 
 
 # ------------------------------------------------------------------ calculations
@@ -385,6 +476,238 @@ def _body(d: BodyIn, ctx: Context, stopped: bool) -> list[Indicator]:
 # ------------------------------------------------------------------ catalogue
 
 
+# --- engine-3 calculations. Self-comparison results carry `no_validated_reference`; a documented
+# threshold adds a flag note (never an interpretation, so it can't move the profile map or a score).
+
+G = 9.81  # m/s^2
+
+
+def _broad_jump(d: BroadJumpIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    best = max(d.attempt_1_cm, d.attempt_2_cm or 0)
+    notes = ("no_validated_reference", "first_results_include_learning") + (
+        ("stopped_early",) if stopped else ()
+    )
+    return [
+        Indicator(
+            "broad_jump_cm",
+            best,
+            "cm",
+            Provenance.measured,
+            notes=notes,
+            reference_ids=(refs.MARIN_JIMENEZ_2024.id,),
+        )
+    ]
+
+
+def _vertical_jump(d: VerticalJumpIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    notes = ("no_validated_reference", "jump_and_reach_method") + (("stopped_early",) if stopped else ())
+    return [
+        Indicator(
+            "vertical_jump_cm",
+            d.jump_reach_cm - d.standing_reach_cm,
+            "cm",
+            Provenance.calculated,
+            notes=notes,
+            reference_ids=(refs.MARKOVIC_2004.id,),
+        )
+    ]
+
+
+def _agility_505(d: Agility505In, ctx: Context, stopped: bool) -> list[Indicator]:
+    left, right = float(d.left_s), float(d.right_s)
+    timing = ("hand_timing_low_precision",) if d.timing == "stopwatch" else ()
+    ref = (refs.BARRERA_505_2025.id,)
+    return [
+        Indicator("agility_505_left_s", left, "s", Provenance.measured),
+        Indicator("agility_505_right_s", right, "s", Provenance.measured),
+        Indicator(
+            "agility_505_difference_s",
+            round(abs(left - right), 2),
+            "s",
+            Provenance.calculated,
+            notes=("no_validated_reference",),
+        ),
+        Indicator(
+            "agility_505_best_s",
+            min(left, right),
+            "s",
+            Provenance.calculated,
+            notes=("no_validated_reference",) + timing + (("stopped_early",) if stopped else ()),
+            reference_ids=ref,
+        ),
+    ]
+
+
+def _sprint_20(d: Sprint20In, ctx: Context, stopped: bool) -> list[Indicator]:
+    return [
+        Indicator(
+            "sprint_20m_s",
+            float(d.seconds),
+            "s",
+            Provenance.measured,
+            notes=("no_validated_reference",) + (("stopped_early",) if stopped else ()),
+            reference_ids=(refs.HAUGEN_BUCHHEIT_2016.id,),
+        )
+    ]
+
+
+def _ruler_drop(d: RulerDropIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    caught = [float(x) for x in d.drops_cm if x < 61]
+    missed = 5 - len(caught)
+    ref = (refs.ECKNER_2011.id,)
+    out = [Indicator("ruler_drop_missed", missed, "count", Provenance.measured)]
+    if len(caught) < 3:
+        # Too few catches to summarise honestly: no reaction time is reported.
+        out.append(
+            Indicator(
+                "reaction_time_ms",
+                None,
+                "ms",
+                Provenance.calculated,
+                notes=("too_few_catches",),
+                reference_ids=ref,
+            )
+        )
+        return out
+    mean_cm = sum(caught) / len(caught)
+    out += [
+        Indicator("ruler_drop_mean_cm", round(mean_cm, 1), "cm", Provenance.calculated),
+        Indicator(
+            "reaction_time_ms",
+            round(math.sqrt(2 * mean_cm / 100 / G) * 1000),
+            "ms",
+            Provenance.calculated,
+            notes=("no_validated_reference", "physics_from_fall_distance"),
+            reference_ids=ref,
+        ),
+    ]
+    return out
+
+
+def _back_scratch(d: BackScratchIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    right, left = float(d.right_over_cm), float(d.left_over_cm)
+    return [
+        Indicator("back_scratch_right_cm", right, "cm", Provenance.measured),
+        Indicator("back_scratch_left_cm", left, "cm", Provenance.measured),
+        Indicator(
+            "back_scratch_difference_cm",
+            round(abs(right - left), 1),
+            "cm",
+            Provenance.calculated,
+            notes=("no_validated_reference",),
+        ),
+        Indicator(
+            "back_scratch_best_cm",
+            max(right, left),
+            "cm",
+            Provenance.calculated,
+            notes=("no_validated_reference",),
+            reference_ids=(refs.ALBRECHT_2021.id,),
+        ),
+    ]
+
+
+ANTERIOR_FLAG_CM = 4.0  # Plisky 2006; inconsistent across studies (Plisky 2021): a flag, not a risk
+
+
+def _anterior_reach(d: AnteriorReachIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    left, right = float(d.left_cm), float(d.right_cm)
+    diff = round(abs(left - right), 1)
+    flag = ("asymmetry_above_documented_4cm",) if diff > ANTERIOR_FLAG_CM else ()
+    out = [
+        Indicator("anterior_reach_left_cm", left, "cm", Provenance.measured),
+        Indicator("anterior_reach_right_cm", right, "cm", Provenance.measured),
+        Indicator(
+            "anterior_reach_difference_cm",
+            diff,
+            "cm",
+            Provenance.calculated,
+            notes=("documented_threshold_not_a_norm",) + flag,
+            reference_ids=(refs.PLISKY_2006.id,),
+        ),
+    ]
+    if d.leg_length_cm:
+        leg = float(d.leg_length_cm)
+        out.append(
+            Indicator(
+                "anterior_reach_best_pct_leg",
+                round(max(left, right) / leg * 100, 1),
+                "%",
+                Provenance.calculated,
+                notes=("no_validated_reference",),
+            )
+        )
+    return out
+
+
+HOP_LSI_FLAG = 90.0  # Munro & Herrington 2011; from small and clinical samples: a flag, not a norm
+
+
+def _single_leg_hop(d: SingleLegHopIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    lsi = round(min(d.left_cm, d.right_cm) / max(d.left_cm, d.right_cm) * 100, 1)
+    flag = ("lsi_below_documented_90",) if lsi < HOP_LSI_FLAG else ()
+    return [
+        Indicator("hop_left_cm", d.left_cm, "cm", Provenance.measured),
+        Indicator("hop_right_cm", d.right_cm, "cm", Provenance.measured),
+        Indicator(
+            "hop_symmetry_pct",
+            lsi,
+            "%",
+            Provenance.calculated,
+            notes=("documented_threshold_not_a_norm",) + flag + (("stopped_early",) if stopped else ()),
+            reference_ids=(refs.MUNRO_HERRINGTON_2011.id,),
+        ),
+    ]
+
+
+def _circumferences(d: CircumferencesIn, ctx: Context, stopped: bool) -> list[Indicator]:
+    ref = (refs.NACHER_2026.id,)
+    sites = [
+        ("arm_left_cm", d.arm_left_cm),
+        ("arm_right_cm", d.arm_right_cm),
+        ("thigh_left_cm", d.thigh_left_cm),
+        ("thigh_right_cm", d.thigh_right_cm),
+        ("calf_left_cm", d.calf_left_cm),
+        ("calf_right_cm", d.calf_right_cm),
+        ("chest_cm", d.chest_cm),
+    ]
+    out = [
+        Indicator(
+            f"girth_{code}",
+            float(v),
+            "cm",
+            Provenance.measured,
+            notes=("no_validated_reference",),
+            reference_ids=ref,
+        )
+        for code, v in sites
+        if v is not None
+    ]
+    out.append(
+        Indicator(
+            "girth_arm_difference_cm",
+            round(abs(float(d.arm_left_cm - d.arm_right_cm)), 1),
+            "cm",
+            Provenance.calculated,
+            notes=("no_validated_reference",),
+        )
+    )
+    return out
+
+
+def _swim_12(d: Swim12In, ctx: Context, stopped: bool) -> list[Indicator]:
+    return [
+        Indicator(
+            "swim_12min_m",
+            d.distance_m,
+            "m",
+            Provenance.measured,
+            notes=("no_validated_reference", "not_a_vo2_estimate") + (("stopped_early",) if stopped else ()),
+            reference_ids=(refs.CONLEY_1991.id,),
+        )
+    ]
+
+
 @dataclass(frozen=True)
 class TestDefinition:
     code: str
@@ -516,6 +839,117 @@ TESTS: dict[str, TestDefinition] = {
             (),
             "bmi",
             {"weight_kg": "weight_kg", "waist_cm": "waist_cm"},
+        ),
+        # --- engine-3: sport and goal test modules (activated by the personalisation engine).
+        TestDefinition(
+            "broad_jump",
+            "1",
+            Dimension.strength,
+            IntensityCeiling.maximal,
+            ("tape_measure",),
+            BroadJumpIn,
+            _broad_jump,
+            (),
+            "broad_jump_cm",
+        ),
+        TestDefinition(
+            "vertical_jump",
+            "1",
+            Dimension.strength,
+            IntensityCeiling.maximal,
+            ("wall", "tape_measure", "chalk_or_tape"),
+            VerticalJumpIn,
+            _vertical_jump,
+            (),
+            "vertical_jump_cm",
+        ),
+        TestDefinition(
+            "agility_505",
+            "1",
+            Dimension.balance,
+            IntensityCeiling.maximal,
+            ("markers", "tape_measure", "video_app"),
+            Agility505In,
+            _agility_505,
+            ("start", "timing"),
+            "agility_505_best_s",
+        ),
+        TestDefinition(
+            "sprint_20m",
+            "1",
+            Dimension.strength,
+            IntensityCeiling.maximal,
+            ("markers", "tape_measure", "video_app"),
+            Sprint20In,
+            _sprint_20,
+            ("timing",),
+            "sprint_20m_s",
+        ),
+        TestDefinition(
+            "ruler_drop",
+            "1",
+            Dimension.balance,
+            IntensityCeiling.non_exertional,
+            ("ruler_60cm", "helper"),
+            RulerDropIn,
+            _ruler_drop,
+            (),
+            "reaction_time_ms",
+        ),
+        TestDefinition(
+            "back_scratch",
+            "1",
+            Dimension.mobility,
+            IntensityCeiling.non_exertional,
+            ("ruler",),
+            BackScratchIn,
+            _back_scratch,
+            (),
+            "back_scratch_best_cm",
+        ),
+        TestDefinition(
+            "anterior_reach",
+            "1",
+            Dimension.balance,
+            IntensityCeiling.submaximal,
+            ("tape_measure",),
+            AnteriorReachIn,
+            _anterior_reach,
+            (),
+            "anterior_reach_difference_cm",
+        ),
+        TestDefinition(
+            "single_leg_hop",
+            "1",
+            Dimension.strength,
+            IntensityCeiling.maximal,
+            ("tape_measure",),
+            SingleLegHopIn,
+            _single_leg_hop,
+            (),
+            "hop_symmetry_pct",
+        ),
+        TestDefinition(
+            "circumferences",
+            "1",
+            Dimension.body,
+            IntensityCeiling.non_exertional,
+            ("tape_measure",),
+            CircumferencesIn,
+            _circumferences,
+            (),
+            "girth_arm_right_cm",
+        ),
+        TestDefinition(
+            "swim_12min",
+            "1",
+            Dimension.cardio,
+            IntensityCeiling.maximal,
+            ("pool", "timer"),
+            Swim12In,
+            _swim_12,
+            ("stroke",),
+            "swim_12min_m",
         ),
     )
 }

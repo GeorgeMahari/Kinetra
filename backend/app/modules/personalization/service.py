@@ -172,7 +172,9 @@ def _reason(r: engine.Reason) -> ReasonOut:
 
 
 def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
-    weights = engine.capacity_weights(engine_profile(db, user))
+    profile = engine_profile(db, user)
+    weights = engine.capacity_weights(profile)
+    practised = frozenset(s.code for s in profile.sports if s.sessions_per_week > 0)
     ceiling = onboarding_service.latest_intensity_ceiling(db, user)
     # Only tests the scoring engine knows can be recorded, so only those are offered.
     specs = {code: spec for code, spec in TEST_PROFILES.items() if code in TESTS}
@@ -182,6 +184,7 @@ def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
         _last_done(db, user),
         lambda code: allowed(TESTS[code], ceiling),
         specs,
+        practised,
     )
     return BatteryOut(
         version=engine.PERSONALIZATION_VERSION,

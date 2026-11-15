@@ -169,6 +169,152 @@ YMCA_STEP = Reference(
     approximate=True,
 )
 
+# --- engine-3: sport and goal test modules (personalisation). None of these rates a result: they give
+# the protocol, its reliability and, where one exists, a documented threshold. Abstract or full text
+# read through Europe PMC / PMC (see docs/SCIENCE.md section 9).
+
+MARIN_JIMENEZ_2024 = Reference(
+    id="marin_jimenez_2024_slj",
+    citation=(
+        "Marin-Jimenez N, et al. Eur J Sport Sci. 2024. doi:10.1002/ejsc.12182 [standing long jump "
+        "reliability in adults, Adult-Fit]"
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC11369318/",
+    note=(
+        "Protocol: best of 2 jumps, two-foot take-off and landing, distance to the back of the nearest heel. "
+        "Adults 18-64: ICC 0.94 without familiarisation (retest about 12 cm longer, MDC90 29 cm); after 3 "
+        "practice sessions ICC 1.00. No adult age-by-sex norms were found, so results are self-comparison."
+    ),
+)
+
+MARKOVIC_2004 = Reference(
+    id="markovic_2004_jumps",
+    citation=(
+        "Markovic G, et al. J Strength Cond Res. 2004;18(3):551. "
+        "doi:10.1519/1533-4287(2004)18<551:rafvos>2.0.co;2 [reliability of seven jump tests]"
+    ),
+    url="https://doi.org/10.1519/1533-4287(2004)18<551:RAFVOS>2.0.CO;2",
+    note=(
+        "Seven jump tests including the jump-and-reach (Sargent): Cronbach alpha 0.93-0.98, within-subject "
+        "CV 2.4-4.6%. Jump-and-reach and flight-time heights differ, so one method is used throughout. "
+        "Canadian adult norms exist (Payne et al. 2000) but their values could not be read; not used."
+    ),
+)
+
+BARRERA_505_2025 = Reference(
+    id="barrera_2025_505",
+    citation=(
+        "Barrera-Dominguez FJ, et al. Eur J Sport Sci. 2025. doi:10.1002/ejsc.12252 [505 "
+        "change-of-direction test timed with a phone]"
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC11730434/",
+    note=(
+        "505: 10 m run-up (traditional) or standing start 5 m from the line (modified), 5 m in, 180-degree "
+        "turn, 5 m out; slips and early turns discarded; 3 min rest. "
+        "Phone video vs timing gates ICC >= 0.91. "
+        "Hand stopwatch timing is less reliable (Chen 2021) and is flagged. No adult norms found."
+    ),
+)
+
+HAUGEN_BUCHHEIT_2016 = Reference(
+    id="haugen_buchheit_2016",
+    citation=(
+        "Haugen T, Buchheit M. Sports Med. 2016. doi:10.1007/s40279-015-0446-0 [sprint timing methods]"
+    ),
+    url="https://doi.org/10.1007/s40279-015-0446-0",
+    note=(
+        "Manual timing should be avoided over 10-20 m because of large absolute errors; Kinetra therefore "
+        "accepts only phone-video or timing-gate times for the sprint. No adult norms found."
+    ),
+)
+
+ECKNER_2011 = Reference(
+    id="eckner_2011_ruler_drop",
+    citation=(
+        "Eckner JT, Kutcher JS, Richardson JK. J Athl Train. 2011;46(4):409-414. "
+        "doi:10.4085/1062-6050-46.4.409 [clinical reaction time, ruler-drop method]"
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC3419153/",
+    note=(
+        "Reaction time from the fall distance: t = sqrt(2d/g). Season-to-season ICC 0.65 (SEM 16.6 ms). "
+        "With a plain ruler in adults 60+ reliability was lower (Ferreira 2024, ICC 0.57). Needs a helper. "
+        "No adult norms found."
+    ),
+)
+
+ALBRECHT_2021 = Reference(
+    id="albrecht_2021_back_scratch",
+    citation=(
+        "Albrecht BM, Stalling I, Bammann K. BMC Geriatr. 2021. doi:10.1186/s12877-021-02188-9 [Senior "
+        "Fitness Test percentiles, ages 65-75]"
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC8074447/",
+    note=(
+        "Back-scratch: one hand over the shoulder, the other up the back, distance between the middle "
+        "fingers. Norms cover 65-75 (values not read) and Rikli & Jones 60-94; none under 60, so results "
+        "are self-comparison."
+    ),
+)
+
+PLISKY_2006 = Reference(
+    id="plisky_2006_sebt",
+    citation=(
+        "Plisky PJ, et al. J Orthop Sports Phys Ther. 2006. doi:10.2519/jospt.2006.2244 [Star Excursion "
+        "Balance Test and injury in high-school basketball]"
+    ),
+    url="https://doi.org/10.2519/jospt.2006.2244",
+    note=(
+        "Players with an anterior reach difference above 4 cm were 2.5 times more likely to be injured. "
+        "A 2021 meta-analysis (Plisky et al., IJSPT, PMC8486397) found this link in only 3 of 13 studies, so "
+        "Kinetra shows the difference as a flag to look at, never as a risk score or a diagnosis."
+    ),
+    approximate=True,
+)
+
+MUNRO_HERRINGTON_2011 = Reference(
+    id="munro_herrington_2011_hop",
+    citation=(
+        "Munro AG, Herrington LC. J Strength Cond Res. 2011. doi:10.1519/jsc.0b013e3181d83335 "
+        "[between-session reliability of hop tests]"
+    ),
+    url="https://doi.org/10.1519/JSC.0b013e3181d83335",
+    note=(
+        "Single-leg hop ICC 0.76-0.92 with a learning effect; all healthy subjects reached a limb symmetry "
+        "index of at least 90%, which they recommend as a reference. The 90% figure comes from small and "
+        "clinical samples and can overestimate function after knee injury (Wellsandt 2017): a flag only."
+    ),
+    approximate=True,
+)
+
+NACHER_2026 = Reference(
+    id="nacher_2026_isak_girths",
+    citation=(
+        "Nacher-Fernandez M, et al. J Int Soc Sports Nutr. 2026. doi:10.1080/15502783.2026.2724094 [ISAK "
+        "girth measurement reliability]"
+    ),
+    url="https://pmc.ncbi.nlm.nih.gov/articles/PMC13591961/",
+    note=(
+        "ISAK sites; each girth measured twice (a third time if they differ by more than 1%). "
+        "Trained-measurer "
+        "error about 0.6%; self-measurement reliability is unknown. Arm circumference tracked training "
+        "change in young men (Gentil 2020). Population girth tables describe fat plus muscle, not muscle "
+        "size, so results are self-comparison."
+    ),
+)
+
+CONLEY_1991 = Reference(
+    id="conley_1991_swim",
+    citation=(
+        "Conley DS, et al. Med Sci Sports Exerc. 1991. doi:10.1249/00005768-199106000-00019 [12-minute "
+        "swim as a field test of peak aerobic power, men]"
+    ),
+    url="https://doi.org/10.1249/00005768-199106000-00019",
+    note=(
+        "Distance in 12 min correlated only r = 0.40 with peak aerobic power (0.42 in women, Conley 1992): "
+        "a progress measure for swimmers, not a VO2 estimate. No norms or retest data were found."
+    ),
+)
+
 ALL = {
     r.id: r
     for r in (
@@ -183,6 +329,16 @@ ALL = {
         CHMS_SIT_REACH,
         SPRINGER_2007,
         YMCA_STEP,
+        MARIN_JIMENEZ_2024,
+        MARKOVIC_2004,
+        BARRERA_505_2025,
+        HAUGEN_BUCHHEIT_2016,
+        ECKNER_2011,
+        ALBRECHT_2021,
+        PLISKY_2006,
+        MUNRO_HERRINGTON_2011,
+        NACHER_2026,
+        CONLEY_1991,
     )
 }
 
