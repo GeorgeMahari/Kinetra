@@ -3,6 +3,8 @@ import insightsEn from './insights.en';
 import devicesEn from './devices.en';
 import parentalConsentEn from './parentalConsent.en';
 import hybridEn from './hybrid.en';
+import redesignAuthEn from './redesignAuth.en';
+import redesignProfileEn from './redesignProfile.en';
 import planEn from './plan.en';
 import progressionEn from './progression.en';
 
@@ -14,6 +16,8 @@ const en = {
   ...progressionEn,
   ...planEn,
   ...hybridEn,
+  ...redesignAuthEn,
+  ...redesignProfileEn,
   brand: {
     name: 'Kinetra',
     tagline: 'Know your body’s full spectrum.',

@@ -3,6 +3,8 @@ import insightsRo from './insights.ro';
 import devicesRo from './devices.ro';
 import parentalConsentRo from './parentalConsent.ro';
 import hybridRo from './hybrid.ro';
+import redesignAuthRo from './redesignAuth.ro';
+import redesignProfileRo from './redesignProfile.ro';
 import planRo from './plan.ro';
 import progressionRo from './progression.ro';
 import type { TranslationResources } from './en';
@@ -15,6 +17,8 @@ const ro: TranslationResources = {
   ...progressionRo,
   ...planRo,
   ...hybridRo,
+  ...redesignAuthRo,
+  ...redesignProfileRo,
   brand: {
     name: 'Kinetra',
     tagline: 'Cunoaște-ți întregul spectru fizic.',

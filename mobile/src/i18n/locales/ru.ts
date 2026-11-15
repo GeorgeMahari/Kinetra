@@ -3,6 +3,8 @@ import insightsRu from './insights.ru';
 import devicesRu from './devices.ru';
 import parentalConsentRu from './parentalConsent.ru';
 import hybridRu from './hybrid.ru';
+import redesignAuthRu from './redesignAuth.ru';
+import redesignProfileRu from './redesignProfile.ru';
 import planRu from './plan.ru';
 import progressionRu from './progression.ru';
 import type { TranslationResources } from './en';
@@ -15,6 +17,8 @@ const ru: TranslationResources = {
   ...progressionRu,
   ...planRu,
   ...hybridRu,
+  ...redesignAuthRu,
+  ...redesignProfileRu,
   brand: {
     name: 'Kinetra',
     tagline: 'Узнайте весь спектр возможностей своего тела.',
