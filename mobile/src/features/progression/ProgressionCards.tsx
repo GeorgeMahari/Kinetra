@@ -1,11 +1,15 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import type { Progression } from '@/api/progression';
 import { errorMessage } from '@/api/errorMessage';
 import { AppText } from '@/components/AppText';
+import { BadgeArt } from '@/components/BadgeArt';
+import { PressableScale } from '@/components/motion';
+import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Stepper } from '@/components/Choice';
@@ -150,7 +154,7 @@ export function WeekCard({ p }: { p: Progression }) {
 
 export function PersonalBests({ p }: { p: Progression }) {
   const { t, i18n } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   return (
     <View style={{ gap: spacing.sm }}>
       <SectionHeader title={t('progression.pbTitle')} caption={t('progression.pbHint')} />
@@ -159,90 +163,99 @@ export function PersonalBests({ p }: { p: Progression }) {
           {t('progression.pbEmpty')}
         </AppText>
       ) : (
-        p.personal_bests.map((b) => {
-          const protocol = protocolLabel(t, b.protocol_key);
-          return (
-            <Pressable
-              key={`${b.test_code}-${b.protocol_key}-${b.indicator}`}
-              testID={`pb-${b.indicator}`}
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/result/[id]', params: { id: b.result_id } })}
-              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.md }}
-            >
-              <View style={{ flex: 1 }}>
-                <AppText variant="label">{t(`assess.indicators.${b.indicator}` as 'assess.indicators.bmi')}</AppText>
-                <AppText variant="caption" color="textMuted">
-                  {[t(`assess.tests.${b.test_code}.name`), protocol, new Date(b.performed_at).toLocaleDateString(i18n.resolvedLanguage)]
-                    .filter(Boolean)
-                    .join(' · ')}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          {p.personal_bests.map((b) => {
+            const protocol = protocolLabel(t, b.protocol_key);
+            const value = formatValue(
+              { code: b.indicator, value: b.value, unit: b.unit, provenance: 'measured', interpretation: null, notes: [], reference_ids: [] },
+              i18n.resolvedLanguage,
+            );
+            return (
+              <PressableScale
+                key={`${b.test_code}-${b.protocol_key}-${b.indicator}`}
+                testID={`pb-${b.indicator}`}
+                accessibilityRole="button"
+                onPress={() => router.push({ pathname: '/result/[id]', params: { id: b.result_id } })}
+                highlight={{ base: colors.surface, active: colors.brandSoft }}
+                style={{
+                  flexBasis: '47%',
+                  flexGrow: 1,
+                  padding: spacing.md,
+                  gap: spacing.xs,
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {isPictogram(b.test_code) ? <Pictogram name={b.test_code} size={34} /> : null}
+                  <Icon name="flame" size={16} color={colors.dataInk} />
+                </View>
+                <AppText variant="metricSm" style={{ fontSize: 24, lineHeight: 28 }}>
+                  {value}
                 </AppText>
-              </View>
-              <AppText variant="heading">
-                {formatValue({ code: b.indicator, value: b.value, unit: b.unit, provenance: 'measured', interpretation: null, notes: [], reference_ids: [] }, i18n.resolvedLanguage)}
-              </AppText>
-            </Pressable>
-          );
-        })
+                <AppText variant="caption" numberOfLines={1}>
+                  {t(`assess.indicators.${b.indicator}` as 'assess.indicators.bmi')}
+                </AppText>
+                <AppText variant="micro" color="textMuted" numberOfLines={2}>
+                  {[protocol, new Date(b.performed_at).toLocaleDateString(i18n.resolvedLanguage)].filter(Boolean).join(' · ')}
+                </AppText>
+              </PressableScale>
+            );
+          })}
+        </View>
       )}
     </View>
   );
 }
 
+/** Achievements as a badge collection: earned first (newest first), then the rest in catalogue order. */
 export function AchievementsList({ p, limit }: { p: Progression; limit?: number }) {
   const { t, i18n } = useTranslation();
-  const { colors, spacing, radius } = useTheme();
-  // Earned first (newest first), then the rest in catalogue order.
+  const { colors, spacing, radius, elevation } = useTheme();
   const sorted = [...p.achievements].sort((a, b) =>
     a.earned_at && b.earned_at ? b.earned_at.localeCompare(a.earned_at) : a.earned_at ? -1 : b.earned_at ? 1 : 0,
   );
   return (
-    <View style={{ gap: spacing.sm }}>
-      {sorted.slice(0, limit ?? sorted.length).map((a) => {
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+      {sorted.slice(0, limit ?? sorted.length).map((a, i) => {
         const earned = !!a.earned_at;
         return (
-          <View
+          <Animated.View
             key={a.code}
-            testID={`achievement-${a.code}`}
-            accessible
-            accessibilityLabel={`${t(`progression.achievements.${a.code}.name`)}: ${earned ? t('progression.earnedOn', { date: new Date(a.earned_at!).toLocaleDateString(i18n.resolvedLanguage) }) : t('progression.notYet')}`}
-            style={{
-              flexDirection: 'row',
-              gap: spacing.md,
-              alignItems: 'center',
-              padding: spacing.md,
-              borderRadius: radius.md,
-              borderWidth: 1,
-              borderColor: colors.border,
-              backgroundColor: colors.surface,
-            }}
+            entering={FadeInDown.delay(Math.min(i, 10) * 40).duration(300).reduceMotion(ReduceMotion.System)}
+            style={{ flexBasis: '47%', flexGrow: 1 }}
           >
             <View
+              testID={`achievement-${a.code}`}
+              accessible
+              accessibilityLabel={`${t(`progression.achievements.${a.code}.name`)}: ${earned ? t('progression.earnedOn', { date: new Date(a.earned_at!).toLocaleDateString(i18n.resolvedLanguage) }) : t('progression.notYet')}`}
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: radius.pill,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: earned ? colors.brandSoft : 'transparent',
-                borderWidth: earned ? 0 : 1,
-                borderStyle: 'dashed',
-                borderColor: colors.unknown,
+                minHeight: 168,
+                padding: spacing.md,
+                gap: spacing.xs,
+                borderRadius: radius.lg,
+                borderWidth: 1,
+                borderColor: earned ? colors.border : colors.hairline,
+                backgroundColor: earned ? colors.surface : 'transparent',
+                ...(earned ? elevation.card : null),
               }}
             >
-              <Icon name={earned ? 'check' : 'unknown'} size={18} color={earned ? colors.brand : colors.unknown} />
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <AppText variant="label">{t(`progression.achievements.${a.code}.name`)}</AppText>
-              <AppText variant="caption" color="textMuted">
+              <BadgeArt code={a.code} earned={earned} size={52} />
+              <AppText variant="label" color={earned ? 'text' : 'textMuted'} numberOfLines={2}>
+                {t(`progression.achievements.${a.code}.name`)}
+              </AppText>
+              <AppText variant="micro" color="textMuted" numberOfLines={3} style={{ flex: 1 }}>
                 {t(`progression.achievements.${a.code}.body`)}
               </AppText>
+              <AppText variant="micro" color={earned ? 'dataInk' : 'unknown'}>
+                {earned ? new Date(a.earned_at!).toLocaleDateString(i18n.resolvedLanguage) : t('progression.notYet')}
+              </AppText>
             </View>
-            <AppText variant="caption" color={earned ? 'text' : 'unknown'}>
-              {earned ? new Date(a.earned_at!).toLocaleDateString(i18n.resolvedLanguage) : t('progression.notYet')}
-            </AppText>
-          </View>
+          </Animated.View>
         );
       })}
+      {(limit ?? sorted.length) % 2 === 1 ? <View style={{ flexBasis: '47%', flexGrow: 1 }} /> : null}
     </View>
   );
 }

@@ -86,6 +86,10 @@ const hybridEn = {
     moreRecs: '{{count}} more recommendations',
     fewerRecs: 'Show fewer',
   },
+  achievementsView: {
+    count: 'Achievements unlocked: {{earned}} of {{total}}',
+    caption: 'Every badge comes from what you do: tests, retests, complete days, a trail finished.',
+  },
   body: {
     title: 'Body map',
     intro: 'Which body areas each test uses, coloured with the health zone of the dimension you pick.',

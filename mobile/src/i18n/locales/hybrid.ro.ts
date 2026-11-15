@@ -86,6 +86,10 @@ const hybridRo = {
     moreRecs: 'Încă {{count}} recomandări',
     fewerRecs: 'Arată mai puține',
   },
+  achievementsView: {
+    count: 'Realizări deblocate: {{earned}} din {{total}}',
+    caption: 'Fiecare insignă vine din ce faci: teste, retestări, zile complete, traseul dus la capăt.',
+  },
   body: {
     title: 'Harta corpului',
     intro: 'Ce zone ale corpului folosește fiecare test, colorate cu zona de sănătate a dimensiunii alese.',
