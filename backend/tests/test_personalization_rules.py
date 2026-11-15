@@ -31,6 +31,18 @@ class TestKnowledgeTables:
     def test_every_existing_goal_is_mapped(self) -> None:
         assert {g.value for g in Goal} <= set(GOAL_CAPACITIES)
 
+    def test_onboarding_priorities_cover_every_goal(self) -> None:
+        from app.modules.onboarding.rules import GOAL_DIMENSIONS
+
+        assert set(GOAL_DIMENSIONS) == set(Goal)
+
+    def test_new_goals_point_at_the_dimensions_of_their_main_capacities(self) -> None:
+        from app.modules.onboarding.rules import GOAL_DIMENSIONS
+
+        for goal in ("build_muscle", "power_speed", "agility_coordination"):
+            main = {DIMENSION_OF[c] for c, w in GOAL_CAPACITIES[goal].items() if w >= 2}
+            assert main == set(GOAL_DIMENSIONS[Goal(goal)]), goal
+
     def test_goal_weights_are_1_to_3(self) -> None:
         for caps in GOAL_CAPACITIES.values():
             assert all(1 <= w <= 3 for w in caps.values())

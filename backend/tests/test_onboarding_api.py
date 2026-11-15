@@ -199,7 +199,9 @@ class TestPrivacy:
         api.post("/api/v1/onboarding/complete", headers=user, json=answers())
         export = api.get("/api/v1/me/export", headers=user).json()["onboarding"]
         assert set(export["goals"]) == {"get_stronger", "improve_endurance"}
-        assert export["activity_profiles"][0]["sports"] == [{"code": "cycling", "sessions_per_week": 3}]
+        assert export["activity_profiles"][0]["sports"] == [
+            {"code": "cycling", "sessions_per_week": 3, "level": None}
+        ]
         assert export["readiness_screenings"][0]["result"] == "clear"
 
         assert api.post("/api/v1/me/delete", headers=user, json={"password": PASSWORD}).status_code == 204

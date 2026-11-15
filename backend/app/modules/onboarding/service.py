@@ -14,6 +14,7 @@ from app.modules.onboarding.models import (
     OnboardingState,
     ReadinessScreening,
     Sport,
+    UserCapacityPriority,
     UserGoal,
 )
 from app.modules.onboarding.schemas import (
@@ -140,7 +141,8 @@ def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingS
     a = answers.activity
 
     db.execute(delete(UserGoal).where(UserGoal.user_id == user.id))
-    db.add_all(UserGoal(user_id=user.id, goal=g.value) for g in answers.goals)
+    # The order of `goals` is their importance: the first is the primary goal (migration 0010).
+    db.add_all(UserGoal(user_id=user.id, goal=g.value, rank=i + 1) for i, g in enumerate(answers.goals))
 
     profile = ActivityProfile(
         user_id=user.id,
@@ -158,7 +160,12 @@ def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingS
         sleep_quality=fu.sleep_quality.value if fu.sleep_quality else None,
         rules_version=rules.RULES_VERSION,
         sports=[
-            ActivityProfileSport(sport_code=s.code, sessions_per_week=s.sessions_per_week) for s in a.sports
+            ActivityProfileSport(
+                sport_code=s.code,
+                sessions_per_week=s.sessions_per_week,
+                level=s.level.value if s.level else None,
+            )
+            for s in a.sports
         ],
     )
     db.add(profile)
@@ -184,7 +191,8 @@ def complete(db: Session, user: User, answers: OnboardingAnswers) -> OnboardingS
     return get_summary(db, user)
 
 
-def _latest_profile(db: Session, user: User) -> ActivityProfile | None:
+def latest_profile(db: Session, user: User) -> ActivityProfile | None:
+    """The current activity snapshot (the latest), or None before onboarding."""
     return db.scalars(
         select(ActivityProfile)
         .where(ActivityProfile.user_id == user.id)
@@ -209,8 +217,15 @@ def get_summary(db: Session, user: User) -> OnboardingSummary:
             "onboarding_incomplete", "Onboarding has not been completed.", status.HTTP_404_NOT_FOUND
         )
 
-    goals = [Goal(g) for g in db.scalars(select(UserGoal.goal).where(UserGoal.user_id == user.id)).all()]
-    profile = _latest_profile(db, user)
+    goals = [
+        Goal(g)
+        for g in db.scalars(
+            select(UserGoal.goal)
+            .where(UserGoal.user_id == user.id)
+            .order_by(UserGoal.rank.asc().nulls_last(), UserGoal.goal)
+        ).all()
+    ]
+    profile = latest_profile(db, user)
     screening = _latest_screening(db, user)
 
     priorities: list[DimensionPriorityOut] = []
@@ -279,10 +294,18 @@ def export_data(db: Session, user: User) -> dict[str, object]:
         .where(ReadinessScreening.user_id == user.id)
         .order_by(ReadinessScreening.answered_at)
     ).all()
-    goals = db.scalars(select(UserGoal.goal).where(UserGoal.user_id == user.id)).all()
+    goals = db.scalars(
+        select(UserGoal.goal)
+        .where(UserGoal.user_id == user.id)
+        .order_by(UserGoal.rank.asc().nulls_last(), UserGoal.goal)
+    ).all()
+    capacity_priorities = db.scalars(
+        select(UserCapacityPriority).where(UserCapacityPriority.user_id == user.id)
+    ).all()
     state = db.get(OnboardingState, user.id)
     return {
-        "goals": list(goals),
+        "goals": list(goals),  # most important first
+        "capacity_priorities": [{"capacity": c.capacity, "weight": c.weight} for c in capacity_priorities],
         "activity_profiles": [
             {
                 "recorded_at": p.recorded_at.isoformat(),
@@ -291,7 +314,8 @@ def export_data(db: Session, user: User) -> dict[str, object]:
                 "typical_session_minutes": p.typical_session_minutes,
                 "training_experience": p.training_experience,
                 "sports": [
-                    {"code": s.sport_code, "sessions_per_week": s.sessions_per_week} for s in p.sports
+                    {"code": s.sport_code, "sessions_per_week": s.sessions_per_week, "level": s.level}
+                    for s in p.sports
                 ],
                 "strength_sessions_per_week": p.strength_sessions_per_week,
                 "cardio_sessions_per_week": p.cardio_sessions_per_week,
@@ -332,7 +356,7 @@ def latest_intensity_ceiling(db: Session, user: User) -> IntensityCeiling | None
 
 def reported_sleep(db: Session, user: User) -> tuple[float | None, SleepQuality | None] | None:
     """Self-reported sleep (hours, quality) from the latest activity profile, or None if neither was given."""
-    p = _latest_profile(db, user)
+    p = latest_profile(db, user)
     if not p or (p.sleep_hours is None and p.sleep_quality is None):
         return None
     hours = float(p.sleep_hours) if p.sleep_hours is not None else None
@@ -349,7 +373,7 @@ class ActivitySnapshot(TypedDict):
 
 def latest_activity_snapshot(db: Session, user: User) -> ActivitySnapshot | None:
     """Self-reported activity facts from the latest profile, for recommendation rules."""
-    p = _latest_profile(db, user)
+    p = latest_profile(db, user)
     if p is None:
         return None
     categories = set(

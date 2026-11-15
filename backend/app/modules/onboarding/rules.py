@@ -28,7 +28,8 @@ from app.modules.onboarding.vocab import (
     SportCategory,
 )
 
-RULES_VERSION = "onboarding-rules-1"
+# rules-2 (migration 0010): three new goals are mapped; every earlier goal behaves exactly as in rules-1.
+RULES_VERSION = "onboarding-rules-2"
 SCREENING_VERSION = "kinetra-readiness-2"
 
 LOW_ACTIVITY = {ActivityLevel.sedentary, ActivityLevel.light}
@@ -152,6 +153,10 @@ GOAL_DIMENSIONS: dict[Goal, tuple[Dimension, ...]] = {
     Goal.sport_performance: (),  # resolved from the sports practised, below
     Goal.general_wellbeing: (Dimension.cardio, Dimension.mobility, Dimension.body),
     Goal.know_baseline: (),  # every dimension equally
+    # Added with migration 0010; the dimensions of each goal's main capacities (personalization.knowledge).
+    Goal.build_muscle: (Dimension.body, Dimension.strength),
+    Goal.power_speed: (Dimension.strength,),
+    Goal.agility_coordination: (Dimension.balance,),
 }
 
 SPORT_PERFORMANCE_DIMENSIONS: dict[SportCategory, tuple[Dimension, ...]] = {

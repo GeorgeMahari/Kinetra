@@ -16,6 +16,7 @@ from app.modules.onboarding.vocab import (
     ReadinessResult,
     SleepQuality,
     SportCategory,
+    SportLevel,
     StairsTolerance,
     TrainingExperience,
 )
@@ -32,6 +33,7 @@ class SportPractice(BaseModel):
     model_config = ConfigDict(extra="forbid")
     code: str = Field(min_length=1, max_length=40)
     sessions_per_week: int = Sessions
+    level: SportLevel | None = None  # optional, added in migration 0010
 
 
 class ActivityAnswers(BaseModel):
