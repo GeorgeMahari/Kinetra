@@ -73,9 +73,9 @@ Reading the table:
   collection, Expo Go, Metro's development runtime or navigation caching. It must be re-measured on a
   release build with a fresh process and a forced idle period before drawing any conclusion.
 
-### Open decision
+### Open decision (resolved in the redesign pass, see below)
 
-With loops visible, each screen still renders continuously. Options, none implemented:
+With loops visible, each screen still renders continuously. Options considered at the time:
 1. Keep as is, and measure on a phone (release build) before deciding.
 2. Rest between pulses (e.g. 1.7 s pulse, 2.5 s still): fewer frames per minute, slightly different look.
 3. At most one ambient loop on screen at a time.
@@ -83,3 +83,44 @@ With loops visible, each screen still renders continuously. Options, none implem
 ### Not yet measured
 
 Release-build FPS, time to interactive, memory and battery on a real device.
+
+## Redesign pass (2026-11-15, after Step 2)
+
+Same emulator and Expo Go setup. Each value is idle CPU (%) from `top`, four samples 2 s apart, after
+about 25 s of settling on the screen.
+
+### Finding
+
+Before this pass, the idle Today screen used **83–97 %** CPU when the trail-head beacon was in view.
+With the hero scrolled out of view it used 4–14 %, which isolates the beacon loop (the only repeating
+animation on Today). This matches Step 2's finding that any running loop forces a frame every vsync on
+this emulator. The Step 2 row "Idle CPU, Today 7 / 8 / 6" was probably taken without the beacon on
+screen, so it understated the cost.
+
+### Change
+
+This resolves the open decision above with a fourth option. Ambient loops (Today beacon, Plan trail
+ring, streak flame, week "today" ring) now play `AMBIENT_REPEATS` = 4 times each time they come into
+view, then rest (`mobile/src/components/visibleLoop.ts`). They still start again when the element
+re-enters the viewport or the screen regains focus, and they stay off under Reduce Motion.
+
+| Screen (idle, after settling) | Before this pass | After |
+|---|---|---|
+| Today, hero in view | 82.6 / 97.4 (beacon running) | 7.3 / 7.0 / 6.5 / 15.5 |
+| Plan, hero in view | ≈ 80–95 (Step 2) | 7.5 / 10.0 / 6.5 (after the pulses end) |
+| Progress (10 interactive charts mounted) | — | 6.8 / 6.0 / 8.5 / 7.0 |
+| Profile | — | 14.2 / 22.0 / 7.5 / 6.0 |
+| Assess | — | 16.6 / 7.0 / 7.5 / 11.0 |
+
+### New interactive pieces: what they cost when idle
+
+- **LineChart** (draw-on, scrubbing): the draw-on is a single 700 ms timing and the pan gesture runs
+  only during touch, so the Progress tab with all its charts settles to the same idle level as a
+  static screen.
+- **Ring timer:** it redraws only on the existing 200 ms ticks while running and does nothing when idle.
+- **Body map focus:** a single spring when an area is selected.
+
+### Still not measured
+
+Release-build FPS, time to interactive, memory and battery on a real device. These are deferred to the
+final validation, as agreed. Memory growth over repeated navigation (Step 2) has not been re-measured.

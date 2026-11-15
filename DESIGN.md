@@ -1,65 +1,98 @@
 ---
 name: Kinetra
-description: Know your body's full spectrum.
+description: Know your body's full spectrum. Kinetra Hybrid, on the "Marcaje turistice" world.
 colors:
-  instrument-indigo: "#4B4FE0"
-  instrument-indigo-dark: "#6366F1"
-  indigo-text-dark: "#8B8EF6"
-  indigo-wash: "#ECECFE"
-  indigo-wash-dark: "#23264F"
-  signal-mint: "#14A88E"
-  signal-mint-dark: "#22C7A9"
-  paper: "#F7F8FB"
+  rock: "#F3F4F2"
   white: "#FFFFFF"
-  hairline: "#E7EAF2"
-  ink: "#0B1020"
-  ink-surface: "#121A2E"
-  ink-raised: "#1C2640"
-  ink-border: "#2A3655"
-  muted-slate: "#5A6480"
-  muted-slate-dark: "#AEB6CA"
-  unknown-slate: "#8A94AD"
-  caution-amber: "#B97511"
-  caution-amber-dark: "#F2A93B"
-  alert-coral: "#D2483B"
-  alert-coral-dark: "#F0685A"
+  stone-200: "#DCDFDA"
+  stone-500: "#8A928E"
+  stone-600: "#5C6460"
+  ink: "#1A1D1F"
+  night-950: "#0E1512"
+  night-900: "#16201B"
+  night-800: "#1D2A23"
+  night-700: "#2A3832"
+  mist-300: "#A7B2AC"
+  mist-100: "#E8ECE9"
+  forest-800: "#1E4A33"
+  forest-700: "#2F6B45"
+  forest-600: "#2F7A4F"
+  forest-300: "#7CC796"
+  forest-100: "#E3EEE6"
+  forest-night: "#1E3327"
+  leaf-500: "#5FB37E"
+  teal-700: "#1E6B63"
+  teal-300: "#5FC4B6"
+  teal-100: "#D8ECE8"
+  teal-night: "#16352F"
+  blaze-red: "#D23A2C"
+  blaze-blue: "#2563C9"
+  blaze-yellow: "#E3B21E"
+  blaze-green: "#2F8F4E"
+  amber-600: "#B97511"
+  amber-400: "#F2A93B"
+  error-600: "#B3261E"
+  error-300: "#F2766B"
 typography:
   display:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
-    fontSize: "34px"
+    fontFamily: "Geologica"
+    fontSize: "32px"
     fontWeight: 700
-    lineHeight: "40px"
-    letterSpacing: "-0.6px"
+    lineHeight: "38px"
+    letterSpacing: "-0.8px"
   title:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
+    fontFamily: "Geologica"
     fontSize: "24px"
     fontWeight: 700
     lineHeight: "30px"
-    letterSpacing: "-0.3px"
+    letterSpacing: "-0.4px"
   heading:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
+    fontFamily: "Geologica"
     fontSize: "18px"
     fontWeight: 600
     lineHeight: "24px"
+    letterSpacing: "-0.2px"
   body:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
+    fontFamily: "Geologica"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: "23px"
   label:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
+    fontFamily: "Geologica"
     fontSize: "14px"
     fontWeight: 600
     lineHeight: "19px"
   caption:
-    fontFamily: "System (SF Pro on iOS, Roboto on Android)"
+    fontFamily: "Geologica"
     fontSize: "13px"
     fontWeight: 400
     lineHeight: "18px"
+  micro:
+    fontFamily: "Geologica"
+    fontSize: "11px"
+    fontWeight: 600
+    lineHeight: "14px"
+    letterSpacing: "0.2px"
+  metric:
+    fontFamily: "Geologica"
+    fontSize: "46px"
+    fontWeight: 700
+    lineHeight: "50px"
+    letterSpacing: "-1.4px"
+    fontFeature: "tnum"
+  metric-sm:
+    fontFamily: "Geologica"
+    fontSize: "28px"
+    fontWeight: 700
+    lineHeight: "32px"
+    letterSpacing: "-0.6px"
+    fontFeature: "tnum"
 rounded:
+  plate: "5px"
   sm: "8px"
   md: "12px"
-  lg: "20px"
+  lg: "18px"
+  xl: "24px"
   pill: "999px"
 spacing:
   xxs: "2px"
@@ -72,196 +105,181 @@ spacing:
   xxxl: "48px"
 components:
   button-primary:
-    backgroundColor: "{colors.instrument-indigo}"
+    backgroundColor: "{colors.forest-700}"
     textColor: "{colors.white}"
     rounded: "{rounded.md}"
-    padding: "0 24px"
     height: "52px"
   button-secondary:
-    backgroundColor: "{colors.indigo-wash}"
-    textColor: "{colors.instrument-indigo}"
-    rounded: "{rounded.md}"
-    padding: "0 24px"
-    height: "52px"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.instrument-indigo}"
+    backgroundColor: "{colors.forest-100}"
+    textColor: "{colors.forest-700}"
     rounded: "{rounded.md}"
     height: "52px"
   card:
     backgroundColor: "{colors.white}"
     rounded: "{rounded.lg}"
     padding: "16px"
-  text-field:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
+  shell-panel:
+    backgroundColor: "{colors.forest-700}"
+    textColor: "{colors.white}"
+    rounded: "{rounded.xl}"
+    padding: "16px"
+  sunken-well:
+    backgroundColor: "#EAEDE9"
     rounded: "{rounded.md}"
-    padding: "0 12px"
-  chip-segment:
+  blaze-plate:
     backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
+    rounded: "{rounded.plate}"
+  zone-badge:
     rounded: "{rounded.pill}"
-    padding: "10px 16px"
-  status-pill-unknown:
-    backgroundColor: "transparent"
-    textColor: "{colors.unknown-slate}"
-    rounded: "{rounded.pill}"
-    padding: "3px 8px"
+    padding: "4px 8px"
 ---
 
 # Design System: Kinetra
 
+This file describes what ships in `mobile/src/theme/tokens.ts` and the components built on it. The
+token file is the source of truth; when the two disagree, the code wins and this file is out of date.
+Component rules, motion, data visualisation and the body map are in `docs/DESIGN_SYSTEM.md`.
+
 ## Overview
 
-**Creative North Star: "The scientific instrument with human warmth"**
+**Base world: "Marcaje turistice"** (Carpathian trail waymarks). Every fitness dimension is a marked
+trail with its own blaze, a painted shape on a small white plate. The ground is rock-white by day and
+night forest in dark mode, and the shell (the hero panels) is forest green.
 
-Kinetra reads like a precise measuring instrument that a beginner is still comfortable holding. The
-precision comes from restraint: deep ink or soft paper surfaces, hairline borders instead of shadows,
-one confident indigo for action and a mint signal reserved for progress. The warmth comes from
-generous spacing, softly rounded forms, plain language and a tone that never judges a result.
+**Kinetra Hybrid** adds three layers to that base:
 
-Density is calm, not sparse: one column, large tap targets (52px buttons), cards that group one idea
-each. Colour carries meaning, never decoration, so a status can always be read at a glance and
-"not assessed" never looks like a bad result. Light and dark themes are equal citizens; dark is the
-"ink" expression of the same system, not an afterthought.
+- **Organic intelligence.** The app is a trail you walk. The hero panels draw your history as a path,
+  and the plan is a route with markers.
+- **Performance lab.** Measurements use a deep-teal data ink, hairline grids, sunken wells, tabular
+  metric figures, percentile rulers, band bars and interactive charts.
+- **Human wellness.** Trail-sign pictograms show people doing each test. An illustrative body map
+  shows which areas a test involves. Copy is plain and calm and never judges.
 
-**Key Characteristics:**
-- Flat surfaces separated by 1px hairlines; no drop shadows.
-- One accent (indigo) for action, one signal (mint) for progress, status colours only for meaning.
-- System fonts (SF Pro / Roboto) for full Romanian and Cyrillic coverage.
-- Soft geometry: 12px controls, 20px cards, pills for choices and status.
-- Honest labelling everywhere: measured, calculated, estimated, reported.
+**Key characteristics**
+
+- Colour identifies, it never judges. A low result is never red, and a change is never green or red.
+- "Not assessed" is neutral grey with a dashed outline. It never looks like a bad result.
+- One family, Geologica, with Romanian diacritics and Cyrillic, plus tabular metric figures for numbers.
+- Light and dark are equal. Dark mode is night forest, not inverted light mode.
+- Motion is short and calm, every animation respects Reduce Motion, and ambient loops rest after a
+  few pulses.
 
 ## Colors
 
-A cool ink-and-paper neutral base with a single indigo voice and a mint signal.
+### Ground
 
-### Primary
-- **Instrument Indigo** (light `instrument-indigo`, dark `instrument-indigo-dark`): primary buttons,
-  active tab, links, selected choices, icons inside dimension badges. The one colour that means "you can act here".
-- **Indigo Text** (light `instrument-indigo`, dark `indigo-text-dark`; token `brandText` in code): every
-  indigo *text*: links, ghost and secondary button labels, selected-choice labels. In dark mode the fill
-  indigo is too dark for text (about 4:1 on ink), so text uses the lighter step (7.3:1 on ink, 5:1 on
-  Indigo Wash). Fills and icons keep `brand`.
-- **Indigo Wash** (`indigo-wash` / `indigo-wash-dark`): secondary buttons, icon badge backgrounds,
-  selected-choice fills. Indigo at whisper strength.
+| Role | Light | Dark |
+|---|---|---|
+| background | rock `#F3F4F2` | night-950 `#0E1512` |
+| surface (cards) | white | night-900 `#16201B` |
+| surfaceRaised | white | night-800 `#1D2A23` |
+| surfaceSunken (wells behind data) | `#EAEDE9` | `#0A100D` |
+| border | stone-200 | night-700 |
+| hairline (grids, dividers in data) | ink at 9 % | mist at 9 % |
+| text / textMuted | ink / stone-600 | mist-100 / mist-300 |
 
-### Secondary
-- **Signal Mint** (`signal-mint` / `signal-mint-dark`): progress only: completion bars, objectives met,
-  "done" ticks, measured-provenance badges.
+### Forest (action and shell)
 
-### Neutral
-- **Paper** and **White** (light) / **Ink**, **Ink Surface**, **Ink Raised** (dark): background,
-  card surface and raised surface.
-- **Hairline** (`hairline` / `ink-border`): every border and divider.
-- **Ink** / **Muted Slate**: primary and secondary text. Muted slate carries captions, hints and descriptions.
-- **Unknown Slate** (`unknown-slate`): "not assessed / reported only / unknown". Deliberately neutral.
+- **brand** (forest-700 in light, forest-600 in dark) fills primary buttons, active marks and selected
+  states. White text on it meets at least 4.5:1.
+- **brandText** (forest-700 in light, forest-300 in dark) is used for links and green text. Never use
+  `brand` for text in dark mode.
+- **brandSoft** (forest-100 / forest-night) fills secondary buttons and selected-chip backgrounds.
+- **shell** (forest-700 / forest-800) is the trail-head panel behind the Today, Plan, Progress-level,
+  achievements and test-detail heroes. Text on it is `onShell` (white) and `onShellMuted`.
+- **progress** (forest-700 / leaf-500) marks "done" ticks and completed days.
 
-### Status
-- **Caution Amber** (`caution-amber` / `caution-amber-dark`): safety notes and caution borders.
-- **Alert Coral** (`alert-coral` / `alert-coral-dark`): errors and destructive confirmation only.
+### Data ink (performance lab)
 
-### Named Rules
-**The Meaning-Only Rule.** Amber and coral appear only when something needs care or went wrong.
-They never decorate, and a low result is never coloured red.
+- **dataInk** (teal-700 / teal-300) is used for chart lines, markers, ruler markers, meters and change
+  figures. It has at least 4.5:1 contrast on the surface in both themes.
+- **dataInkSoft** (teal-100 / teal-night) is used for area fills under lines, meter tracks and zone
+  tints.
 
-**The Neutral Unknown Rule.** Anything not yet known uses Unknown Slate with a dashed outline, never
-a warning or error colour.
+### Waymark blazes
 
-**The Text Contrast Rule.** Indigo text always uses `brandText`, never `brand`: body-size text needs
-4.5:1 in both themes.
+Red, blue, yellow and green paints are each paired with a shape (bar, dot, cross, triangle) on a white
+plate in both themes. They identify a dimension and nothing else.
 
-**The No Verdict Colour Rule. Changes between results are signed numbers in text colour
-("+3 vs previous"), never green or red: "up" is good for push-ups and not for resting heart rate.
+### Zones (D42)
+
+`attention` (amber), `fine` (forest) and `strength` (teal) each have a `Soft` tint. A zone is always
+shown with its icon and word (`ZoneBadge`), never by colour alone. `unknown` uses the neutral grey.
+
+### Meaning only
+
+**warning** (amber) is for safety notes. **danger** (error red) is for errors and destructive
+confirmations. Neither is ever used to colour a result.
+
+### Named rules
+
+- **The no-verdict colour rule.** A change between results is a signed number in data ink inside a
+  neutral chip, for example "+3 vs previous". "Up" is good for push-ups and bad for resting heart
+  rate, so the colour never decides.
+- **The neutral-unknown rule.** Anything not yet known uses `unknown` grey with a dashed outline.
+- **The text-contrast rule.** Body-size text uses `text`, `textMuted`, `brandText` or `dataInk`, all
+  at 4.5:1 or more in both themes.
 
 ## Typography
 
-**Display Font:** platform system font (SF Pro on iOS, Roboto on Android)
-**Body Font:** the same system font
+**Family:** Geologica 400, 500, 600 and 700, loaded through expo-font. It covers Romanian and Cyrillic.
 
-**Character:** one familiar, highly legible family in six steps; hierarchy comes from size and
-weight, not from a second face.
+| Variant | Size / line | Weight | Use |
+|---|---|---|---|
+| display | 32/38, −0.8 | 700 | greeting, timer digits |
+| title | 24/30, −0.4 | 700 | screen titles, hero names |
+| heading | 18/24, −0.2 | 600 | section and card headings |
+| body | 16/23 | 400 | explanations, instructions |
+| label | 14/19 | 600 | row titles, button labels, chip figures |
+| caption | 13/18 | 400 | descriptions, dates, hints |
+| micro | 11/14, +0.2 | 600 | chart axes, upper-case eyebrow labels on the shell |
+| metric | 46/50, −1.4, tabular | 700 | headline numbers (level, earned badges, result hero) |
+| metricSm | 28/32, −0.6, tabular | 700 | latest value on a series card, hero counts, personal bests |
 
-### Hierarchy
-- **Display** (700, 34/40, -0.6 tracking): greeting and landing headline ("Hello, George").
-- **Title** (700, 24/30, -0.3): screen titles ("Assessments", "Result").
-- **Heading** (600, 18/24): section and card headings ("Your physical profile").
-- **Body** (400, 16/23): explanations and instructions.
-- **Label** (600, 14/19; 16 inside buttons): row titles, button text, values on dimension rows.
-- **Caption** (400, 13/18): descriptions, dates, hints, provenance notes.
-
-### Named Rules
-**The One Family Rule.** A display face may be added later through expo-font, but every screen must
-still work in the system font with Romanian diacritics and Cyrillic.
+The difference between a reading voice and a measuring voice comes from weight and size: metric
+figures are always tabular so digits do not jump.
 
 ## Layout
 
-Single-column screens inside the `Screen` container with 24px (`xl`) gaps between sections and
-12–16px inside cards. The 4px-based spacing scale (`xxs` 2 to `xxxl` 48) is the only source of
-spacing. Primary actions span the full content width at the bottom of a flow (Save result, Enter
-result, Continue). Bottom tabs (Today, Assess, Progress, Profile) for the main areas; flows such as a
-test, a result, onboarding and profile editing open above the tabs with a back arrow.
+The layout is a single column inside `Screen`, with 24 px (`xl`) between sections and 12–16 px inside
+cards, built on a 4 px spacing scale. Each tab opens with a shell hero, then content cards, then
+secondary lists. A screen has at most one primary (filled) action, often in the footer. There are
+five bottom tabs: Today, Plan, Assess, Progress and Profile. Flows such as a test, recording,
+results, the body map and the profile map open above the tabs with a back arrow.
 
-## Elevation & Depth
+## Elevation and depth
 
-Flat by default. Depth comes from tonal layering (background → surface → raised surface) and 1px
-hairline borders. No component uses a drop shadow. Pressed state is shown by lowering opacity (0.85);
-disabled by 0.5.
-
-### Named Rules
-**The Hairline Rule.** Separate with a 1px hairline or a tonal step, never with a shadow.
+- **Light theme:** cards use a soft offset shadow (`elevation.card`), and floating sheets use
+  `floating`.
+- **Dark theme:** there are no card shadows. Depth comes from tonal steps
+  (background → surface → raised) and borders.
+- **Data wells:** data visuals sit in sunken wells (`surfaceSunken`) instead of floating above the page.
 
 ## Shapes
 
-Softly rounded everywhere: 8px for notices and small marks, 12px for buttons, inputs and choices,
-20px for cards, full pills for segmented choices, chips and status labels. Inputs and choices use a
-1.5px stroke; cards and dividers a 1px stroke. Dimension icons sit in 40px circular indigo-wash badges.
+| Element | Radius |
+|---|---|
+| blaze plate | 5 |
+| notices, small marks | 8 |
+| buttons, inputs, wells | 12 |
+| cards | 18 |
+| shell panels and heroes | 24 |
+| chips, zone badges, meters, segmented controls | pill |
 
-## Components
+Achievement badges are diamonds (a waymark turned 45°). Pictograms sit on rounded forest "signs".
 
-### Buttons
-- **Shape:** gently rounded (12px), 52px minimum height, 24px side padding, label at 16/600.
-- **Primary:** Instrument Indigo with white text: the single main action of a screen.
-- **Secondary:** Indigo Wash with indigo text: the second action (e.g. "Back to home" under "Next test").
-- **Ghost:** transparent with indigo text: quiet actions (Delete this result, Update my answers).
-- **States:** pressed 0.85 opacity, disabled 0.5, loading shows a spinner in the label colour.
+## Do and don't
 
-### Cards / Containers
-- **Corner Style:** 20px.
-- **Background:** surface (white / ink surface) on the page background.
-- **Border:** 1px hairline. **Shadow:** none.
-- **Internal Padding:** 16px, 12px gap between children.
+**Do:**
 
-### Inputs / Fields
-- **Style:** 1.5px stroke, 12px radius, 12px side padding on the surface colour.
-- **Error:** coral stroke plus a caption message under the field ("Required.").
+- Take every colour, size, radius and duration from `tokens.ts` through `useTheme()`.
+- Label every value with its provenance: measured, calculated, estimated or reported.
+- Check new screens in light and dark, and in Romanian, English and Russian.
+- Pair every colour signal with a shape, icon or word.
 
-### Chips and segmented choices
-- **Style:** pills with a 1.5px stroke; selected state fills with Indigo Wash, indigo stroke and indigo text.
+**Don't:**
 
-### Navigation
-- **Bottom tabs:** surface background with a hairline top border; active tab indigo, inactive muted
-  slate; labels 12/600 under 22-icon set glyphs.
-
-### Dimension row (signature component)
-- A 40px indigo-wash icon badge, the dimension name (label), a caption with the test and date (or what
-  was reported), and on the right either the value (label) or a dashed Unknown Slate pill
-  ("Not assessed").
-
-### Status pill
-- Dashed 1px Unknown Slate outline, 11px caption text, pill shape. Used only for unknown states.
-
-## Do's and Don'ts
-
-### Do:
-- **Do** take every colour, spacing and radius from `mobile/src/theme/tokens.ts` through `useTheme()`.
-- **Do** give each screen one primary (indigo) action; put a second action in the secondary style.
-- **Do** label every value with its provenance (measured, calculated, estimated, reported).
-- **Do** check every new screen in light and dark, and in Romanian, English and Russian.
-
-### Don't:
-- **Don't** add drop shadows; use a hairline or a tonal step.
-- **Don't** colour a result as good or bad, or a change as green or red.
-- **Don't** show an overall score, a ranking, or a comparison with other people.
-- **Don't** use amber or coral for anything that isn't a safety note or an error.
-- **Don't** encode status by colour alone; pair it with text, shape or a dashed outline.
+- Colour a result or a change as good or bad.
+- Show an overall score, a ranking or a comparison with other people.
+- Use amber or red for anything other than safety notes and errors.
+- Add a loop that runs forever. Use `useVisibleLoop` with `AMBIENT_REPEATS`.
