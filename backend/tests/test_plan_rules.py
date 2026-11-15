@@ -131,3 +131,28 @@ class TestTargets:
         t = targets.stance(30, 40)
         assert t is not None and t.target == 45
         assert targets.stance(50, 40) is None
+
+
+class TestPersonalFocus:
+    """plan-2: health first, then what matters to the person."""
+
+    def test_without_relevance_it_is_plan_1(self) -> None:
+        levels = {"cardio": 0.6, "strength": 0.5, "balance": 0.7}
+        assert rules.choose_focus(levels) == rules.choose_focus(levels, {})
+
+    def test_an_attention_zone_dimension_always_wins(self) -> None:
+        levels = {"cardio": 0.3, "strength": 0.6}
+        assert rules.choose_focus(levels, {"strength": 20.0})[0] == "cardio"
+
+    def test_with_no_attention_zone_the_most_relevant_dimension_leads(self) -> None:
+        levels = {"cardio": 0.5, "strength": 0.6, "balance": 0.7}
+        assert rules.choose_focus(levels)[0] == "cardio"
+        assert rules.choose_focus(levels, {"balance": 9.0, "strength": 4.0})[0] == "balance"
+
+    def test_a_dimension_already_a_strength_is_not_chosen_for_relevance(self) -> None:
+        levels = {"cardio": 0.5, "strength": 0.9}
+        assert rules.choose_focus(levels, {"strength": 20.0})[0] == "cardio"
+
+    def test_irrelevant_profile_falls_back_to_the_lowest(self) -> None:
+        levels = {"cardio": 0.5, "strength": 0.6}
+        assert rules.choose_focus(levels, {"lifestyle": 5.0})[0] == "cardio"

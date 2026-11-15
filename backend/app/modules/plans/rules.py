@@ -19,7 +19,9 @@ from datetime import date, timedelta
 
 from app.modules.onboarding.vocab import IntensityCeiling
 
-PLAN_VERSION = "plan-1"
+# plan-2: the focus also weighs what matters to the person (personalisation), but only when no
+# dimension is in the attention zone; health comes first. Running plan-1 plans are unchanged.
+PLAN_VERSION = "plan-2"
 PLAN_WEEKS = 8
 DAILY_GAIN = 0.01
 
@@ -70,12 +72,24 @@ def secondary_for(primary: str, levels: Mapping[str, float | None]) -> str:
     return measured[0][2] if measured else other[0]
 
 
-def choose_focus(levels: Mapping[str, float | None]) -> tuple[str, str]:
-    """(primary, secondary). With nothing measured: fitness first, then strength."""
+def choose_focus(
+    levels: Mapping[str, float | None], relevance: Mapping[str, float] | None = None
+) -> tuple[str, str]:
+    """(primary, secondary). With nothing measured: fitness first, then strength.
+
+    Health first: the lowest-standing dimension, exactly as in plan-1, whenever any dimension is in the
+    attention zone or no profile relevance is known. Otherwise the focus is the dimension that matters
+    most to the person (`relevance`, summed capacity weights) among those not yet a strength; ties go to
+    the lower standing."""
     measured = sorted(
         (lv, EVIDENCE_ORDER.index(d), d) for d, lv in levels.items() if lv is not None and d in FAMILY
     )
     primary = measured[0][2] if measured else "cardio"
+    if relevance and measured and measured[0][0] >= ATTENTION_BELOW:
+        room = [(relevance.get(d, 0.0), -lv, -i, d) for lv, i, d in measured if lv < STRENGTH_FROM]
+        best = max(room, default=None)
+        if best is not None and best[0] > 0:
+            primary = best[3]
     return primary, secondary_for(primary, levels)
 
 

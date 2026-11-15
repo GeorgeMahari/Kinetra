@@ -13,6 +13,9 @@ from app.modules.assessments.models import Measurement
 from app.modules.assessments.schemas import Overview
 from app.modules.insights import service as insights_service
 from app.modules.onboarding import service as onboarding_service
+from app.modules.personalization import service as personalization_service
+from app.modules.personalization.capacities import DIMENSION_OF
+from app.modules.personalization.engine import capacity_weights
 from app.modules.plans import queries, rules, targets
 from app.modules.plans.models import ImprovementPlan, PlanTaskCompletion
 from app.modules.plans.schemas import (
@@ -114,6 +117,15 @@ def _target_for(db: Session, user: User, dimension: str, ov: Overview, today: da
     return next((t for t in candidates if t is not None), None)
 
 
+def _relevance(db: Session, user: User) -> dict[str, float]:
+    """How much each dimension matters to the person: the summed weights of its capacities."""
+    out: dict[str, float] = {}
+    for cw in capacity_weights(personalization_service.engine_profile(db, user)):
+        d = DIMENSION_OF[cw.capacity].value
+        out[d] = out.get(d, 0.0) + cw.weight
+    return out
+
+
 def _active(db: Session, user: User, today: date) -> ImprovementPlan | None:
     row = db.scalar(
         select(ImprovementPlan).where(ImprovementPlan.user_id == user.id, ImprovementPlan.status == "active")
@@ -153,7 +165,7 @@ def view(db: Session, user: User, today: date) -> PlanViewOut:
     _check_today(today)
     ov = assessments_service.overview(db, user)
     levels = _levels(db, user, ov)
-    primary, secondary = rules.choose_focus(levels)
+    primary, secondary = rules.choose_focus(levels, _relevance(db, user))
     row = _active(db, user, today)
     rows = queries.plans(db, user)
     spans = queries.spans(rows)
@@ -224,7 +236,7 @@ def start(db: Session, user: User, body: StartIn) -> PlanViewOut:
         raise AppError("plan_active", "A plan is already running.", status.HTTP_409_CONFLICT)
     ov = assessments_service.overview(db, user)
     levels = _levels(db, user, ov)
-    primary, secondary = rules.choose_focus(levels)
+    primary, secondary = rules.choose_focus(levels, _relevance(db, user))
     if body.primary and body.primary != primary:
         primary, secondary = body.primary, rules.secondary_for(body.primary, levels)
     ceiling = onboarding_service.latest_intensity_ceiling(db, user)
