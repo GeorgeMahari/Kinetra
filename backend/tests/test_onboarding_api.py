@@ -50,8 +50,9 @@ def user(api: TestClient) -> dict[str, str]:
 
 def test_sports_catalogue_is_seeded(api: TestClient) -> None:
     sports = api.get("/api/v1/catalog/sports").json()
-    assert len(sports) == 30
+    assert len(sports) == 33  # 30 from 0003, 3 athletics disciplines from 0010
     assert {"code": "cycling", "category": "endurance"} in sports
+    assert {"code": "athletics_sprints", "category": "mixed"} in sports
 
 
 def test_onboarding_requires_authentication(api: TestClient) -> None:
@@ -209,9 +210,10 @@ class TestPrivacy:
                 "activity_profile_sports",
                 "readiness_screenings",
                 "onboarding_states",
+                "user_capacity_priorities",
             ):
                 assert conn.execute(text(f"SELECT count(*) FROM {table}")).scalar_one() == 0, table
-            assert conn.execute(text("SELECT count(*) FROM sports")).scalar_one() == 30  # catalogue untouched
+            assert conn.execute(text("SELECT count(*) FROM sports")).scalar_one() == 33  # catalogue untouched
 
 
 class TestPregnancyQuestion:

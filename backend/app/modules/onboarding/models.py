@@ -1,7 +1,9 @@
 """Onboarding data.
 
 - `sports`: reference catalogue (seeded by migration 0003). Names are translated in the app by code.
-- `user_goals`: the user's current goals (a preference set, replaced on update).
+- `user_goals`: the user's current goals (a preference set, replaced on update); `rank` 1 = primary,
+  2-3 = secondary, NULL for goals saved before ranks existed (migration 0010).
+- `user_capacity_priorities`: explicit "what matters most" choices (personalisation), replaced on update.
 - `activity_profiles` + `activity_profile_sports`: append-only snapshots. Re-answering creates a new
   snapshot; the latest is current and earlier ones remain as history.
 - `readiness_screenings`: append-only. Stores answers, the rule version and the outcome.
@@ -41,10 +43,12 @@ from app.modules.onboarding.vocab import (
     ReadinessResult,
     SleepQuality,
     SportCategory,
+    SportLevel,
     StairsTolerance,
     TrainingExperience,
     check_in,
 )
+from app.modules.personalization.capacities import Capacity
 
 
 def _now() -> Mapped[datetime]:
@@ -69,9 +73,29 @@ class UserGoal(Base):
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     goal: Mapped[str] = mapped_column(String(40), primary_key=True)
+    rank: Mapped[int | None] = mapped_column(SmallInteger)
     created_at: Mapped[datetime] = _now()
 
-    __table_args__ = (CheckConstraint(check_in("goal", Goal), name="goal_valid"),)
+    __table_args__ = (
+        CheckConstraint(check_in("goal", Goal), name="goal_valid"),
+        CheckConstraint("rank IS NULL OR rank BETWEEN 1 AND 3", name="rank_range"),
+    )
+
+
+class UserCapacityPriority(Base):
+    __tablename__ = "user_capacity_priorities"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    capacity: Mapped[str] = mapped_column(String(30), primary_key=True)
+    weight: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+    __table_args__ = (
+        CheckConstraint(check_in("capacity", Capacity), name="capacity_valid"),
+        CheckConstraint("weight BETWEEN 1 AND 3", name="weight_range"),
+    )
 
 
 class ActivityProfile(Base):
@@ -147,8 +171,12 @@ class ActivityProfileSport(Base):
     )
     sport_code: Mapped[str] = mapped_column(String(40), ForeignKey("sports.code"), primary_key=True)
     sessions_per_week: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    level: Mapped[str | None] = mapped_column(String(20))
 
-    __table_args__ = (CheckConstraint("sessions_per_week BETWEEN 0 AND 21", name="sessions_range"),)
+    __table_args__ = (
+        CheckConstraint("sessions_per_week BETWEEN 0 AND 21", name="sessions_range"),
+        CheckConstraint(f"level IS NULL OR {check_in('level', SportLevel)}", name="level_valid"),
+    )
 
 
 class ReadinessScreening(Base):

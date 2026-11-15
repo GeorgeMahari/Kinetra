@@ -22,3 +22,6 @@ node_modules/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local database backups (contain personal data)
+db/backups/

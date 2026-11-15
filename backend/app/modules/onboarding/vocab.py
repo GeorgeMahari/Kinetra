@@ -14,6 +14,18 @@ class Goal(StrEnum):
     sport_performance = "sport_performance"
     general_wellbeing = "general_wellbeing"
     know_baseline = "know_baseline"
+    # Added in migration 0010 (personalisation).
+    build_muscle = "build_muscle"
+    power_speed = "power_speed"
+    agility_coordination = "agility_coordination"
+
+
+class SportLevel(StrEnum):
+    """Self-reported level in one sport (migration 0010). NULL = not stated."""
+
+    beginner = "beginner"
+    intermediate = "intermediate"
+    advanced = "advanced"
 
 
 class ActivityLevel(StrEnum):

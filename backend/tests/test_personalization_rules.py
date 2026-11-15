@@ -157,3 +157,17 @@ class TestBattery:
         assert tiers == sorted(
             tiers, key=[e.Tier.priority, e.Tier.core, e.Tier.additional, e.Tier.inactive].index
         )
+
+
+class TestMigrationMatchesVocabulary:
+    def test_0010_lists_every_capacity_and_goal(self) -> None:
+        import importlib.util
+        from pathlib import Path
+
+        path = next(Path(__file__).parents[1].glob("alembic/versions/*_0010_*.py"))
+        spec = importlib.util.spec_from_file_location("m0010", path)
+        assert spec and spec.loader
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        assert set(mod.CAPACITIES) == {c.value for c in Capacity}
+        assert set(mod.OLD_GOALS + mod.NEW_GOALS) == {g.value for g in Goal}
