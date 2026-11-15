@@ -28,6 +28,13 @@ import {
 import { useScreenScroll } from './Screen';
 
 /** Whether a box at `top` (window coordinates) with `height` overlaps a window of `windowHeight`. */
+/**
+ * How many times an ambient loop (beacon, ring, flame) plays each time it comes into view, before it
+ * rests. Measured on the emulator, any running loop forces a frame every vsync (PERFORMANCE_REPORT,
+ * step 2 and the redesign pass); a few pulses draw the eye just as well and then the screen goes idle.
+ */
+export const AMBIENT_REPEATS = 4;
+
 export function isInViewport(top: number, height: number, windowHeight: number): boolean {
   'worklet';
   return top + height > 0 && top < windowHeight;
@@ -46,7 +53,7 @@ export function useScreenFocused(): boolean {
 }
 
 /**
- * Runs `loop()` (an infinite Reanimated animation, e.g. `withRepeat(..., -1)`) on `value` only while
+ * Runs `loop()` (a repeating Reanimated animation, e.g. `withRepeat(..., AMBIENT_REPEATS)`) on `value` only while
  * the element holding the returned ref is focused, on screen, and motion is allowed.
  * Attach the ref to the animated element (an `Animated.View`).
  *

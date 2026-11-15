@@ -29,7 +29,7 @@ import type { Plan } from '@/api/plan';
 import { AppText } from '@/components/AppText';
 import { Blaze } from '@/components/Blaze';
 import { Icon } from '@/components/Icon';
-import { useVisibleLoop } from '@/components/visibleLoop';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/theme/ThemeProvider';
 import { blazeColors } from '@/theme/tokens';
@@ -184,7 +184,7 @@ function Here({ x, y }: { x: number; y: number }) {
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
   const { ref } = useVisibleLoop(pulse, () =>
-    withRepeat(withTiming(1, { duration: 1700, easing: Easing.out(Easing.cubic) }), -1),
+    withRepeat(withTiming(1, { duration: 1700, easing: Easing.out(Easing.cubic) }), AMBIENT_REPEATS),
   );
   const ring = useAnimatedStyle(() => ({
     opacity: reduced ? 0.5 : 0.8 * (1 - pulse.value),
@@ -217,7 +217,7 @@ function Streak({ streak, best }: { streak: number; best: number }) {
   // Flickers only with a streak, while Plan is focused and the flame is on screen.
   const { ref } = useVisibleLoop(
     flicker,
-    () => withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 1100 })), -1),
+    () => withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 1100 })), AMBIENT_REPEATS),
     0,
     streak > 0,
   );

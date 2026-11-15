@@ -22,7 +22,7 @@ import type { DimensionCode } from '@/api/onboarding';
 import { AppText } from '@/components/AppText';
 import { Logo } from '@/components/Logo';
 import { useScreenScroll } from '@/components/Screen';
-import { useVisibleLoop } from '@/components/visibleLoop';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -172,7 +172,7 @@ function Beacon({ x, y }: { x: number; y: number }) {
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
   const { ref } = useVisibleLoop(pulse, () =>
-    withRepeat(withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) }), -1),
+    withRepeat(withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) }), AMBIENT_REPEATS),
   );
   const style = useAnimatedStyle(() => ({
     opacity: reduced ? 0.5 : 0.7 * (1 - pulse.value),

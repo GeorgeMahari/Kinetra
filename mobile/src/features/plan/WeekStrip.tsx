@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import type { PlanDay } from '@/api/plan';
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
-import { useVisibleLoop } from '@/components/visibleLoop';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
 import { weekdayNames } from '@/features/progress/calendar';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -106,7 +106,7 @@ function TodayMark({
   const pulse = useSharedValue(0);
   // Pulses only while Plan is focused and this day is on screen (see `useVisibleLoop`).
   const { ref } = useVisibleLoop(pulse, () =>
-    withRepeat(withTiming(1, { duration: 1500, easing: Easing.out(Easing.cubic) }), -1),
+    withRepeat(withTiming(1, { duration: 1500, easing: Easing.out(Easing.cubic) }), AMBIENT_REPEATS),
   );
   const ring = useAnimatedStyle(() => ({ opacity: 0.6 * (1 - pulse.value), transform: [{ scale: 1 + 0.45 * pulse.value }] }));
   return (

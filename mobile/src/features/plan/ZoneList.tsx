@@ -1,27 +1,19 @@
 /**
  * "Where you are now": every dimension in its health zone. Each zone has its own icon and word,
  * so colour is never the only signal, and "not assessed" stays neutral rather than reading as bad.
- * Tapping a row opens the assessments, where a missing or dated test can be done.
+ * Tapping a row opens the assessments of that dimension, where a missing or dated test can be done.
  */
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { PlanView, Zone } from '@/api/plan';
+import type { PlanView } from '@/api/plan';
 import { AppText } from '@/components/AppText';
 import { Blaze } from '@/components/Blaze';
-import { Icon, type IconName } from '@/components/Icon';
+import { ZoneBadge } from '@/components/data/ZoneBadge';
 import { FadeInItem, PressableScale } from '@/components/motion';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/theme/ThemeProvider';
-import type { ThemeColors } from '@/theme/tokens';
-
-const ZONE_STYLE: Record<Zone, { icon: IconName; color: keyof ThemeColors }> = {
-  attention: { icon: 'alert', color: 'warning' },
-  fine: { icon: 'check', color: 'brandText' },
-  strength: { icon: 'flame', color: 'brandText' },
-  unknown: { icon: 'unknown', color: 'unknown' },
-};
 
 export function ZoneList({ zones, focus }: { zones: PlanView['zones']; focus?: string }) {
   const { t } = useTranslation();
@@ -37,7 +29,6 @@ export function ZoneList({ zones, focus }: { zones: PlanView['zones']; focus?: s
       <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }}>
         {rows.map((z, i) => {
           const dim = DIMENSIONS.find((d) => d.key === z.dimension);
-          const s = ZONE_STYLE[z.zone];
           const name = t(`dimensions.${z.dimension}.name`);
           return (
             <FadeInItem key={z.dimension} index={i}>
@@ -46,7 +37,7 @@ export function ZoneList({ zones, focus }: { zones: PlanView['zones']; focus?: s
                 testID={`zone-${z.dimension}`}
                 accessibilityRole="button"
                 accessibilityLabel={`${name}: ${t(`plan.zones.${z.zone}`)}${focus === z.dimension ? `, ${t('plan.focusTag')}` : ''}`}
-                onPress={() => router.push('/assess')}
+                onPress={() => router.push({ pathname: '/assess', params: { dimension: z.dimension } })}
                 hapticKind="select"
                 highlight={{ base: colors.surface, active: colors.brandSoft }}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, minHeight: 56 }}
@@ -60,23 +51,7 @@ export function ZoneList({ zones, focus }: { zones: PlanView['zones']; focus?: s
                     </AppText>
                   ) : null}
                 </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4,
-                    paddingVertical: 4,
-                    paddingHorizontal: spacing.sm,
-                    borderRadius: radius.pill,
-                    borderWidth: 1,
-                    borderColor: z.zone === 'attention' ? colors.warning : colors.border,
-                  }}
-                >
-                  <Icon name={s.icon} size={14} color={colors[s.color]} />
-                  <AppText variant="caption" color={s.color} style={{ fontWeight: '600' }}>
-                    {t(`plan.zones.${z.zone}`)}
-                  </AppText>
-                </View>
+                <ZoneBadge zone={z.zone} />
               </PressableScale>
             </FadeInItem>
           );
