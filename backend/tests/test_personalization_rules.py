@@ -4,6 +4,7 @@ from datetime import date
 
 from app.modules.onboarding.vocab import Dimension, Goal
 from app.modules.personalization import engine as e
+from app.modules.personalization import knowledge
 from app.modules.personalization.capacities import DIMENSION_OF, Capacity
 from app.modules.personalization.knowledge import (
     GOAL_CAPACITIES,
@@ -70,7 +71,9 @@ class TestWeights:
         assert set(weights(sports=(e.SportEntry("unlisted", 5),)).values()) == {0}
 
     def test_overlapping_sources_add_up_with_every_reason_kept(self, monkeypatch) -> None:
-        monkeypatch.setitem(e.SPORT_DEMANDS, "gym_strength", SportDemand({Capacity.max_strength: 3}, "ref"))
+        monkeypatch.setitem(
+            knowledge.SPORT_DEMANDS, "gym_strength", SportDemand({Capacity.max_strength: 3}, "ref")
+        )
         cws = e.capacity_weights(
             e.Profile(
                 sports=(e.SportEntry("gym_strength", 4, "advanced"),),
@@ -87,7 +90,7 @@ class TestWeights:
         }
 
     def test_sport_performance_goal_boosts_sport_demands(self, monkeypatch) -> None:
-        monkeypatch.setitem(e.SPORT_DEMANDS, "tennis", SportDemand({Capacity.agility: 2}, "ref"))
+        monkeypatch.setitem(knowledge.SPORT_DEMANDS, "tennis", SportDemand({Capacity.agility: 2}, "ref"))
         tennis = (e.SportEntry("tennis", 2),)
         plain = weights(sports=tennis)[Capacity.agility]
         boosted = weights(sports=tennis, goals=("sport_performance",))[Capacity.agility]
@@ -171,3 +174,84 @@ class TestMigrationMatchesVocabulary:
         spec.loader.exec_module(mod)
         assert set(mod.CAPACITIES) == {c.value for c in Capacity}
         assert set(mod.OLD_GOALS + mod.NEW_GOALS) == {g.value for g in Goal}
+
+
+def top(profile: e.Profile, n: int = 3) -> list[Capacity]:
+    return [cw.capacity for cw in e.capacity_weights(profile)[:n]]
+
+
+class TestBriefScenarios:
+    """The four users of the brief: same body, different goals, different batteries."""
+
+    def test_bodybuilding_hypertrophy(self) -> None:
+        a = e.Profile(
+            sports=(e.SportEntry("gym_strength", 5, "advanced", "strength"),),
+            goals=("build_muscle",),
+            goals_ranked=True,
+        )
+        assert top(a, 2) == [Capacity.hypertrophy, Capacity.max_strength]
+
+    def test_tennis_performance(self) -> None:
+        b = e.Profile(
+            sports=(e.SportEntry("tennis", 4, "intermediate", "racket"),),
+            goals=("sport_performance",),
+            goals_ranked=True,
+        )
+        assert set(top(b, 2)) == {Capacity.speed, Capacity.agility}
+
+    def test_cycling_endurance(self) -> None:
+        c = e.Profile(
+            sports=(e.SportEntry("cycling", 5, None, "endurance"),),
+            goals=("improve_endurance",),
+            goals_ranked=True,
+        )
+        assert top(c, 1) == [Capacity.aerobic_endurance]
+
+    def test_volleyball_jump_and_power(self) -> None:
+        d = e.Profile(
+            sports=(e.SportEntry("volleyball", 3, None, "team"),), goals=("power_speed",), goals_ranked=True
+        )
+        assert top(d, 1) == [Capacity.power]
+
+    def test_four_users_get_four_different_priorities(self) -> None:
+        profiles = [
+            e.Profile(sports=(e.SportEntry("gym_strength", 5, None, "strength"),), goals=("build_muscle",)),
+            e.Profile(sports=(e.SportEntry("tennis", 4, None, "racket"),), goals=("sport_performance",)),
+            e.Profile(sports=(e.SportEntry("cycling", 5, None, "endurance"),), goals=("improve_endurance",)),
+            e.Profile(sports=(e.SportEntry("volleyball", 3, None, "team"),), goals=("power_speed",)),
+        ]
+        assert len({top(p, 1)[0] for p in profiles}) == 4
+
+    def test_gym_and_tennis_combine_into_one_ranking(self) -> None:
+        both = e.Profile(
+            sports=(
+                e.SportEntry("gym_strength", 4, None, "strength"),
+                e.SportEntry("tennis", 2, None, "racket"),
+            ),
+            goals=("build_muscle",),
+            goals_ranked=True,
+        )
+        ranked = top(both, 5)
+        assert Capacity.hypertrophy in ranked and Capacity.agility in ranked
+        cw = {c.capacity: c for c in e.capacity_weights(both)}
+        assert {r.code for r in cw[Capacity.max_strength].reasons} == {"gym_strength", "build_muscle"}
+
+    def test_a_sport_without_its_own_row_uses_its_category(self) -> None:
+        w = weights(sports=(e.SportEntry("handball", 3, None, "team"),))
+        assert w[Capacity.agility] > 0
+        reasons = next(
+            cw
+            for cw in e.capacity_weights(e.Profile(sports=(e.SportEntry("handball", 3, None, "team"),)))
+            if cw.capacity is Capacity.agility
+        ).reasons
+        assert reasons[0].code == "handball"
+
+    def test_no_sport_makes_reaction_time_relevant(self) -> None:
+        for code, d in knowledge.SPORT_DEMANDS.items():
+            assert Capacity.reaction not in d.capacities, code
+        for caps in knowledge.CATEGORY_DEMANDS.values():
+            assert Capacity.reaction not in caps
+
+    def test_every_sport_row_cites_a_known_reference(self) -> None:
+        for code, d in knowledge.SPORT_DEMANDS.items():
+            assert d.reference in knowledge.SPORT_REFERENCES, code

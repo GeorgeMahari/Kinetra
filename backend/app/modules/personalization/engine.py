@@ -21,11 +21,11 @@ from enum import StrEnum
 from app.modules.personalization.capacities import Capacity
 from app.modules.personalization.knowledge import (
     GOAL_CAPACITIES,
-    SPORT_DEMANDS,
     TEST_PROFILES,
     AssessmentSpec,
     Evidence,
     Role,
+    sport_demand,
 )
 
 PERSONALIZATION_VERSION = "personalization-1"
@@ -58,6 +58,7 @@ class SportEntry:
     code: str
     sessions_per_week: int
     level: str | None = None
+    category: str | None = None  # the sport's catalogue category, for sports without their own row
 
 
 @dataclass(frozen=True)
@@ -92,7 +93,7 @@ def capacity_weights(profile: Profile) -> list[CapacityWeight]:
     sport_boost = SPORT_GOAL_BOOST if "sport_performance" in profile.goals else 1.0
 
     for s in profile.sports:
-        demand = SPORT_DEMANDS.get(s.code)
+        demand = sport_demand(s.code, s.category)
         if demand is None:
             continue
         factor = frequency_factor(s.sessions_per_week) * LEVEL_FACTOR.get(s.level, 1.0) * sport_boost

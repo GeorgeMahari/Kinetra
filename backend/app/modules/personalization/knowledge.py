@@ -67,10 +67,88 @@ GOAL_CAPACITIES: dict[str, dict[C, int]] = {
 }
 
 # ------------------------------------------------------------------ sports
-# Filled from the source research (docs/PERSONALIZATION_PROPOSAL.md section 8). A sport that is not
-# listed contributes nothing, which falls back to today's behaviour.
+# Sport-specific rows come from physical-demand reviews whose abstracts were read (docs/SCIENCE.md
+# section 9). Every other sport uses its category's profile, labelled `category:<name>`: a design
+# default, not a cited claim. Reaction time is deliberately absent everywhere: no source read links it
+# to performance, so only the user's own goal or priority can make it relevant.
 
-SPORT_DEMANDS: dict[str, SportDemand] = {}
+SPORT_REFERENCES: dict[str, str] = {
+    "acsm_resistance_2009": "American College of Sports Medicine. Position stand: Progression models in "
+    "resistance training for healthy adults. Med Sci Sports Exerc. 2009;41(3):687-708. "
+    "doi:10.1249/MSS.0b013e3181915670",
+    "kovacs_tennis_2007": "Kovacs MS. Tennis physiology: training the competitive athlete. Sports Med. "
+    "2007;37(3):189-198. doi:10.2165/00007256-200737030-00001",
+    "lidor_ziv_volleyball_2010": "Lidor R, Ziv G. Physical and physiological attributes of female volleyball "
+    "players: a review. J Strength Cond Res. 2010;24(7):1963-1973. doi:10.1519/JSC.0b013e3181ddf835",
+    "stolen_soccer_2005": "Stolen T, Chamari K, Castagna C, Wisloff U. Physiology of soccer: an update. "
+    "Sports Med. 2005;35(6):501-536. doi:10.2165/00007256-200535060-00004",
+    "ziv_lidor_basketball_2009": "Ziv G, Lidor R. Physical attributes, physiological characteristics, "
+    "on-court "
+    "performances and nutritional strategies of female and male basketball players. Sports Med. "
+    "2009;39(7):547-568. doi:10.2165/00007256-200939070-00003",
+    "faria_cycling_2005": "Faria EW, Parker DL, Faria IE. The science of cycling: factors affecting "
+    "performance - part 2. Sports Med. 2005;35(4):313-337. doi:10.2165/00007256-200535040-00003",
+    "joyner_coyle_running_2008": "Joyner MJ, Coyle EF. Endurance exercise performance: the physiology of "
+    "champions. J Physiol. 2008;586(1):35-44. doi:10.1113/jphysiol.2007.143834",
+    "pyne_sharp_swimming_2014": "Pyne DB, Sharp RL. Physical and energy requirements of competitive swimming "
+    "events. Int J Sport Nutr Exerc Metab. 2014;24(4):351-359. doi:10.1123/ijsnem.2014-0047 "
+    "(abstract names no capacity list: weak support)",
+    "chaabene_boxing_2015": "Chaabene H, et al. Amateur boxing: physical and physiological attributes. "
+    "Sports Med. 2015;45(3):337-352. doi:10.1007/s40279-014-0274-7",
+}
+
+# Category defaults: design choices mirroring onboarding.rules.SPORT_PERFORMANCE_DIMENSIONS.
+CATEGORY_DEMANDS: dict[str, dict[C, int]] = {
+    "endurance": {C.aerobic_endurance: 3, C.recovery_hr: 1},
+    "strength": {C.max_strength: 3, C.muscular_endurance: 2},
+    "team": {C.aerobic_endurance: 2, C.speed: 2, C.agility: 2, C.power: 2},
+    "racket": {C.agility: 2, C.speed: 2, C.aerobic_endurance: 1},
+    "combat": {C.aerobic_endurance: 2, C.power: 2, C.max_strength: 2},
+    "mind_body": {C.mobility: 3, C.balance: 2},
+    "mixed": {C.max_strength: 2, C.aerobic_endurance: 2, C.muscular_endurance: 1},
+}
+
+SPORT_DEMANDS: dict[str, SportDemand] = {
+    # Hypertrophy and strength programmes share design; track muscle size and strength (ACSM 2009).
+    "gym_strength": SportDemand(
+        {C.max_strength: 3, C.hypertrophy: 3, C.muscular_endurance: 2}, "acsm_resistance_2009"
+    ),
+    # Speed, agility and power with a high aerobic base; points last under 10 s (Kovacs 2007).
+    "tennis": SportDemand(
+        {C.speed: 3, C.agility: 3, C.power: 2, C.aerobic_endurance: 2}, "kovacs_tennis_2007"
+    ),
+    # Vertical jump separates skill levels; strength, agility/speed, aerobic profile (Lidor & Ziv 2010).
+    "volleyball": SportDemand(
+        {C.power: 3, C.max_strength: 2, C.agility: 2, C.speed: 2, C.aerobic_endurance: 1},
+        "lidor_ziv_volleyball_2010",
+    ),
+    # ~10 km a game near threshold plus jumps, sprints, turns and balance (Stolen 2005).
+    "football": SportDemand(
+        {C.aerobic_endurance: 3, C.speed: 3, C.agility: 2, C.power: 2, C.balance: 1}, "stolen_soccer_2005"
+    ),
+    # Aerobic capacity, vertical jump, speed and agility (Ziv & Lidor 2009).
+    "basketball": SportDemand(
+        {C.power: 3, C.agility: 3, C.speed: 2, C.aerobic_endurance: 2}, "ziv_lidor_basketball_2009"
+    ),
+    # Peak power output and economy on an aerobic base (Faria 2005).
+    "cycling": SportDemand({C.aerobic_endurance: 3, C.power: 2}, "faria_cycling_2005"),
+    # VO2max, lactate threshold and economy (Joyner & Coyle 2008).
+    "running": SportDemand({C.aerobic_endurance: 3, C.recovery_hr: 1}, "joyner_coyle_running_2008"),
+    # Weakly supported: the abstract gives no capacity list (Pyne & Sharp 2014).
+    "swimming": SportDemand({C.aerobic_endurance: 3}, "pyne_sharp_swimming_2014"),
+    # Cardiorespiratory fitness, anaerobic power, limb strength and power (Chaabene 2015).
+    "boxing": SportDemand({C.aerobic_endurance: 3, C.power: 3, C.max_strength: 2}, "chaabene_boxing_2015"),
+}
+
+
+def sport_demand(code: str, category: str | None) -> SportDemand | None:
+    """The sport's own row, else its category's default, else nothing."""
+    if code in SPORT_DEMANDS:
+        return SPORT_DEMANDS[code]
+    if category in CATEGORY_DEMANDS:
+        return SportDemand(CATEGORY_DEMANDS[category], f"category:{category}")
+    return None
+
 
 # ------------------------------------------------------------------ tests
 # The ten existing tests form the core battery; their evidence matches the norms in assessments/engine.
