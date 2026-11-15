@@ -62,7 +62,7 @@ class ReferenceOut(BaseModel):
 
 class RecommendationOut(BaseModel):
     code: str
-    kind: Literal["setup", "safety", "profile", "assess", "retest", "habit"]
+    kind: Literal["setup", "safety", "profile", "assess", "retest", "habit", "progress", "flag"]
     priority: int
     dimension: str | None
     test_code: str | None

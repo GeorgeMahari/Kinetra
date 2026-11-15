@@ -38,6 +38,9 @@ class AssessmentSpec:
     core: bool = False  # the general battery everyone sees (today's tests)
     # Only relevant to people who practise one of these sports (e.g. the swim test). Empty = anyone.
     only_for_sports: frozenset[str] = frozenset()
+    # Which way the headline improves: "up", "down", or None when it depends on context (heart rate,
+    # body size, asymmetry). Used only to spot a declining trend, never to rate a single result.
+    better: str | None = None
 
 
 @dataclass(frozen=True)
@@ -164,46 +167,55 @@ TEST_PROFILES: dict[str, AssessmentSpec] = {
         core=True,
     ),
     "cooper_12min": AssessmentSpec(
-        {C.aerobic_endurance: Role.primary}, Evidence.validated_norms, 8, core=True
+        {C.aerobic_endurance: Role.primary}, Evidence.validated_norms, 8, core=True, better="up"
     ),
     "pushups": AssessmentSpec(
         {C.muscular_endurance: Role.primary, C.max_strength: Role.secondary},
         Evidence.validated_norms,
         8,
         core=True,
+        better="up",
     ),
     "pulls": AssessmentSpec(
         {C.max_strength: Role.primary, C.muscular_endurance: Role.secondary},
         Evidence.self_comparison,
         8,
         core=True,
+        better="up",
     ),
     "chair_stand_30s": AssessmentSpec(
         {C.max_strength: Role.primary, C.muscular_endurance: Role.secondary},
         Evidence.validated_norms,
         8,
         core=True,
+        better="up",
     ),
-    "plank": AssessmentSpec({C.muscular_endurance: Role.primary}, Evidence.validated_norms, 8, core=True),
-    "sit_reach": AssessmentSpec({C.mobility: Role.primary}, Evidence.validated_norms, 8, core=True),
-    "single_leg_stance": AssessmentSpec({C.balance: Role.primary}, Evidence.validated_norms, 8, core=True),
+    "plank": AssessmentSpec(
+        {C.muscular_endurance: Role.primary}, Evidence.validated_norms, 8, core=True, better="up"
+    ),
+    "sit_reach": AssessmentSpec(
+        {C.mobility: Role.primary}, Evidence.validated_norms, 8, core=True, better="up"
+    ),
+    "single_leg_stance": AssessmentSpec(
+        {C.balance: Role.primary}, Evidence.validated_norms, 8, core=True, better="up"
+    ),
     "body_measurements": AssessmentSpec(
         {C.body_composition: Role.primary}, Evidence.validated_norms, 8, core=True
     ),
     # --- engine-3 modules. None is rated against a norm: self-comparison, or a documented flag.
-    "broad_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6),
-    "vertical_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6),
+    "broad_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6, better="up"),
+    "vertical_jump": AssessmentSpec({C.power: Role.primary}, Evidence.self_comparison, 6, better="up"),
     "agility_505": AssessmentSpec(
-        {C.agility: Role.primary, C.speed: Role.secondary}, Evidence.self_comparison, 6
+        {C.agility: Role.primary, C.speed: Role.secondary}, Evidence.self_comparison, 6, better="down"
     ),
     "sprint_20m": AssessmentSpec(
-        {C.speed: Role.primary, C.power: Role.secondary}, Evidence.self_comparison, 6
+        {C.speed: Role.primary, C.power: Role.secondary}, Evidence.self_comparison, 6, better="down"
     ),
-    "ruler_drop": AssessmentSpec({C.reaction: Role.primary}, Evidence.self_comparison, 6),
-    "back_scratch": AssessmentSpec({C.mobility: Role.primary}, Evidence.self_comparison, 8),
+    "ruler_drop": AssessmentSpec({C.reaction: Role.primary}, Evidence.self_comparison, 6, better="down"),
+    "back_scratch": AssessmentSpec({C.mobility: Role.primary}, Evidence.self_comparison, 8, better="up"),
     "anterior_reach": AssessmentSpec({C.balance: Role.primary}, Evidence.documented_threshold, 8),
     "single_leg_hop": AssessmentSpec(
-        {C.power: Role.primary, C.balance: Role.secondary}, Evidence.documented_threshold, 8
+        {C.power: Role.primary, C.balance: Role.secondary}, Evidence.documented_threshold, 8, better="up"
     ),
     "circumferences": AssessmentSpec(
         {C.hypertrophy: Role.primary, C.body_composition: Role.secondary}, Evidence.self_comparison, 6
@@ -213,5 +225,6 @@ TEST_PROFILES: dict[str, AssessmentSpec] = {
         Evidence.self_comparison,
         8,
         only_for_sports=frozenset({"swimming", "triathlon"}),
+        better="up",
     ),
 }

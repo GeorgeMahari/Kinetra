@@ -25,6 +25,10 @@ from app.modules.insights.schemas import (
 )
 from app.modules.onboarding import service as onboarding_service
 from app.modules.onboarding.service import ActivitySnapshot
+from app.modules.onboarding.vocab import IntensityCeiling
+from app.modules.personalization import service as personalization_service
+from app.modules.personalization.advice import personal_recommendations
+from app.modules.personalization.engine import Tier
 from app.modules.users.models import User
 from app.shared.age import age_on
 
@@ -160,6 +164,20 @@ def dashboard(db: Session, user: User) -> DashboardOut:
         key=lambda c: latest_results[c].performed_at,
     )
 
+    # Personal recommendations: the sport profile, the battery and real results (insights-4).
+    personal: list[rules.Recommendation] = []
+    if completed:
+        weights, items = personalization_service.state(db, user, now.date())
+        active = [i.test_code for i in items if i.tier is not Tier.inactive]
+        personal = personal_recommendations(
+            weights,
+            items,
+            {d: (s.level if s else None) for d, s in levels.items()},
+            personalization_service.histories(db, user, active),
+            adult=(_age(user) or 0) >= 18,
+            effort_blocked=ov.intensity_ceiling is IntensityCeiling.non_exertional,
+        )
+
     inputs = rules.RecInputs(
         onboarding_completed=completed,
         ceiling=ov.intensity_ceiling,
@@ -174,6 +192,7 @@ def dashboard(db: Session, user: User) -> DashboardOut:
         dimension_status={d.dimension.value: d.status for d in ov.dimensions},
         allowed_tests_by_dimension=allowed_by_dim,
         due_retests=due,
+        personal=personal,
     )
     recs = [
         RecommendationOut(

@@ -6,6 +6,7 @@ levels) plus `user_capacity_priorities`. Updating it writes a new activity snaps
 never touched here.
 """
 
+from collections.abc import Iterable
 from datetime import UTC, date, datetime
 
 from fastapi import status
@@ -24,7 +25,7 @@ from app.modules.onboarding.models import (
     UserGoal,
 )
 from app.modules.onboarding.vocab import Goal, SportLevel
-from app.modules.personalization import engine
+from app.modules.personalization import advice, engine
 from app.modules.personalization.capacities import DIMENSION_OF, Capacity
 from app.modules.personalization.knowledge import TEST_PROFILES
 from app.modules.personalization.schemas import (
@@ -171,7 +172,10 @@ def _reason(r: engine.Reason) -> ReasonOut:
     return ReasonOut(source=r.source, code=r.code, capacity=r.capacity)
 
 
-def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
+def state(
+    db: Session, user: User, today: date | None = None
+) -> tuple[list[engine.CapacityWeight], list[engine.BatteryItem]]:
+    """The user's capacity weights and tiered battery (used by the battery endpoint and the dashboard)."""
     profile = engine_profile(db, user)
     weights = engine.capacity_weights(profile)
     practised = frozenset(s.code for s in profile.sports if s.sessions_per_week > 0)
@@ -186,6 +190,42 @@ def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
         specs,
         practised,
     )
+    return weights, items
+
+
+def histories(db: Session, user: User, codes: Iterable[str]) -> dict[str, advice.History]:
+    """Headline values per test, oldest first, from the latest protocol only; notes of the latest result."""
+    wanted = [c for c in codes if c in TESTS]
+    rows = db.scalars(
+        select(TestResult)
+        .where(
+            TestResult.user_id == user.id, TestResult.status == "completed", TestResult.test_code.in_(wanted)
+        )
+        .order_by(TestResult.performed_at, TestResult.created_at)
+    ).all()
+    by_test: dict[str, list[TestResult]] = {}
+    for r in rows:
+        by_test.setdefault(r.test_code, []).append(r)
+    out: dict[str, advice.History] = {}
+    for code, rs in by_test.items():
+        headline = TESTS[code].headline
+        protocol = rs[-1].protocol_key
+        values: list[float] = []
+        latest_notes: tuple[str, ...] = ()
+        for r in rs:
+            if r.protocol_key != protocol:
+                continue
+            ind = next((i for i in r.indicators if i.get("code") == headline), None)
+            if ind is not None and ind.get("value") is not None:
+                values.append(float(ind["value"]))
+        notes = [n for i in rs[-1].indicators for n in i.get("notes", [])]
+        latest_notes = tuple(notes)
+        out[code] = advice.History(tuple(values), latest_notes)
+    return out
+
+
+def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
+    weights, items = state(db, user, today)
     return BatteryOut(
         version=engine.PERSONALIZATION_VERSION,
         capacities=[

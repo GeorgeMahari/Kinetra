@@ -208,3 +208,28 @@ class TestGeneralRulesStayAsBefore:
         assert body["engine_version"] == "engine-3"
         headline = next(i for i in body["indicators"] if i["code"] == "broad_jump_cm")
         assert headline["value"] == 212 and headline["interpretation"] is None
+
+
+class TestDashboardPersonalRecommendations:
+    def test_cyclist_with_endurance_goal_is_asked_to_measure_cardio_first(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        dash = api.get("/api/v1/dashboard", headers=user).json()
+        assert dash["insights_version"] == "insights-4"
+        personal = [r for r in dash["recommendations"] if r["code"].startswith("assess_test_")]
+        assert personal and personal[0]["params"]["for"]
+        assert personal[0]["params"]["for"][0]["source"] in {"sport", "goal"}
+
+    def test_no_training_advice_without_a_weak_validated_result(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        recs = api.get("/api/v1/dashboard", headers=user).json()["recommendations"]
+        assert not [r for r in recs if r["code"].startswith("train_")]
+
+    def test_weak_cooper_result_triggers_aerobic_training_for_the_cyclist(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        assert post(api, user, "cooper_12min", {"distance_m": 1600, "mode": "run"}).status_code == 201
+        recs = api.get("/api/v1/dashboard", headers=user).json()["recommendations"]
+        train = next(r for r in recs if r["code"] == "train_aerobic_endurance")
+        assert train["reference"]["id"] == "who_pa_2020"

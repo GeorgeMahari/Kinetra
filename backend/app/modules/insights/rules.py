@@ -12,7 +12,8 @@ from typing import Any
 
 from app.modules.onboarding.vocab import IntensityCeiling
 
-INSIGHTS_VERSION = "insights-3"
+# insights-4: personal recommendations from the sport profile and real results (personalization.advice).
+INSIGHTS_VERSION = "insights-4"
 RETEST_AFTER = timedelta(weeks=8)
 MAX_RECOMMENDATIONS = 6
 
@@ -38,7 +39,14 @@ AASM_SRS_2015 = Reference(
     "AASM and SRS. Sleep. 2015;38(6):843-844. Adults 18-60: 7 or more hours per night on a regular basis.",
     "https://aasm.org/seven-or-more-hours-of-sleep-per-night-a-health-necessity-for-adults/",
 )
-REFERENCES = {r.id: r for r in (WHO_PA_2020, AASM_SRS_2015)}
+ACSM_RESISTANCE_2009 = Reference(
+    "acsm_resistance_2009",
+    "American College of Sports Medicine. Position stand on progression models in resistance training "
+    "for healthy adults. Med Sci Sports Exerc. 2009. doi:10.1249/mss.0b013e3181915670. Hypertrophy and "
+    "strength programmes share design (e.g. 8-12 repetition maximum for novices), progressing gradually.",
+    "https://doi.org/10.1249/mss.0b013e3181915670",
+)
+REFERENCES = {r.id: r for r in (WHO_PA_2020, AASM_SRS_2015, ACSM_RESISTANCE_2009)}
 
 
 # ---------------------------------------------------------------- progress
@@ -215,12 +223,14 @@ class RecInputs:
     dimension_status: Mapping[str, str] = field(default_factory=dict)
     allowed_tests_by_dimension: Mapping[str, Sequence[str]] = field(default_factory=dict)
     due_retests: Sequence[str] = ()
+    # Personal recommendations (personalization.advice), merged and ranked with the general ones.
+    personal: Sequence["Recommendation"] = ()
 
 
 @dataclass(frozen=True)
 class Recommendation:
     code: str
-    kind: str  # setup | safety | profile | assess | retest | habit
+    kind: str  # setup | safety | profile | assess | retest | habit | progress | flag
     priority: int
     dimension: str | None = None
     test_code: str | None = None
@@ -339,5 +349,8 @@ def recommend(x: RecInputs) -> list[Recommendation]:
             )
         )
 
+    # A personal suggestion replaces the general one for the same test, so nothing is said twice.
+    named = {r.test_code for r in x.personal if r.test_code}
+    recs = [r for r in recs if not (r.test_code and r.test_code in named)] + list(x.personal)
     recs.sort(key=lambda r: (-r.priority, r.code))
     return recs[:MAX_RECOMMENDATIONS]
