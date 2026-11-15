@@ -92,7 +92,7 @@ export default function ProfileMapScreen() {
                     testID={`map-key-${d.key}`}
                     accessibilityRole="button"
                     accessibilityLabel={`${t(`dimensions.${d.key}.name`)}: ${line}`}
-                    onPress={() => router.push('/assess')}
+                    onPress={() => router.push({ pathname: '/assess', params: { dimension: d.key } })}
                     hapticKind="select"
                     highlight={{ base: colors.surface, active: colors.brandSoft }}
                     style={{
@@ -131,9 +131,9 @@ function LevelMeter({ level, testID }: { level: number; testID?: string }) {
       testID={testID}
       importantForAccessibility="no"
       accessibilityElementsHidden
-      style={{ width: 48, height: 6, borderRadius: radius.pill, backgroundColor: colors.brandSoft, overflow: 'hidden' }}
+      style={{ width: 48, height: 6, borderRadius: radius.pill, backgroundColor: colors.dataInkSoft, overflow: 'hidden' }}
     >
-      <View style={{ width: `${Math.round(level * 100)}%`, height: '100%', borderRadius: radius.pill, backgroundColor: colors.brand }} />
+      <View style={{ width: `${Math.round(level * 100)}%`, height: '100%', borderRadius: radius.pill, backgroundColor: colors.dataInk }} />
     </View>
   );
 }

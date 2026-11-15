@@ -32,6 +32,14 @@ it('lists tests by dimension, with locked tests explained', async () => {
   expect(screen.getByTestId('test-pushups')).toHaveTextContent(/Suggested/);
 });
 
+it('opens on one dimension when asked (profile map key)', async () => {
+  const backend = createFakeBackend({ status: 'completed' });
+  await renderRouter(routes, { initialUrl: '/assess?dimension=muscularEndurance', wrapper: providers(backend.request) });
+  expect(await screen.findByTestId('test-pushups')).toBeTruthy();
+  expect(screen.getByTestId('assess-filter-muscularEndurance')).toBeChecked();
+  expect(screen.queryByTestId('test-cooper_12min')).toBeNull();
+});
+
 it('records a result and shows it with provenance and no invented rating', async () => {
   const backend = createFakeBackend({ status: 'completed' });
   await renderRouter(routes, { initialUrl: '/assess', wrapper: providers(backend.request) });

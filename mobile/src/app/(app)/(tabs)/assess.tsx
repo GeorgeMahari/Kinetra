@@ -3,9 +3,9 @@
  * intensity (1–3 steps), and its state (done on a date, not done, or locked with the reason). Dimension
  * chips filter the guide; the suggested tests carry a ribbon. Tapping a tile opens the test.
  */
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, View, type ScrollViewInstance } from 'react-native';
 import Animated, { FadeInDown, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
@@ -87,7 +87,22 @@ export default function Assess() {
   const { colors, spacing, radius } = useTheme();
   const tests = useTests();
   const overview = useOverview();
-  const [filter, setFilter] = useState<DimensionCode | 'all'>('all');
+  // Other screens (the profile map key) can open the guide on one dimension: ?dimension=<code>.
+  const { dimension } = useLocalSearchParams<{ dimension?: string }>();
+  const asked = DIMENSIONS.some((d) => d.key === dimension) ? (dimension as DimensionCode) : 'all';
+  const [filter, setFilter] = useState<DimensionCode | 'all'>(asked);
+  const [seenAsked, setSeenAsked] = useState(asked);
+  if (seenAsked !== asked) {
+    setSeenAsked(asked);
+    setFilter(asked);
+  }
+  // Keep the chosen chip in view: the row scrolls sideways and a deep link may pick a far chip.
+  const chipRow = useRef<ScrollViewInstance>(null);
+  const chipX = useRef(new Map<string, number>());
+  useEffect(() => {
+    const x = chipX.current.get(filter);
+    if (x != null) chipRow.current?.scrollTo({ x: Math.max(0, x - 16), animated: true });
+  }, [filter]);
 
   if (tests.isPending || overview.isPending) {
     return (
@@ -129,7 +144,7 @@ export default function Assess() {
         </View>
         {ov.intensity_ceiling == null ? <Notice tone="info" message={t('assess.ceilingNone')} /> : null}
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
+        <ScrollView ref={chipRow} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
           {(['all', ...dims.map((d) => d.key)] as const).map((k) => {
             const on = filter === k;
             const dim = DIMENSIONS.find((d) => d.key === k);
@@ -141,6 +156,10 @@ export default function Assess() {
                 accessibilityState={{ checked: on }}
                 hapticKind="select"
                 onPress={() => setFilter(k)}
+                onLayout={(e) => {
+                  chipX.current.set(k, e.nativeEvent.layout.x);
+                  if (k === filter && k !== 'all') chipRow.current?.scrollTo({ x: Math.max(0, e.nativeEvent.layout.x - 16), animated: false });
+                }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
