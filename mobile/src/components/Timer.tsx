@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Svg, { Circle } from 'react-native-svg';
 
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { AppText } from './AppText';
 import { Button } from './Button';
+import { haptic } from './motion';
+
+const RING = 216;
+const STROKE = 10;
 
 export function formatClock(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
@@ -15,6 +20,10 @@ export function formatClock(totalSeconds: number): string {
 /**
  * Countdown (fixed-duration tests) or stopwatch (hold tests). Uses wall-clock time so it stays
  * accurate even if renders are delayed. `onStop` reports elapsed seconds for stopwatch mode.
+ *
+ * Drawn as a ring: it fills towards the limit (the countdown's length or the stopwatch's cap);
+ * an uncapped stopwatch sweeps once a minute. The ring follows the same 200 ms ticks as the
+ * digits, so nothing animates while the timer is idle. A success haptic marks the limit.
  */
 export function Timer({
   mode,
@@ -41,6 +50,7 @@ export function Timer({
       if (limit != null && e >= limit) {
         setElapsed(limit);
         setStartedAt(null);
+        haptic('success');
         onStop?.(limit);
       } else {
         setElapsed(e);
@@ -54,6 +64,9 @@ export function Timer({
   const running = startedAt != null;
   const finished = !running && limit != null && elapsed >= limit;
   const display = mode === 'countdown' ? seconds - elapsed : elapsed;
+  const fraction = limit ? Math.min(1, elapsed / limit) : (elapsed % 60) / 60;
+  const r = (RING - STROKE) / 2;
+  const circumference = 2 * Math.PI * r;
 
   return (
     <View
@@ -68,15 +81,34 @@ export function Timer({
         backgroundColor: colors.surface,
       }}
     >
-      <AppText
-        testID="timer-display"
-        variant="display"
-        accessibilityLiveRegion="polite"
-        style={{ fontVariant: ['tabular-nums'] }}
-        color={finished ? 'progress' : 'text'}
-      >
-        {finished && mode === 'countdown' ? t('assess.timer.done') : formatClock(display)}
-      </AppText>
+      <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
+        <Svg width={RING} height={RING} style={{ position: 'absolute' }}>
+          <Circle cx={RING / 2} cy={RING / 2} r={r} stroke={colors.surfaceSunken} strokeWidth={STROKE} fill="none" />
+          {fraction > 0 ? (
+            <Circle
+              cx={RING / 2}
+              cy={RING / 2}
+              r={r}
+              stroke={finished ? colors.progress : colors.dataInk}
+              strokeWidth={STROKE}
+              strokeLinecap="round"
+              fill="none"
+              strokeDasharray={[circumference, circumference]}
+              strokeDashoffset={circumference * (1 - fraction)}
+              transform={`rotate(-90 ${RING / 2} ${RING / 2})`}
+            />
+          ) : null}
+        </Svg>
+        <AppText
+          testID="timer-display"
+          variant={finished && mode === 'countdown' ? 'title' : 'display'}
+          accessibilityLiveRegion="polite"
+          style={{ fontVariant: ['tabular-nums'], textAlign: 'center' }}
+          color={finished ? 'progress' : 'text'}
+        >
+          {finished && mode === 'countdown' ? t('assess.timer.done') : formatClock(display)}
+        </AppText>
+      </View>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         {running ? (
           <Button
