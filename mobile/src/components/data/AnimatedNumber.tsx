@@ -15,13 +15,11 @@ export function AnimatedNumber({
   ...text
 }: { value: number; format: (v: number) => string; duration?: number } & Omit<AppTextProps, 'children'>) {
   const reduced = useReducedMotion();
-  const [shown, setShown] = useState(reduced ? value : 0);
+  const animate = !reduced && Number.isFinite(value);
+  const [shown, setShown] = useState(0);
   const frame = useRef<number | null>(null);
   useEffect(() => {
-    if (reduced || !Number.isFinite(value)) {
-      setShown(value);
-      return undefined;
-    }
+    if (!animate) return undefined;
     const start = Date.now();
     const tick = () => {
       const k = Math.min(1, (Date.now() - start) / duration);
@@ -33,10 +31,10 @@ export function AnimatedNumber({
     return () => {
       if (frame.current != null) cancelAnimationFrame(frame.current);
     };
-  }, [value, reduced, duration]);
+  }, [value, animate, duration]);
   return (
     <AppText variant="metric" {...text} accessibilityLabel={format(value)}>
-      {format(shown)}
+      {format(animate ? shown : value)}
     </AppText>
   );
 }
