@@ -2,6 +2,7 @@ import assessEn from './assess.en';
 import insightsEn from './insights.en';
 import devicesEn from './devices.en';
 import parentalConsentEn from './parentalConsent.en';
+import hybridEn from './hybrid.en';
 import planEn from './plan.en';
 import progressionEn from './progression.en';
 
@@ -12,6 +13,7 @@ const en = {
   ...parentalConsentEn,
   ...progressionEn,
   ...planEn,
+  ...hybridEn,
   brand: {
     name: 'Kinetra',
     tagline: 'Know your body’s full spectrum.',

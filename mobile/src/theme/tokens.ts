@@ -5,6 +5,10 @@
  * marked trail: its blaze (shape + colour on a white plate) identifies it everywhere. Blaze colours
  * identify, never judge: errors and safety notes keep their own colours plus an icon and text, and
  * "not assessed" stays neutral rather than reading as a bad result.
+ *
+ * Kinetra Hybrid (2026-11-15) adds two layers on this base, see docs/DESIGN_SYSTEM.md:
+ * - Performance lab: a deep-teal data ink, hairlines and sunken wells for charts, metric type sizes.
+ * - Human wellness: trail-sign pictograms of people (components/pictograms) and the body map.
  */
 
 const palette = {
@@ -38,6 +42,12 @@ const palette = {
   blazeBlue: '#2563C9',
   blazeYellow: '#E3B21E',
   blazeGreen: '#2F8F4E',
+
+  // Data ink (performance-lab layer): charts, rulers, the "strength" zone
+  teal700: '#1E6B63',
+  teal300: '#5FC4B6',
+  teal100: '#D8ECE8',
+  tealNight: '#16352F',
 
   // Meaning only
   amber600: '#B97511',
@@ -74,6 +84,20 @@ export interface ThemeColors {
   /** The white plate a blaze is painted on. */
   plate: string;
   plateBorder: string;
+  /** Recessed wells behind charts and rulers. */
+  surfaceSunken: string;
+  /** 1-px grid and divider lines inside data visuals. */
+  hairline: string;
+  /** Data ink: lines, markers and fills of charts and rulers (≥ 4.5:1 on surface). */
+  dataInk: string;
+  dataInkSoft: string;
+  /** Health zones (D42). Each is always paired with its icon and word, never colour alone. */
+  zoneAttention: string;
+  zoneAttentionSoft: string;
+  zoneFine: string;
+  zoneFineSoft: string;
+  zoneStrength: string;
+  zoneStrengthSoft: string;
 }
 
 export const colors: Record<ColorScheme, ThemeColors> = {
@@ -98,6 +122,16 @@ export const colors: Record<ColorScheme, ThemeColors> = {
     danger: palette.error600,
     plate: palette.white,
     plateBorder: palette.stone200,
+    surfaceSunken: '#EAEDE9',
+    hairline: 'rgba(26,29,31,0.09)',
+    dataInk: palette.teal700,
+    dataInkSoft: palette.teal100,
+    zoneAttention: palette.amber600,
+    zoneAttentionSoft: '#F8ECD6',
+    zoneFine: palette.forest700,
+    zoneFineSoft: palette.forest100,
+    zoneStrength: palette.teal700,
+    zoneStrengthSoft: palette.teal100,
   },
   dark: {
     background: palette.night950,
@@ -120,6 +154,16 @@ export const colors: Record<ColorScheme, ThemeColors> = {
     danger: palette.error300,
     plate: '#F4F5F2',
     plateBorder: palette.night700,
+    surfaceSunken: '#0A100D',
+    hairline: 'rgba(232,236,233,0.09)',
+    dataInk: palette.teal300,
+    dataInkSoft: palette.tealNight,
+    zoneAttention: palette.amber400,
+    zoneAttentionSoft: '#3A2B12',
+    zoneFine: palette.forest300,
+    zoneFineSoft: palette.forestNight,
+    zoneStrength: palette.teal300,
+    zoneStrengthSoft: palette.tealNight,
   },
 };
 
@@ -144,10 +188,12 @@ export const elevation = {
   light: {
     card: { shadowColor: '#1A2A20', shadowOpacity: 0.07, shadowRadius: 14, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
     raised: { shadowColor: '#1A2A20', shadowOpacity: 0.12, shadowRadius: 22, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+    floating: { shadowColor: '#0E1512', shadowOpacity: 0.22, shadowRadius: 30, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
   },
   dark: {
     card: {},
     raised: {},
+    floating: { shadowColor: '#000000', shadowOpacity: 0.5, shadowRadius: 30, shadowOffset: { width: 0, height: 16 }, elevation: 12 },
   },
 } as const;
 
@@ -157,7 +203,15 @@ export const motion = {
   spring: { damping: 18, stiffness: 260, mass: 0.6 },
   duration: { fast: 150, base: 250, slow: 400 },
   stagger: 40,
+  /** Springs: `gentle` for panels and sheets, `snappy` for touch feedback and markers. */
+  gentle: { damping: 20, stiffness: 180, mass: 0.9 },
+  snappy: { damping: 14, stiffness: 320, mass: 0.6 },
+  /** Reveal of a number or a marker into its final place. */
+  reveal: 700,
 } as const;
+
+/** Icon sizes, so glyphs line up with text across screens. */
+export const iconSize = { sm: 16, md: 20, lg: 24, xl: 32, hero: 48 } as const;
 
 /** Geologica: one family with Romanian diacritics and Cyrillic. Weights map to loaded faces. */
 export const fontFamily = {
@@ -175,6 +229,11 @@ export const typography = {
   body: { fontSize: 16, lineHeight: 23, fontWeight: '400' as const },
   label: { fontSize: 14, lineHeight: 19, fontWeight: '600' as const },
   caption: { fontSize: 13, lineHeight: 18, fontWeight: '400' as const },
+  /** Chart axes and small data labels. */
+  micro: { fontSize: 11, lineHeight: 14, fontWeight: '600' as const, letterSpacing: 0.2 },
+  /** Headline measurements (performance-lab layer): tabular figures, tight tracking. */
+  metric: { fontSize: 46, lineHeight: 50, fontWeight: '700' as const, letterSpacing: -1.4, fontVariant: ['tabular-nums'] as 'tabular-nums'[] },
+  metricSm: { fontSize: 28, lineHeight: 32, fontWeight: '700' as const, letterSpacing: -0.6, fontVariant: ['tabular-nums'] as 'tabular-nums'[] },
 } as const;
 
 export type TypographyVariant = keyof typeof typography;

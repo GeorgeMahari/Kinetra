@@ -17,6 +17,9 @@ import { Checkbox } from '@/components/Checkbox';
 import { Icon, type IconName } from '@/components/Icon';
 import { Divider, ListRow, SectionHeader } from '@/components/ListRow';
 import { Logo } from '@/components/Logo';
+import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
+
+const PICTOS: PictogramName[] = ['resting_hr', 'hrr_step', 'cooper_12min', 'pushups', 'pulls', 'chair_stand_30s', 'plank', 'sit_reach', 'single_leg_stance', 'body_measurements', 'brisk_walk', 'steady_cardio', 'intervals', 'sit_to_stand', 'balance_hold', 'mobility_flow', 'daily_steps', 'wind_down'];
 import { Notice } from '@/components/Notice';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { Screen } from '@/components/Screen';
@@ -53,6 +56,17 @@ export default function DevGallery() {
       />
       <Screen header>
         <View style={{ gap: spacing.xxl }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }} testID="gallery-pictograms">
+            {PICTOS.map((n) => (
+              <View key={n} style={{ alignItems: 'center', width: 76, gap: 2 }}>
+                <Pictogram name={n} size={56} />
+                <AppText variant="micro" color="textMuted" numberOfLines={1}>{n}</AppText>
+              </View>
+            ))}
+            {PICTOS.slice(0, 6).map((n) => (
+              <Pictogram key={`bare-${n}`} name={n} size={40} variant="bare" />
+            ))}
+          </View>
           <Logo size={40} />
           <AppText variant="caption" color="textMuted" testID="layout-probe"
             onLayout={(e) => setContentW(Math.round(e.nativeEvent.layout.width))}>
