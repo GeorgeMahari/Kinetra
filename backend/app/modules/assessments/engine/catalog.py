@@ -158,7 +158,7 @@ class Agility505In(_In):
 class Sprint20In(_In):
     """20 m sprint from a standing start, 0.5 m behind the line. Hand timing is not accepted."""
 
-    seconds: Decimal = Field(ge=2, le=8, decimal_places=2)
+    time_s: Decimal = Field(ge=2, le=8, decimal_places=2)
     timing: Literal["video_app", "timing_gates"]
 
 
@@ -542,7 +542,7 @@ def _sprint_20(d: Sprint20In, ctx: Context, stopped: bool) -> list[Indicator]:
     return [
         Indicator(
             "sprint_20m_s",
-            float(d.seconds),
+            float(d.time_s),
             "s",
             Provenance.measured,
             notes=("no_validated_reference",) + (("stopped_early",) if stopped else ()),

@@ -38,7 +38,7 @@ VALID: dict[str, dict[str, Any]] = {
     "broad_jump": {"attempt_1_cm": 210, "attempt_2_cm": 224},
     "vertical_jump": {"standing_reach_cm": 228, "jump_reach_cm": 281},
     "agility_505": {"left_s": "2.61", "right_s": "2.49", "start": "flying", "timing": "video_app"},
-    "sprint_20m": {"seconds": "3.21", "timing": "video_app"},
+    "sprint_20m": {"time_s": "3.21", "timing": "video_app"},
     "ruler_drop": {"drops_cm": ["18", "22", "20", "61", "20"]},
     "back_scratch": {"right_over_cm": "4.5", "left_over_cm": "-3.0"},
     "anterior_reach": {"left_cm": "68.0", "right_cm": "62.5", "leg_length_cm": "90.0"},
@@ -108,7 +108,7 @@ class TestCalculations:
 
     def test_sprint_refuses_hand_timing(self) -> None:
         with pytest.raises(ValidationError):
-            ind("sprint_20m", {"seconds": "3.2", "timing": "stopwatch"})
+            ind("sprint_20m", {"time_s": "3.2", "timing": "stopwatch"})
 
     def test_ruler_drop_reaction_time_from_physics(self) -> None:
         out = ind("ruler_drop", VALID["ruler_drop"])
