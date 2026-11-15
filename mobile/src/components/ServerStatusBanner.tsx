@@ -3,15 +3,18 @@ import { useTranslation } from 'react-i18next';
 
 import type { ServerState } from '@/api/health';
 import { useTheme } from '@/theme/ThemeProvider';
+import { iconSize } from '@/theme/tokens';
 
 import { AppText } from './AppText';
+import { Icon, type IconName } from './Icon';
 
+/** Server reachability as a pill: an icon per state (not colour alone) and its word. */
 export function ServerStatusBanner({ state, onRetry }: { state: ServerState; onRetry: () => void }) {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
 
-  const dot =
-    state === 'online' ? colors.progress : state === 'degraded' ? colors.warning : colors.danger;
+  const icon: IconName = state === 'online' ? 'check' : state === 'degraded' ? 'alert' : 'offline';
+  const ink = state === 'online' ? colors.zoneFine : state === 'degraded' ? colors.zoneAttention : colors.danger;
 
   return (
     <View
@@ -21,11 +24,11 @@ export function ServerStatusBanner({ state, onRetry }: { state: ServerState; onR
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.sm,
-        paddingVertical: spacing.sm,
+        paddingVertical: spacing.xs + 2,
         paddingHorizontal: spacing.md,
         borderRadius: radius.pill,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.hairline,
         backgroundColor: colors.surface,
         alignSelf: 'flex-start',
       }}
@@ -33,7 +36,7 @@ export function ServerStatusBanner({ state, onRetry }: { state: ServerState; onR
       {state === 'checking' ? (
         <ActivityIndicator size="small" color={colors.textMuted} />
       ) : (
-        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: dot }} />
+        <Icon name={icon} size={iconSize.sm} color={ink} />
       )}
       <AppText variant="caption" color="textMuted">
         {t(`server.${state}`)}
