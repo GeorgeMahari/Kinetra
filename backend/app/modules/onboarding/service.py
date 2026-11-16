@@ -14,7 +14,6 @@ from app.modules.onboarding.models import (
     OnboardingState,
     ReadinessScreening,
     Sport,
-    UserCapacityPriority,
     UserGoal,
 )
 from app.modules.onboarding.schemas import (
@@ -31,7 +30,6 @@ from app.modules.onboarding.schemas import (
 from app.modules.onboarding.vocab import (
     ActivityLevel,
     Goal,
-    IntensityCeiling,
     MobilityPractice,
     ReadinessQuestion,
     ReadinessResult,
@@ -40,6 +38,7 @@ from app.modules.onboarding.vocab import (
 )
 from app.modules.users.models import SexForNorms, User
 from app.shared.age import age_on
+from app.shared.vocab import IntensityCeiling
 
 logger = logging.getLogger(__name__)
 
@@ -299,13 +298,9 @@ def export_data(db: Session, user: User) -> dict[str, object]:
         .where(UserGoal.user_id == user.id)
         .order_by(UserGoal.rank.asc().nulls_last(), UserGoal.goal)
     ).all()
-    capacity_priorities = db.scalars(
-        select(UserCapacityPriority).where(UserCapacityPriority.user_id == user.id)
-    ).all()
     state = db.get(OnboardingState, user.id)
     return {
         "goals": list(goals),  # most important first
-        "capacity_priorities": [{"capacity": c.capacity, "weight": c.weight} for c in capacity_priorities],
         "activity_profiles": [
             {
                 "recorded_at": p.recorded_at.isoformat(),

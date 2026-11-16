@@ -10,10 +10,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.assessments.models import TestResult
-from app.modules.onboarding.vocab import IntensityCeiling
 from app.modules.plans import rules
 from app.modules.plans.models import ImprovementPlan, PlanTaskCompletion
 from app.modules.users.models import User
+from app.shared.vocab import IntensityCeiling
 
 
 def params_to_json(p: rules.PlanParams) -> dict[str, Any]:

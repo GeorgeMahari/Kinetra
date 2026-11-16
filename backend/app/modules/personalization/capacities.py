@@ -7,7 +7,7 @@ they are never scores.
 
 from enum import StrEnum
 
-from app.modules.onboarding.vocab import Dimension
+from app.shared.vocab import Dimension
 
 
 class Capacity(StrEnum):

@@ -6,7 +6,6 @@ levels) plus `user_capacity_priorities`. Updating it writes a new activity snaps
 never touched here.
 """
 
-from collections.abc import Iterable
 from datetime import UTC, date, datetime
 
 from fastapi import status
@@ -17,17 +16,12 @@ from app.core.errors import AppError
 from app.modules.assessments.engine.catalog import TESTS, allowed
 from app.modules.assessments.models import TestResult
 from app.modules.onboarding import service as onboarding_service
-from app.modules.onboarding.models import (
-    ActivityProfile,
-    ActivityProfileSport,
-    Sport,
-    UserCapacityPriority,
-    UserGoal,
-)
+from app.modules.onboarding.models import ActivityProfile, ActivityProfileSport, Sport, UserGoal
 from app.modules.onboarding.vocab import Goal, SportLevel
-from app.modules.personalization import advice, engine
+from app.modules.personalization import engine
 from app.modules.personalization.capacities import DIMENSION_OF, Capacity
 from app.modules.personalization.knowledge import TEST_PROFILES
+from app.modules.personalization.models import UserCapacityPriority
 from app.modules.personalization.schemas import (
     BatteryOut,
     BatteryTestOut,
@@ -193,37 +187,6 @@ def state(
     return weights, items
 
 
-def histories(db: Session, user: User, codes: Iterable[str]) -> dict[str, advice.History]:
-    """Headline values per test, oldest first, from the latest protocol only; notes of the latest result."""
-    wanted = [c for c in codes if c in TESTS]
-    rows = db.scalars(
-        select(TestResult)
-        .where(
-            TestResult.user_id == user.id, TestResult.status == "completed", TestResult.test_code.in_(wanted)
-        )
-        .order_by(TestResult.performed_at, TestResult.created_at)
-    ).all()
-    by_test: dict[str, list[TestResult]] = {}
-    for r in rows:
-        by_test.setdefault(r.test_code, []).append(r)
-    out: dict[str, advice.History] = {}
-    for code, rs in by_test.items():
-        headline = TESTS[code].headline
-        protocol = rs[-1].protocol_key
-        values: list[float] = []
-        latest_notes: tuple[str, ...] = ()
-        for r in rs:
-            if r.protocol_key != protocol:
-                continue
-            ind = next((i for i in r.indicators if i.get("code") == headline), None)
-            if ind is not None and ind.get("value") is not None:
-                values.append(float(ind["value"]))
-        notes = [n for i in rs[-1].indicators for n in i.get("notes", [])]
-        latest_notes = tuple(notes)
-        out[code] = advice.History(tuple(values), latest_notes)
-    return out
-
-
 def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
     weights, items = state(db, user, today)
     return BatteryOut(
@@ -253,3 +216,8 @@ def battery(db: Session, user: User, today: date | None = None) -> BatteryOut:
             for i in items
         ],
     )
+
+
+def export_priorities(db: Session, user: User) -> list[dict[str, object]]:
+    """The user's explicit capacity priorities, for the data export (under `onboarding`, as before)."""
+    return [{"capacity": p.capacity.value, "weight": p.weight} for p in _priorities(db, user)]

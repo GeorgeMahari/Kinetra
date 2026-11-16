@@ -3,7 +3,6 @@
 - `sports`: reference catalogue (seeded by migration 0003). Names are translated in the app by code.
 - `user_goals`: the user's current goals (a preference set, replaced on update); `rank` 1 = primary,
   2-3 = secondary, NULL for goals saved before ranks existed (migration 0010).
-- `user_capacity_priorities`: explicit "what matters most" choices (personalisation), replaced on update.
 - `activity_profiles` + `activity_profile_sports`: append-only snapshots. Re-answering creates a new
   snapshot; the latest is current and earlier ones remain as history.
 - `readiness_screenings`: append-only. Stores answers, the rule version and the outcome.
@@ -38,7 +37,6 @@ from app.modules.onboarding.vocab import (
     ActivityLevel,
     FloorRise,
     Goal,
-    IntensityCeiling,
     MobilityPractice,
     ReadinessResult,
     SleepQuality,
@@ -46,9 +44,8 @@ from app.modules.onboarding.vocab import (
     SportLevel,
     StairsTolerance,
     TrainingExperience,
-    check_in,
 )
-from app.modules.personalization.capacities import Capacity
+from app.shared.vocab import IntensityCeiling, check_in
 
 
 def _now() -> Mapped[datetime]:
@@ -79,22 +76,6 @@ class UserGoal(Base):
     __table_args__ = (
         CheckConstraint(check_in("goal", Goal), name="goal_valid"),
         CheckConstraint("rank IS NULL OR rank BETWEEN 1 AND 3", name="rank_range"),
-    )
-
-
-class UserCapacityPriority(Base):
-    __tablename__ = "user_capacity_priorities"
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    capacity: Mapped[str] = mapped_column(String(30), primary_key=True)
-    weight: Mapped[int] = mapped_column(SmallInteger, nullable=False)
-    created_at: Mapped[datetime] = _now()
-
-    __table_args__ = (
-        CheckConstraint(check_in("capacity", Capacity), name="capacity_valid"),
-        CheckConstraint("weight BETWEEN 1 AND 3", name="weight_range"),
     )
 
 

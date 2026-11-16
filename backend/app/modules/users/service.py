@@ -11,6 +11,7 @@ from app.modules.assessments import service as assessments_service
 from app.modules.auth.models import RefreshToken
 from app.modules.consent.models import ParentalConsent
 from app.modules.onboarding import service as onboarding_service
+from app.modules.personalization import service as personalization_service
 from app.modules.progression import service as progression_service
 from app.modules.users.models import User, UserProfile
 from app.modules.users.schemas import (
@@ -122,7 +123,10 @@ def export_data(db: Session, user: User) -> DataExport:
             }
             for s in sessions
         ],
-        onboarding=onboarding_service.export_data(db, user),
+        onboarding={
+            **onboarding_service.export_data(db, user),
+            "capacity_priorities": personalization_service.export_priorities(db, user),
+        },
         assessments=assessments_service.export_data(db, user),
         progression=progression_service.export_data(db, user),
     )

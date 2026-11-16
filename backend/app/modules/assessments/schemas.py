@@ -4,7 +4,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.onboarding.vocab import Dimension, IntensityCeiling, SleepQuality
+from app.modules.onboarding.vocab import SleepQuality
+from app.shared.vocab import Dimension, IntensityCeiling
 
 
 class ReferenceOut(BaseModel):

@@ -13,15 +13,14 @@ from app.modules.onboarding.rules import (
 )
 from app.modules.onboarding.vocab import (
     ActivityLevel,
-    Dimension,
     FollowUp,
     Goal,
-    IntensityCeiling,
     MobilityPractice,
     ReadinessQuestion,
     ReadinessResult,
 )
 from app.modules.onboarding.vocab import SportCategory as C
+from app.shared.vocab import Dimension, IntensityCeiling
 
 
 def facts(level=ActivityLevel.moderate, sessions=3, cats=(), age=30, **kw) -> ActivityFacts:  # type: ignore[no-untyped-def]

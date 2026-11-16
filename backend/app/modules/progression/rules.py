@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from app.modules.onboarding.vocab import IntensityCeiling
+from app.shared.vocab import IntensityCeiling
 
 PROGRESSION_VERSION = "progression-2"
 

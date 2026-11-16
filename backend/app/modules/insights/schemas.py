@@ -5,7 +5,7 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from app.modules.assessments.schemas import Overview, ResultOut
-from app.modules.onboarding.vocab import Dimension
+from app.shared.vocab import Dimension
 
 
 class PointOut(BaseModel):

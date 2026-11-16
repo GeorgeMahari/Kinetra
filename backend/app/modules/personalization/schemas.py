@@ -2,10 +2,11 @@
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.modules.onboarding.vocab import Dimension, Goal, SportLevel
+from app.modules.onboarding.vocab import Goal, SportLevel
 from app.modules.personalization.capacities import Capacity
 from app.modules.personalization.engine import Status, Tier
 from app.modules.personalization.knowledge import Evidence
+from app.shared.vocab import Dimension
 
 
 class SportIn(BaseModel):

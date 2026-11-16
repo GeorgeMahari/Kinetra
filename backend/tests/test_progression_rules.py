@@ -2,7 +2,6 @@
 
 from datetime import UTC, date, datetime, timedelta
 
-from app.modules.onboarding.vocab import IntensityCeiling
 from app.modules.progression.rules import (
     Checkin,
     ObjectiveInputs,
@@ -13,6 +12,7 @@ from app.modules.progression.rules import (
     week_start,
     weekly_objectives,
 )
+from app.shared.vocab import IntensityCeiling
 
 MON = date(2026, 11, 9)  # a Monday
 TODAY = date(2026, 11, 12)  # Thursday of that week

@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from app.modules.onboarding.vocab import Dimension, Goal
+from app.modules.onboarding.vocab import Goal
 from app.modules.personalization import engine as e
 from app.modules.personalization import knowledge
 from app.modules.personalization.capacities import DIMENSION_OF, Capacity
@@ -14,6 +14,7 @@ from app.modules.personalization.knowledge import (
     Role,
     SportDemand,
 )
+from app.shared.vocab import Dimension
 
 TODAY = date(2026, 11, 16)
 ORIGINAL_TEN = {

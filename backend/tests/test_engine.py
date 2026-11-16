@@ -16,7 +16,7 @@ from app.modules.assessments.engine.catalog import (
     run,
     who_bmi_category,
 )
-from app.modules.onboarding.vocab import IntensityCeiling
+from app.shared.vocab import IntensityCeiling
 
 MAN_30 = Context(age=30, sex_for_norms="male", height_cm=175.0)
 

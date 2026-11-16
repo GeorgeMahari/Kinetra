@@ -3,7 +3,7 @@
 from datetime import UTC, datetime, timedelta
 
 from app.modules.insights.rules import RecInputs, build_series, coverage, recommend
-from app.modules.onboarding.vocab import IntensityCeiling
+from app.shared.vocab import IntensityCeiling
 
 T0 = datetime(2026, 9, 1, tzinfo=UTC)
 

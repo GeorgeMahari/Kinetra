@@ -18,15 +18,14 @@ from dataclasses import dataclass, field
 
 from app.modules.onboarding.vocab import (
     ActivityLevel,
-    Dimension,
     FollowUp,
     Goal,
-    IntensityCeiling,
     MobilityPractice,
     ReadinessQuestion,
     ReadinessResult,
     SportCategory,
 )
+from app.shared.vocab import Dimension, IntensityCeiling
 
 # rules-2 (migration 0010): three new goals are mapped; every earlier goal behaves exactly as in rules-1.
 RULES_VERSION = "onboarding-rules-2"

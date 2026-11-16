@@ -3,8 +3,8 @@
 from datetime import date
 
 from app.modules.insights import rules
+from app.modules.insights.personal import History, personal_recommendations
 from app.modules.personalization import engine as e
-from app.modules.personalization.advice import History, personal_recommendations
 from app.modules.personalization.capacities import Capacity
 
 TODAY = date(2026, 11, 16)

@@ -35,9 +35,9 @@ from app.modules.assessments.schemas import (
     TestOut,
 )
 from app.modules.onboarding import service as onboarding_service
-from app.modules.onboarding.vocab import Dimension, IntensityCeiling
 from app.modules.users.models import User
 from app.shared.age import age_on
+from app.shared.vocab import Dimension, IntensityCeiling
 
 logger = logging.getLogger(__name__)
 

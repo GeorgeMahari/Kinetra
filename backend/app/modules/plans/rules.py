@@ -17,7 +17,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-from app.modules.onboarding.vocab import IntensityCeiling
+from app.shared.vocab import IntensityCeiling
 
 # plan-2: the focus also weighs what matters to the person (personalisation), but only when no
 # dimension is in the attention zone; health comes first. Running plan-1 plans are unchanged.

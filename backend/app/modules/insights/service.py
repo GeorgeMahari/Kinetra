@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from dataclasses import asdict
 from datetime import UTC, datetime
 
@@ -11,6 +12,7 @@ from app.modules.assessments.engine.catalog import CORE_TESTS, TESTS, allowed
 from app.modules.assessments.models import TestResult
 from app.modules.assessments.schemas import DimensionOverview, Overview
 from app.modules.insights import rules
+from app.modules.insights.personal import History, personal_recommendations
 from app.modules.insights.schemas import (
     CoverageOut,
     DashboardOut,
@@ -25,12 +27,11 @@ from app.modules.insights.schemas import (
 )
 from app.modules.onboarding import service as onboarding_service
 from app.modules.onboarding.service import ActivitySnapshot
-from app.modules.onboarding.vocab import IntensityCeiling
 from app.modules.personalization import service as personalization_service
-from app.modules.personalization.advice import personal_recommendations
 from app.modules.personalization.engine import Tier
 from app.modules.users.models import User
 from app.shared.age import age_on
+from app.shared.vocab import IntensityCeiling
 
 
 def progress(db: Session, user: User, test_code: str) -> ProgressOut:
@@ -120,6 +121,37 @@ def standings(
     return {d.dimension.value: standing_of(d) for d in ov.dimensions}
 
 
+def _histories(db: Session, user: User, codes: Iterable[str]) -> dict[str, History]:
+    """Headline values per test, oldest first, from the latest protocol only; notes of the latest result."""
+    wanted = [c for c in codes if c in TESTS]
+    rows = db.scalars(
+        select(TestResult)
+        .where(
+            TestResult.user_id == user.id, TestResult.status == "completed", TestResult.test_code.in_(wanted)
+        )
+        .order_by(TestResult.performed_at, TestResult.created_at)
+    ).all()
+    by_test: dict[str, list[TestResult]] = {}
+    for r in rows:
+        by_test.setdefault(r.test_code, []).append(r)
+    out: dict[str, History] = {}
+    for code, rs in by_test.items():
+        headline = TESTS[code].headline
+        protocol = rs[-1].protocol_key
+        values: list[float] = []
+        latest_notes: tuple[str, ...] = ()
+        for r in rs:
+            if r.protocol_key != protocol:
+                continue
+            ind = next((i for i in r.indicators if i.get("code") == headline), None)
+            if ind is not None and ind.get("value") is not None:
+                values.append(float(ind["value"]))
+        notes = [n for i in rs[-1].indicators for n in i.get("notes", [])]
+        latest_notes = tuple(notes)
+        out[code] = History(tuple(values), latest_notes)
+    return out
+
+
 def dashboard(db: Session, user: User) -> DashboardOut:
     now = datetime.now(UTC)
     ov = assessments_service.overview(db, user)
@@ -173,7 +205,7 @@ def dashboard(db: Session, user: User) -> DashboardOut:
             weights,
             items,
             {d: (s.level if s else None) for d, s in levels.items()},
-            personalization_service.histories(db, user, active),
+            _histories(db, user, active),
             adult=(_age(user) or 0) >= 18,
             effort_blocked=ov.intensity_ceiling is IntensityCeiling.non_exertional,
         )

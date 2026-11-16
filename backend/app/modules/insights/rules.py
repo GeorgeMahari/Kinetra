@@ -10,9 +10,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.modules.onboarding.vocab import IntensityCeiling
+from app.shared.vocab import IntensityCeiling
 
-# insights-4: personal recommendations from the sport profile and real results (personalization.advice).
+# insights-4: personal recommendations from the sport profile and real results (insights.personal).
 INSIGHTS_VERSION = "insights-4"
 RETEST_AFTER = timedelta(weeks=8)
 MAX_RECOMMENDATIONS = 6
@@ -223,7 +223,7 @@ class RecInputs:
     dimension_status: Mapping[str, str] = field(default_factory=dict)
     allowed_tests_by_dimension: Mapping[str, Sequence[str]] = field(default_factory=dict)
     due_retests: Sequence[str] = ()
-    # Personal recommendations (personalization.advice), merged and ranked with the general ones.
+    # Personal recommendations (insights.personal), merged and ranked with the general ones.
     personal: Sequence["Recommendation"] = ()
 
 

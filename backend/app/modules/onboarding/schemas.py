@@ -6,11 +6,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from app.modules.onboarding.vocab import (
     ActivityLevel,
-    Dimension,
     FloorRise,
     FollowUp,
     Goal,
-    IntensityCeiling,
     MobilityPractice,
     ReadinessQuestion,
     ReadinessResult,
@@ -20,6 +18,7 @@ from app.modules.onboarding.vocab import (
     StairsTolerance,
     TrainingExperience,
 )
+from app.shared.vocab import Dimension, IntensityCeiling
 
 Sessions = Field(ge=0, le=21)
 

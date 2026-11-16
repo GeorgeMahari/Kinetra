@@ -2,9 +2,9 @@
 
 from datetime import date, timedelta
 
-from app.modules.onboarding.vocab import IntensityCeiling
 from app.modules.plans import rules, targets
 from app.modules.plans.rules import PlanParams, PlanSpan
+from app.shared.vocab import IntensityCeiling
 
 MONDAY = date(2026, 11, 16)
 

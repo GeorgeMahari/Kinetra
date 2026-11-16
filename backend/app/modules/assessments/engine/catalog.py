@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from app.modules.assessments.engine import norms
 from app.modules.assessments.engine import references as refs
 from app.modules.assessments.engine.catalog_types import Interpretation
-from app.modules.onboarding.vocab import Dimension, IntensityCeiling
+from app.shared.vocab import Dimension, IntensityCeiling
 
 # ------------------------------------------------------------------ result types
 
