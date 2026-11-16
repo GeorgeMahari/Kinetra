@@ -14,6 +14,7 @@ the way they are.
 | [DATA_VISUALIZATION_MAPPING.md](DATA_VISUALIZATION_MAPPING.md) | Which visual each data type uses, and why |
 | [SECURITY.md](SECURITY.md) | Threat model, authentication, data protection |
 | [TESTING.md](TESTING.md) | Test layers, where tests live, how to run them |
+| [PRIVATE_DISTRIBUTION_GUIDE.md](PRIVATE_DISTRIBUTION_GUIDE.md) | Running the public API (Cloudflare Tunnel), building and sharing the Android APK and iPhone builds, backups |
 
 ## To verify or review by hand
 
@@ -28,6 +29,7 @@ the way they are.
 |---|---|
 | [ARCHITECTURE_CURRENT.md](ARCHITECTURE_CURRENT.md) | Architecture audit before the 2026-11-16 restructuring, with findings and baseline |
 | [ARCHITECTURE_PROPOSED.md](ARCHITECTURE_PROPOSED.md) | The restructuring plan: target, migration map, risks |
+| [PRIVATE_DISTRIBUTION_AUDIT.md](PRIVATE_DISTRIBUTION_AUDIT.md) | Infrastructure audit before private distribution: what existed, what was added, what needs the owner's accounts |
 | [PERSONALIZATION_PROPOSAL.md](PERSONALIZATION_PROPOSAL.md) | Sport and goal personalisation: proposal, and what shipped |
 | [REDESIGN_AUDIT.md](REDESIGN_AUDIT.md), [REDESIGN_IMPLEMENTATION_PLAN.md](REDESIGN_IMPLEMENTATION_PLAN.md) | Kinetra Hybrid redesign: audit and plan. File paths in them are from before the restructuring |
 | [PERFORMANCE_REPORT.md](PERFORMANCE_REPORT.md), [REGRESSION_TEST_REPORT.md](REGRESSION_TEST_REPORT.md) | Measured performance and regression checks |
