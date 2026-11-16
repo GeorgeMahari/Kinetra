@@ -120,6 +120,9 @@ const GOAL_PICTO: Record<Goal, PictogramName> = {
   sport_performance: 'intervals',
   general_wellbeing: 'brisk_walk',
   know_baseline: 'resting_hr',
+  build_muscle: 'circumferences',
+  power_speed: 'broad_jump',
+  agility_coordination: 'agility_505',
 };
 
 const LEVEL_PICTO: Record<(typeof ACTIVITY_LEVELS)[number], PictogramName> = {
@@ -148,6 +151,14 @@ export function GoalsStep({ draft, update }: { draft: OnboardingDraft; update: U
             testID={`goal-${g}`}
             multi
             title={t(`goals.${g}`)}
+            // The order of choice is the order of importance: the first is the main goal.
+            body={
+              goals.indexOf(g) === 0
+                ? t('personal.profile.mainGoal')
+                : goals.indexOf(g) > 0
+                  ? t('personal.profile.secondaryGoal', { n: goals.indexOf(g) + 1 })
+                  : undefined
+            }
             selected={goals.includes(g)}
             onPress={() => toggle(g)}
             leading={

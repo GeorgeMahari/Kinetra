@@ -7,6 +7,7 @@ import redesignAuthRo from './redesignAuth.ro';
 import redesignProfileRo from './redesignProfile.ro';
 import planRo from './plan.ro';
 import progressionRo from './progression.ro';
+import personalRo from './personal.ro';
 import type { TranslationResources } from './en';
 
 const ro: TranslationResources = {
@@ -16,6 +17,7 @@ const ro: TranslationResources = {
   ...parentalConsentRo,
   ...progressionRo,
   ...planRo,
+  ...personalRo,
   ...hybridRo,
   ...redesignAuthRo,
   ...redesignProfileRo,
@@ -214,6 +216,9 @@ const ro: TranslationResources = {
     sport_performance: 'Performanță mai bună în sportul meu',
     general_wellbeing: 'O stare generală mai bună',
     know_baseline: 'Doar să aflu unde mă aflu',
+    build_muscle: 'Masă musculară',
+    power_speed: 'Mai multă forță explozivă și viteză',
+    agility_coordination: 'Agilitate și coordonare',
   },
   activityLevels: {
     sedentary: 'Stau mai mult jos',
@@ -242,6 +247,7 @@ const ro: TranslationResources = {
     badminton: 'Badminton', table_tennis: 'Tenis de masă', padel: 'Padel', martial_arts: 'Arte marțiale',
     boxing: 'Box', wrestling: 'Lupte', yoga: 'Yoga', pilates: 'Pilates', dance: 'Dans',
     alpine_skiing: 'Schi / snowboard', other: 'Altele',
+    athletics_sprints: 'Atletism: sprint', athletics_jumps: 'Atletism: sărituri', athletics_throws: 'Atletism: aruncări',
   },
   followUps: {
     strength_sessions_per_week: 'De câte ori pe săptămână faci antrenament de forță (greutăți, benzi sau greutatea corpului)?',

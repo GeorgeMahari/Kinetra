@@ -7,6 +7,7 @@ import redesignAuthEn from './redesignAuth.en';
 import redesignProfileEn from './redesignProfile.en';
 import planEn from './plan.en';
 import progressionEn from './progression.en';
+import personalEn from './personal.en';
 
 const en = {
   assess: assessEn,
@@ -15,6 +16,7 @@ const en = {
   ...parentalConsentEn,
   ...progressionEn,
   ...planEn,
+  ...personalEn,
   ...hybridEn,
   ...redesignAuthEn,
   ...redesignProfileEn,
@@ -213,6 +215,9 @@ const en = {
     sport_performance: 'Perform better in my sport',
     general_wellbeing: 'Feel healthier overall',
     know_baseline: 'Just understand where I am',
+    build_muscle: 'Build muscle',
+    power_speed: 'More power and speed',
+    agility_coordination: 'Agility and coordination',
   },
   activityLevels: {
     sedentary: 'Mostly sitting',
@@ -241,6 +246,7 @@ const en = {
     badminton: 'Badminton', table_tennis: 'Table tennis', padel: 'Padel', martial_arts: 'Martial arts',
     boxing: 'Boxing', wrestling: 'Wrestling', yoga: 'Yoga', pilates: 'Pilates', dance: 'Dance',
     alpine_skiing: 'Skiing / snowboarding', other: 'Other',
+    athletics_sprints: 'Athletics: sprints', athletics_jumps: 'Athletics: jumps', athletics_throws: 'Athletics: throws',
   },
   followUps: {
     strength_sessions_per_week: 'How many times a week do you do strength training (weights, bands or bodyweight)?',

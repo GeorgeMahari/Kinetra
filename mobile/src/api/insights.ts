@@ -11,11 +11,11 @@ export interface Standing {
 
 export interface Recommendation {
   code: string;
-  kind: 'setup' | 'safety' | 'profile' | 'assess' | 'retest' | 'habit';
+  kind: 'setup' | 'safety' | 'profile' | 'assess' | 'retest' | 'habit' | 'progress' | 'flag';
   priority: number;
   dimension: DimensionCode | null;
   test_code: TestCode | null;
-  params: Record<string, number | string>;
+  params: Record<string, number | string | number[] | { source: string; code: string }[]>;
   reasons: string[];
   reference: { id: string; citation: string; url: string } | null;
   general_guidance: boolean;

@@ -18,6 +18,8 @@ const ICON: Record<Recommendation['kind'], IconName> = {
   assess: 'today',
   retest: 'recovery',
   habit: 'check',
+  progress: 'trail',
+  flag: 'info',
 };
 
 function target(r: Recommendation): (() => void) | undefined {

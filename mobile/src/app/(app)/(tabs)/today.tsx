@@ -23,6 +23,7 @@ import { DimensionList } from '@/features/dimensions/DimensionList';
 import { RecommendationCard } from '@/features/insights/RecommendationCard';
 import { useDashboard } from '@/features/insights/useInsights';
 import { OnboardingCard } from '@/features/onboarding/OnboardingCard';
+import { GoalCard } from '@/features/personalization/GoalCard';
 import { CompletionTrail } from '@/features/profile/CompletionTrail';
 import { missingProfileItems } from '@/features/profile/completion';
 import { ObjectivesList } from '@/features/progression/ProgressionCards';
@@ -70,6 +71,12 @@ export default function Today() {
         <Rise index={0}>
           <TodayPlanCard />
         </Rise>
+
+        {dashboard.data ? (
+          <Rise index={1}>
+            <GoalCard latest={dashboard.data.overview.dimensions.flatMap((d) => d.latest)} />
+          </Rise>
+        ) : null}
 
         <OnboardingCard />
 

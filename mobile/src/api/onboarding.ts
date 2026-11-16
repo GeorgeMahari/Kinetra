@@ -10,6 +10,10 @@ export const GOALS = [
   'sport_performance',
   'general_wellbeing',
   'know_baseline',
+  // Added with migration 0010 (personalisation).
+  'build_muscle',
+  'power_speed',
+  'agility_coordination',
 ] as const;
 export type Goal = (typeof GOALS)[number];
 

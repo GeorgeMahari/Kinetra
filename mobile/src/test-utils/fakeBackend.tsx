@@ -154,6 +154,10 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
     };
   };
 
+  let battery: unknown = null;
+  let extraTests: unknown[] = [];
+  let sportProfile: unknown = null;
+
   const request = jest.fn(async (path: string, options: { method?: string; body?: unknown } = {}) => {
     const method = options.method ?? 'GET';
     calls.push({ method, path, body: options.body });
@@ -178,7 +182,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
         status = { status: 'completed', step: 0, draft: {}, completed_at: SUMMARY.completed_at };
         return SUMMARY;
       case 'GET /assessments/tests':
-        return TESTS;
+        return [...TESTS, ...extraTests];
       case 'GET /assessments/overview':
         return {
           intensity_ceiling: 'submaximal',
@@ -283,6 +287,19 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
           active_minutes: b.active_minutes ?? null };
         return progression();
       }
+      // Personalisation is opt-in per test (setBattery / setSportProfile); otherwise it fails like an
+      // older server, and screens fall back to the plain catalogue.
+      case 'GET /personalization/battery':
+        if (!battery) throw new ApiError('not_found', 'x', 404);
+        return battery;
+      case 'GET /personalization/profile':
+        if (!sportProfile) throw new ApiError('not_found', 'x', 404);
+        return sportProfile;
+      case 'PUT /personalization/profile': {
+        const b = options.body as { sports: { code: string; sessions_per_week: number; level: string | null }[]; goals: string[]; priorities: unknown[] };
+        sportProfile = { sports: b.sports.map((x) => ({ ...x, category: 'mixed' })), goals: b.goals, goals_ranked: true, priorities: b.priorities };
+        return sportProfile;
+      }
       case 'GET /onboarding/summary':
         if (status.status !== 'completed') throw new ApiError('onboarding_incomplete', 'x', 404);
         return SUMMARY;
@@ -314,7 +331,15 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
   const setRecommendations = (recs: unknown[]) => {
     recommendations = recs;
   };
-  return { calls, seedResult, setRecommendations, setReportedSleep, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
+  /** Turns personalisation on; `tests` adds engine-3 modules to the catalogue for this test. */
+  const setBattery = (b: unknown, tests: unknown[] = []) => {
+    battery = b;
+    extraTests = tests;
+  };
+  const setSportProfile = (p: unknown) => {
+    sportProfile = p;
+  };
+  return { calls, seedResult, setRecommendations, setReportedSleep, setBattery, setSportProfile, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
 }
 
 const METRICS = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };

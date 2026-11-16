@@ -33,6 +33,17 @@ export const REGIONS_BY_TEST: Record<TestCode, BodyRegion[]> = {
   sit_reach: ['hamstrings', 'calves', 'lowerBack'],
   single_leg_stance: ['ankles', 'glutes'],
   body_measurements: ['waist'],
+  // engine-3 modules: the areas each protocol's movement uses (see the test steps).
+  broad_jump: ['glutes', 'thighs', 'hamstrings', 'calves'],
+  vertical_jump: ['glutes', 'thighs', 'calves', 'shoulders'],
+  agility_505: ['thighs', 'hamstrings', 'calves', 'ankles'],
+  sprint_20m: ['glutes', 'thighs', 'hamstrings', 'calves'],
+  ruler_drop: ['arms'],
+  back_scratch: ['shoulders', 'upperBack'],
+  anterior_reach: ['ankles', 'thighs', 'glutes', 'core'],
+  single_leg_hop: ['glutes', 'thighs', 'calves', 'ankles'],
+  circumferences: ['arms', 'chest', 'thighs', 'calves'],
+  swim_12min: ['heart', 'shoulders', 'upperBack', 'arms'],
 };
 
 /** Plan tasks, same rule: the areas the movement uses. */

@@ -22,6 +22,8 @@ import { ErrorState, LoadingState } from '@/components/States';
 import { FORMS } from '@/features/assessments/forms';
 import { formatNumber, formatValue, ProvenanceBadge, unitLabel } from '@/features/assessments/ResultView';
 import { useResults, useTests } from '@/features/assessments/useAssessments';
+import { useBattery, useSportProfile } from '@/features/personalization/usePersonalization';
+import { whyLines } from '@/features/personalization/why';
 import { useTheme } from '@/theme/ThemeProvider';
 
 
@@ -86,6 +88,8 @@ export default function TestDetail() {
   const results = useResults(testCode);
   const [limitsOpen, setLimitsOpen] = useState(false);
   const locale = i18n.resolvedLanguage;
+  const battery = useBattery();
+  const profile = useSportProfile();
 
   if (tests.isPending) return <LoadingState />;
   if (tests.isError) return <ErrorState error={tests.error} onRetry={() => void tests.refetch()} />;
@@ -104,6 +108,9 @@ export default function TestDetail() {
     .slice(0, 12)
     .reverse();
   const unit = trend[0] ? trend[0].h.unit : '';
+  // Why this test is shown to this person, and how its result can be read (personalization-1).
+  const personal = battery.data?.tests.find((b) => b.test_code === testCode);
+  const primaryGoal = profile.data?.goals_ranked ? (profile.data.goals[0] ?? null) : null;
 
   return (
     <>
@@ -150,6 +157,31 @@ export default function TestDetail() {
               ))}
             </View>
           </Animated.View>
+
+          {personal ? (
+            <Section title={t('personal.why.title')} testID="test-why">
+              <View style={{ padding: spacing.lg, gap: spacing.sm, borderRadius: radius.lg, backgroundColor: colors.surfaceSunken }}>
+                {whyLines(t, personal, primaryGoal, locale).map((line) => (
+                  <View key={line} style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <AppText variant="caption" color="dataInk">
+                      •
+                    </AppText>
+                    <AppText variant="caption" style={{ flex: 1 }}>
+                      {line}
+                    </AppText>
+                  </View>
+                ))}
+                <View style={{ borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: spacing.sm, gap: 2 }}>
+                  <AppText variant="label" color="dataInk" testID="test-evidence">
+                    {t(`personal.evidence.${personal.evidence}`)}
+                  </AppText>
+                  <AppText variant="caption" color="textMuted">
+                    {t(`personal.evidenceHelp.${personal.evidence}`)}
+                  </AppText>
+                </View>
+              </View>
+            </Section>
+          ) : null}
 
           <Section title={t('assess.sections.howTo')}>
             <StepTrail steps={steps} />

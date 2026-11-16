@@ -7,6 +7,7 @@ import redesignAuthRu from './redesignAuth.ru';
 import redesignProfileRu from './redesignProfile.ru';
 import planRu from './plan.ru';
 import progressionRu from './progression.ru';
+import personalRu from './personal.ru';
 import type { TranslationResources } from './en';
 
 const ru: TranslationResources = {
@@ -16,6 +17,7 @@ const ru: TranslationResources = {
   ...parentalConsentRu,
   ...progressionRu,
   ...planRu,
+  ...personalRu,
   ...hybridRu,
   ...redesignAuthRu,
   ...redesignProfileRu,
@@ -214,6 +216,9 @@ const ru: TranslationResources = {
     sport_performance: 'Лучше выступать в своём спорте',
     general_wellbeing: 'Лучше чувствовать себя в целом',
     know_baseline: 'Просто понять, где я сейчас',
+    build_muscle: 'Набрать мышечную массу',
+    power_speed: 'Больше взрывной силы и скорости',
+    agility_coordination: 'Ловкость и координация',
   },
   activityLevels: {
     sedentary: 'В основном сижу',
@@ -242,6 +247,7 @@ const ru: TranslationResources = {
     badminton: 'Бадминтон', table_tennis: 'Настольный теннис', padel: 'Падел', martial_arts: 'Боевые искусства',
     boxing: 'Бокс', wrestling: 'Борьба', yoga: 'Йога', pilates: 'Пилатес', dance: 'Танцы',
     alpine_skiing: 'Горные лыжи / сноуборд', other: 'Другое',
+    athletics_sprints: 'Лёгкая атлетика: спринт', athletics_jumps: 'Лёгкая атлетика: прыжки', athletics_throws: 'Лёгкая атлетика: метания',
   },
   followUps: {
     strength_sessions_per_week: 'Сколько раз в неделю вы делаете силовые тренировки (веса, резинки или вес тела)?',

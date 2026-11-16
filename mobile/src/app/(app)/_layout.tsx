@@ -40,6 +40,7 @@ export default function SignedInLayout() {
         <Stack.Screen name="verify-email" options={{ title: t('auth.verifyTitle') }} />
         <Stack.Screen name="achievements" options={{ title: t('progression.achievementsTitle') }} />
         <Stack.Screen name="body" options={{ title: t('body.title'), animation: 'fade_from_bottom' }} />
+        <Stack.Screen name="sport-profile" options={{ title: '' }} />
         <Stack.Screen
           name="profile-map"
           options={{ title: t('dashboard.mapScreenTitle'), animation: 'fade_from_bottom' }}

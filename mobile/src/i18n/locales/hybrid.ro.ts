@@ -68,6 +68,8 @@ const hybridRo = {
     beats: 'bătăi',
     'mL/kg/min': 'mL/kg/min',
     'kg/m2': 'kg/m²',
+    ms: 'ms',
+    '%': '%',
   },
   assessView: {
     all: 'Toate',

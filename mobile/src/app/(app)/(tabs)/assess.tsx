@@ -2,6 +2,11 @@
  * Assessment catalogue as a field guide: every test is a tile with its trail-sign pictogram, its
  * intensity (1–3 steps), and its state (done on a date, not done, or locked with the reason). Dimension
  * chips filter the guide; the suggested tests carry a ribbon. Tapping a tile opens the test.
+ *
+ * Personalised (personalization-1): with a sport profile, the guide opens with "Priority for you" and
+ * "Activated by your profile", each tile saying why and how its result can be read (norms, a published
+ * reference value, or your own trend); the general battery follows. Tests the profile doesn't need stay
+ * hidden. Without the battery (offline, older server) it falls back to the plain catalogue.
  */
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -11,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { TestInfo } from '@/api/assessments';
 import type { DimensionCode } from '@/api/onboarding';
+import type { BatteryTest, Tier } from '@/api/personalization';
 import { AppText } from '@/components/AppText';
 import { Blaze } from '@/components/Blaze';
 import { IntensityMeter } from '@/components/data/IntensityMeter';
@@ -22,17 +28,41 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { useOverview, useTests } from '@/features/assessments/useAssessments';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
+import { useBattery, useSportProfile } from '@/features/personalization/usePersonalization';
+import { reasonText } from '@/features/personalization/why';
 import { useTheme } from '@/theme/ThemeProvider';
 
-function TestTile({ test, lastDone, suggested, index }: { test: TestInfo; lastDone?: string; suggested: boolean; index: number }) {
+function TestTile({
+  test,
+  lastDone,
+  suggested,
+  index,
+  personal,
+  primaryGoal,
+}: {
+  test: TestInfo;
+  lastDone?: string;
+  suggested: boolean;
+  index: number;
+  personal?: BatteryTest;
+  primaryGoal?: string | null;
+}) {
   const { t, i18n } = useTranslation();
   const { colors, spacing, radius, elevation } = useTheme();
   const name = t(`assess.tests.${test.code}.name`);
   const status = !test.allowed
     ? t(`assess.locked_${test.locked_reason ?? 'intensity_ceiling'}`)
-    : lastDone
-      ? t('assess.lastDone', { date: new Date(lastDone).toLocaleDateString(i18n.resolvedLanguage) })
-      : t('assess.notDone');
+    : personal?.status === 'due'
+      ? t('personal.status.due')
+      : lastDone
+        ? t('assess.lastDone', { date: new Date(lastDone).toLocaleDateString(i18n.resolvedLanguage) })
+        : t('assess.notDone');
+  // The strongest reason this test is shown, for priority and profile-activated tests only.
+  const reason =
+    personal && personal.tier !== 'core' && personal.why[0]
+      ? reasonText(t, personal.why[0], primaryGoal ?? null, i18n.resolvedLanguage)
+      : null;
+  const evidence = personal ? t(`personal.evidence.${personal.evidence}`) : null;
   return (
     <Animated.View
       entering={FadeInDown.delay(Math.min(index, 8) * 45).duration(300).reduceMotion(ReduceMotion.System)}
@@ -42,7 +72,9 @@ function TestTile({ test, lastDone, suggested, index }: { test: TestInfo; lastDo
       <PressableScale
         testID={`test-${test.code}`}
         accessibilityRole="button"
-        accessibilityLabel={`${name}, ${t(`assess.intensity.${test.intensity}`)}, ${status}${suggested ? `, ${t('assess.suggested')}` : ''}`}
+        accessibilityLabel={[name, t(`assess.intensity.${test.intensity}`), status, suggested ? t('assess.suggested') : null, reason, evidence]
+          .filter(Boolean)
+          .join(', ')}
         onPress={() => router.push({ pathname: '/test/[code]', params: { code: test.code } })}
         highlight={{ base: colors.surface, active: colors.brandSoft }}
         style={{
@@ -74,9 +106,19 @@ function TestTile({ test, lastDone, suggested, index }: { test: TestInfo; lastDo
           {name}
         </AppText>
         <IntensityMeter intensity={test.intensity} />
+        {reason ? (
+          <AppText variant="micro" color="text" numberOfLines={3} testID={`test-${test.code}-why`}>
+            {reason}
+          </AppText>
+        ) : null}
         <AppText variant="micro" color={test.allowed ? 'textMuted' : 'text'} numberOfLines={2}>
           {status}
         </AppText>
+        {evidence ? (
+          <AppText variant="micro" color="dataInk" testID={`test-${test.code}-evidence`}>
+            {evidence}
+          </AppText>
+        ) : null}
       </PressableScale>
     </Animated.View>
   );
@@ -87,6 +129,8 @@ export default function Assess() {
   const { colors, spacing, radius } = useTheme();
   const tests = useTests();
   const overview = useOverview();
+  const battery = useBattery();
+  const profile = useSportProfile();
   // Other screens (the profile map key) can open the guide on one dimension: ?dimension=<code>.
   const { dimension } = useLocalSearchParams<{ dimension?: string }>();
   const asked = DIMENSIONS.some((d) => d.key === dimension) ? (dimension as DimensionCode) : 'all';
@@ -127,10 +171,42 @@ export default function Assess() {
 
   const ov = overview.data;
   const latest = new Map(ov.dimensions.flatMap((d) => d.latest.map((r) => [r.test_code, r.performed_at] as const)));
-  const suggested = new Set(ov.dimensions.flatMap((d) => d.suggested_tests));
-  const dims = DIMENSIONS.filter((d) => tests.data.some((x) => x.dimension === d.key));
+  // Personalised battery, when available: tier per test; inactive tests are hidden.
+  const tierOf = new Map<string, BatteryTest>((battery.data?.tests ?? []).map((b) => [b.test_code, b]));
+  const personalised = battery.isSuccess && battery.data.capacities.length > 0;
+  const primaryGoal = profile.data?.goals_ranked ? (profile.data.goals[0] ?? null) : null;
+  const visible = battery.isSuccess
+    ? tests.data.filter((x) => (tierOf.get(x.code)?.tier ?? 'inactive') !== 'inactive')
+    : tests.data;
+  const suggested = personalised
+    ? new Set(
+        [...tierOf.values()].filter((b) => b.tier === 'priority' && b.status !== 'up_to_date').map((b) => b.test_code),
+      )
+    : new Set(ov.dimensions.flatMap((d) => d.suggested_tests));
+  const inTier = (tier: Tier) =>
+    visible
+      .filter((x) => tierOf.get(x.code)?.tier === tier)
+      .sort((a, b) => (tierOf.get(b.code)?.relevance ?? 0) - (tierOf.get(a.code)?.relevance ?? 0));
+  const profileSections =
+    personalised && filter === 'all'
+      ? (['priority', 'additional'] as const).map((tier) => ({ tier, list: inTier(tier) })).filter((sec) => sec.list.length > 0)
+      : [];
+  const inProfileSection = new Set(profileSections.flatMap((sec) => sec.list.map((x) => x.code)));
+  const general = visible.filter((x) => !inProfileSection.has(x.code));
+  const dims = DIMENSIONS.filter((d) => general.some((x) => x.dimension === d.key));
   const shown = dims.filter((d) => filter === 'all' || d.key === filter);
-  const done = tests.data.filter((x) => latest.has(x.code)).length;
+  const done = visible.filter((x) => latest.has(x.code)).length;
+  const tile = (x: TestInfo, i: number) => (
+    <TestTile
+      key={x.code}
+      test={x}
+      lastDone={latest.get(x.code)}
+      suggested={suggested.has(x.code)}
+      index={i}
+      personal={tierOf.get(x.code)}
+      primaryGoal={primaryGoal}
+    />
+  );
 
   return (
     <Screen>
@@ -139,7 +215,7 @@ export default function Assess() {
           <AppText variant="title">{t('assess.title')}</AppText>
           <AppText color="textMuted">{t('assess.intro')}</AppText>
           <AppText variant="label" color="dataInk" testID="assess-progress">
-            {t('assessView.done', { done, total: tests.data.length })}
+            {t('assessView.done', { done, total: visible.length })}
           </AppText>
         </View>
         {ov.intensity_ceiling == null ? <Notice tone="info" message={t('assess.ceilingNone')} /> : null}
@@ -179,18 +255,39 @@ export default function Assess() {
           })}
         </ScrollView>
 
+        {profileSections.map((sec) => (
+          <View key={sec.tier} style={{ gap: spacing.sm }} testID={`assess-section-${sec.tier}`}>
+            <View style={{ gap: 2 }}>
+              <AppText variant="heading">{t(`personal.tiers.${sec.tier}`)}</AppText>
+              <AppText variant="caption" color="textMuted">
+                {t(`personal.tierCaptions.${sec.tier}`)}
+              </AppText>
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+              {sec.list.map(tile)}
+              {sec.list.length % 2 === 1 ? <View style={{ flexBasis: '47%', flexGrow: 1 }} /> : null}
+            </View>
+          </View>
+        ))}
+        {profileSections.length > 0 && shown.length > 0 ? (
+          <View style={{ gap: 2 }}>
+            <AppText variant="heading">{t('personal.tiers.core')}</AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('personal.tierCaptions.core')}
+            </AppText>
+          </View>
+        ) : null}
+
         {shown.map((d) => {
-          const list = tests.data.filter((x) => x.dimension === d.key);
+          const list = general.filter((x) => x.dimension === d.key);
           return (
             <View key={d.key} style={{ gap: spacing.sm }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                 <Blaze {...d.blaze} size={22} />
-                <AppText variant="heading">{t(`dimensions.${d.key}.name`)}</AppText>
+                <AppText variant={profileSections.length > 0 ? 'label' : 'heading'}>{t(`dimensions.${d.key}.name`)}</AppText>
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                {list.map((x, i) => (
-                  <TestTile key={x.code} test={x} lastDone={latest.get(x.code)} suggested={suggested.has(x.code)} index={i} />
-                ))}
+                {list.map(tile)}
                 {list.length % 2 === 1 ? <View style={{ flexBasis: '47%', flexGrow: 1 }} /> : null}
               </View>
             </View>

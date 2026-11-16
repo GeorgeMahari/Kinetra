@@ -68,6 +68,8 @@ const hybridRu = {
     beats: 'ударов',
     'mL/kg/min': 'мл/кг/мин',
     'kg/m2': 'кг/м²',
+    ms: 'мс',
+    '%': '%',
   },
   assessView: {
     all: 'Все',

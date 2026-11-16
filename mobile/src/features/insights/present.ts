@@ -5,10 +5,61 @@ import type { Recommendation } from '@/api/insights';
 
 type T = TFunction;
 
+/** A capacity name inside a sentence ("measure your agility"). */
+export function capacityInline(t: T, capacity: string, locale?: string): string {
+  const name = t(`personal.capacities.${capacity}` as 'personal.capacities.power');
+  return name.toLocaleLowerCase(locale);
+}
+
+/** "for tennis" / "for your goal …" / "because you marked …": the reason a personal recommendation fits. */
+export function forText(t: T, r: Recommendation, locale?: string): string {
+  const reasons = Array.isArray(r.params.for) ? (r.params.for as { source: string; code: string }[]) : [];
+  const first = reasons[0];
+  if (!first) return '';
+  if (first.source === 'sport') return t('personal.recs.forSport', { name: t(`sports.${first.code}` as 'sports.tennis') });
+  if (first.source === 'goal') return t('personal.recs.forGoal', { name: t(`goals.${first.code}` as 'goals.get_stronger') });
+  return t('personal.recs.forPriority', { name: capacityInline(t, first.code, locale) });
+}
+
+/** Personal recommendations (insights-4): codes with a test or capacity suffix. Null when not personal. */
+function personalText(t: T, r: Recommendation, test: string, locale?: string): { title: string; body: string } | null {
+  const forPart = forText(t, r, locale);
+  const capacity = typeof r.params.capacity === 'string' ? capacityInline(t, r.params.capacity, locale) : '';
+  if (r.code.startsWith('assess_test_')) {
+    return {
+      title: t('personal.recs.assessTitle', { capacity }),
+      body: t('personal.recs.assessBody', { for: forPart, test }),
+    };
+  }
+  if (r.code.startsWith('retest_test_')) {
+    return {
+      title: t('personal.recs.retestTitle', { test }),
+      body: t('personal.recs.retestBody', { weeks: r.params.weeks, for: forPart }),
+    };
+  }
+  if (r.code.startsWith('trend_')) return { title: t('personal.recs.trendTitle', { test }), body: t('personal.recs.trendBody') };
+  if (r.code.startsWith('asymmetry_')) return { title: t('personal.recs.flagTitle'), body: t('personal.recs.flagBody', { test }) };
+  const train: Record<string, [string, string]> = {
+    train_aerobic_endurance: ['trainAerobicTitle', 'trainAerobicBody'],
+    train_strength: ['trainStrengthTitle', 'trainStrengthBody'],
+    train_muscular_endurance: ['trainEnduranceTitle', 'trainEnduranceBody'],
+  };
+  const keys = train[r.code];
+  if (keys) {
+    return {
+      title: t(`personal.recs.${keys[0]}` as 'personal.recs.trendTitle'),
+      body: t(`personal.recs.${keys[1]}` as 'personal.recs.trendTitle', { for: forPart }),
+    };
+  }
+  return null;
+}
+
 export function recommendationText(t: T, r: Recommendation, locale?: string): { title: string; body: string } {
   const num = (v: unknown) => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(Number(v));
   const dim = r.dimension ? t(`dimensions.${r.dimension}.name`) : '';
   const test = r.test_code ? t(`assess.tests.${r.test_code}.name`) : '';
+  const personal = personalText(t, r, test, locale);
+  if (personal) return personal;
   switch (r.kind) {
     case 'assess':
       return { title: t('recs.assess.title', { dimension: dim }), body: t('recs.assess.body', { test }) };

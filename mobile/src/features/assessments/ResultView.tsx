@@ -31,7 +31,9 @@ export function formatNumber(value: number, locale: string | undefined, unit: st
 
 /** The unit as written in the current language (units arrive from the API as codes like `reps`). */
 export function unitLabel(unit: string): string {
-  return i18n.t(`viz.unit.${unit}`, { defaultValue: unit === 'kg/m2' ? 'kg/m²' : unit === 'ratio' ? '' : unit });
+  return i18n.t(`viz.unit.${unit}`, {
+    defaultValue: unit === 'kg/m2' ? 'kg/m²' : unit === 'ratio' || unit === 'count' ? '' : unit,
+  });
 }
 
 export function formatValue(i: Indicator, locale?: string): string | null {

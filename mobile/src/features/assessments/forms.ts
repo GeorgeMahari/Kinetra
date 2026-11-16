@@ -13,7 +13,11 @@ export type FieldSpec =
 export interface FormSpec {
   fields: FieldSpec[];
   timer?: { mode: 'countdown'; seconds: number } | { mode: 'stopwatch'; capSeconds?: number };
+  /** Reshapes valid inputs for the API (e.g. five catches into one list). */
+  toApi?: (inputs: Record<string, unknown>) => Record<string, unknown>;
 }
+
+const DROPS = ['drop_1', 'drop_2', 'drop_3', 'drop_4', 'drop_5'] as const;
 
 export const FORMS: Record<TestCode, FormSpec> = {
   resting_hr: {
@@ -79,6 +83,74 @@ export const FORMS: Record<TestCode, FormSpec> = {
       { name: 'waist_cm', kind: 'decimal', min: 40, max: 250, decimals: 1, optional: true },
     ],
   },
+  // engine-3 modules
+  broad_jump: {
+    fields: [
+      { name: 'attempt_1_cm', kind: 'int', min: 20, max: 400 },
+      { name: 'attempt_2_cm', kind: 'int', min: 20, max: 400, optional: true },
+    ],
+  },
+  vertical_jump: {
+    fields: [
+      { name: 'standing_reach_cm', kind: 'int', min: 100, max: 300 },
+      { name: 'jump_reach_cm', kind: 'int', min: 100, max: 420 },
+    ],
+  },
+  agility_505: {
+    fields: [
+      { name: 'start', kind: 'choice', options: ['flying', 'standing'] },
+      { name: 'timing', kind: 'choice', options: ['video_app', 'stopwatch'] },
+      { name: 'left_s', kind: 'decimal', min: 1, max: 8, decimals: 2 },
+      { name: 'right_s', kind: 'decimal', min: 1, max: 8, decimals: 2 },
+    ],
+  },
+  sprint_20m: {
+    fields: [
+      { name: 'timing', kind: 'choice', options: ['video_app', 'timing_gates'] },
+      { name: 'time_s', kind: 'decimal', min: 2, max: 8, decimals: 2 },
+    ],
+  },
+  ruler_drop: {
+    fields: DROPS.map((name) => ({ name, kind: 'decimal' as const, min: 0, max: 61, decimals: 1 })),
+    toApi: (inputs) => ({ drops_cm: DROPS.map((d) => inputs[d]) }),
+  },
+  back_scratch: {
+    fields: [
+      { name: 'right_over_cm', kind: 'decimal', min: -50, max: 30, decimals: 1 },
+      { name: 'left_over_cm', kind: 'decimal', min: -50, max: 30, decimals: 1 },
+    ],
+  },
+  anterior_reach: {
+    fields: [
+      { name: 'left_cm', kind: 'decimal', min: 10, max: 150, decimals: 1 },
+      { name: 'right_cm', kind: 'decimal', min: 10, max: 150, decimals: 1 },
+      { name: 'leg_length_cm', kind: 'decimal', min: 50, max: 130, decimals: 1, optional: true },
+    ],
+  },
+  single_leg_hop: {
+    fields: [
+      { name: 'left_cm', kind: 'int', min: 10, max: 350 },
+      { name: 'right_cm', kind: 'int', min: 10, max: 350 },
+    ],
+  },
+  circumferences: {
+    fields: [
+      { name: 'arm_left_cm', kind: 'decimal', min: 15, max: 70, decimals: 1 },
+      { name: 'arm_right_cm', kind: 'decimal', min: 15, max: 70, decimals: 1 },
+      { name: 'thigh_left_cm', kind: 'decimal', min: 30, max: 100, decimals: 1, optional: true },
+      { name: 'thigh_right_cm', kind: 'decimal', min: 30, max: 100, decimals: 1, optional: true },
+      { name: 'calf_left_cm', kind: 'decimal', min: 20, max: 70, decimals: 1, optional: true },
+      { name: 'calf_right_cm', kind: 'decimal', min: 20, max: 70, decimals: 1, optional: true },
+      { name: 'chest_cm', kind: 'decimal', min: 60, max: 180, decimals: 1, optional: true },
+    ],
+  },
+  swim_12min: {
+    fields: [
+      { name: 'stroke', kind: 'choice', options: ['freestyle', 'mixed'] },
+      { name: 'distance_m', kind: 'int', min: 50, max: 1500 },
+    ],
+    timer: { mode: 'countdown', seconds: 720 },
+  },
 };
 
 export type FormValues = Record<string, string | boolean | undefined>;
@@ -115,5 +187,6 @@ export function parseForm(spec: FormSpec, values: FormValues): {
     }
     inputs[f.name] = n;
   }
+  if (spec.toApi && Object.keys(errors).length === 0) return { inputs: spec.toApi(inputs), errors };
   return { inputs, errors };
 }

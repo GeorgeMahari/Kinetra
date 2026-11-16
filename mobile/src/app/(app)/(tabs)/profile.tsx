@@ -69,6 +69,13 @@ export default function ProfileTab() {
         <FadeInItem index={3}>
           <ListGroup title={tr('redesignProfile.groups.explore')}>
             <ListRow
+              testID="open-sport-profile"
+              icon="trail"
+              title={t('personal.profile.entry')}
+              subtitle={t('personal.profile.entryCaption')}
+              onPress={() => router.push('/sport-profile')}
+            />
+            <ListRow
               testID="open-body"
               icon="body"
               title={t('body.entry')}

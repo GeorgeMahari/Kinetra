@@ -10,7 +10,18 @@ export type TestCode =
   | 'plank'
   | 'sit_reach'
   | 'single_leg_stance'
-  | 'body_measurements';
+  | 'body_measurements'
+  // engine-3 sport and goal modules (offered through the personalisation battery)
+  | 'broad_jump'
+  | 'vertical_jump'
+  | 'agility_505'
+  | 'sprint_20m'
+  | 'ruler_drop'
+  | 'back_scratch'
+  | 'anterior_reach'
+  | 'single_leg_hop'
+  | 'circumferences'
+  | 'swim_12min';
 
 export type Intensity = 'non_exertional' | 'submaximal' | 'maximal';
 export type Provenance = 'measured' | 'calculated' | 'estimated';
