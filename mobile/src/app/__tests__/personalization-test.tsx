@@ -140,6 +140,18 @@ describe('sport profile editor', () => {
   });
 });
 
+describe('goals saved before ranks existed', () => {
+  it('shows no positions and asks for an order before saving', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    backend.setSportProfile({ sports: [], goals: ['get_stronger', 'improve_mobility'], goals_ranked: false, priorities: [] });
+    await renderRouter(routes, { initialUrl: '/sport-profile', wrapper: providers(backend.request) });
+    expect(await screen.findByTestId('sp-goal-get_stronger')).not.toHaveTextContent(/Main goal|Goal 2/);
+    await fireEvent.press(screen.getByTestId('sport-profile-save'));
+    expect(await screen.findByTestId('sport-profile-message')).toHaveTextContent(/in order of importance/);
+    expect(backend.calls.some((c) => c.method === 'PUT')).toBe(false);
+  });
+});
+
 describe('module forms', () => {
   it('ruler drop sends the five catches as one list', () => {
     const { inputs, errors } = parseForm(FORMS.ruler_drop, {

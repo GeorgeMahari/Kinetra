@@ -76,6 +76,7 @@ const personalRo = {
       weight: 'Importanță {{n}} din 3',
       save: 'Salvează profilul',
       saved: 'Profil salvat. Testele și recomandările tale sunt actualizate.',
+      rankGoals: 'Atinge-ți din nou obiectivele în ordinea importanței, ca Kinetra să știe care e obiectivul principal.',
       needGoal: 'Alege cel puțin un obiectiv.',
       batteryPreview: 'Testele tale prioritare acum: {{tests}}',
     },

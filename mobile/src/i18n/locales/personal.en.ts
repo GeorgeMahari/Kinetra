@@ -76,6 +76,7 @@ const personalEn = {
       weight: 'Importance {{n}} of 3',
       save: 'Save my profile',
       saved: 'Profile saved. Your tests and recommendations are updated.',
+      rankGoals: 'Tap your goals again in order of importance, so Kinetra knows which one is your main goal.',
       needGoal: 'Choose at least one goal.',
       batteryPreview: 'Your priority tests now: {{tests}}',
     },

@@ -46,6 +46,8 @@ function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: stri
     initial.sports.map((s) => ({ code: s.code, sessions_per_week: s.sessions_per_week, level: s.level })),
   );
   const [goals, setGoals] = useState<Goal[]>(initial.goals);
+  // Goals saved before ranks existed have no order yet: show positions only once the person sets one.
+  const [ranked, setRanked] = useState(initial.goals_ranked);
   const [weights, setWeights] = useState<Partial<Record<Capacity, number>>>(
     Object.fromEntries(initial.priorities.map((p) => [p.capacity, p.weight])),
   );
@@ -61,8 +63,10 @@ function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: stri
     );
   const patchSport = (code: string, patch: Partial<SportDraft>) =>
     setChosen((c) => c.map((s) => (s.code === code ? { ...s, ...patch } : s)));
-  const toggleGoal = (g: Goal) =>
+  const toggleGoal = (g: Goal) => {
+    setRanked(true);
     setGoals((gs) => (gs.includes(g) ? gs.filter((x) => x !== g) : gs.length < MAX_GOALS ? [...gs, g] : gs));
+  };
   const cycleWeight = (c: Capacity) =>
     setWeights((w) => {
       const next = ((w[c] ?? 0) + 1) % 4;
@@ -76,6 +80,11 @@ function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: stri
     setMsg(null);
     if (goals.length === 0) {
       setMsg({ tone: 'error', text: t('personal.profile.needGoal') });
+      return;
+    }
+    if (!ranked) {
+      // Old goals have no order: never invent a main goal by saving them in an arbitrary order.
+      setMsg({ tone: 'error', text: t('personal.profile.rankGoals') });
       return;
     }
     try {
@@ -129,7 +138,9 @@ function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: stri
                 multi
                 title={t(`goals.${g}`)}
                 body={
-                  i === 0
+                  !ranked
+                    ? undefined
+                    : i === 0
                     ? t('personal.profile.mainGoal')
                     : i > 0
                       ? t('personal.profile.secondaryGoal', { n: i + 1 })
