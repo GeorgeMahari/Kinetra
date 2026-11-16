@@ -136,7 +136,7 @@ components:
 
 # Design System: Kinetra
 
-This file describes what ships in `mobile/src/theme/tokens.ts` and the components built on it. The
+This file describes what ships in `mobile/src/design-system/tokens.ts` and the components built on it. The
 token file is the source of truth; when the two disagree, the code wins and this file is out of date.
 Component rules, motion, data visualisation and the body map are in `docs/DESIGN_SYSTEM.md`.
 

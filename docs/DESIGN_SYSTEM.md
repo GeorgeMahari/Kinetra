@@ -21,17 +21,17 @@ right.
 6. **Accessible first.** Every chart is reachable without a gesture (tap targets plus a table view).
    Every control has a role, a label and a state, and tap targets are at least 32 px (most are 44–56 px).
 
-## 2. Foundations (`mobile/src/theme`, `components/motion.tsx`)
+## 2. Foundations (`mobile/src/design-system/`)
 
 | Piece | Where | Notes |
 |---|---|---|
-| Tokens | `theme/tokens.ts` | colours (light and dark), spacing, radius, elevation, motion, iconSize, typography |
-| Theme | `theme/ThemeProvider.tsx` → `useTheme()` | `scheme` is automatic, light or dark, chosen in Settings |
-| Text | `components/AppText.tsx` | `variant` is one of the typography keys; `color` is any colour token |
-| Press feedback | `PressableScale` (motion.tsx) | scale 0.97, optional highlight tint, `hapticKind` |
+| Tokens | `design-system/tokens.ts` | colours (light and dark), spacing, radius, elevation, motion, iconSize, typography |
+| Theme | `design-system/ThemeProvider.tsx` → `useTheme()` | `scheme` is automatic, light or dark, chosen in Settings |
+| Text | `design-system/AppText.tsx` | `variant` is one of the typography keys; `color` is any colour token |
+| Press feedback | `PressableScale` (design-system/motion.tsx) | scale 0.97, optional highlight tint, `hapticKind` |
 | Entrances | `FadeInItem`, Reanimated `entering` with `.reduceMotion(ReduceMotion.System)` | staggered at 35–40 ms |
-| Haptics | `haptic(kind)` (motion.tsx) | `tap`, `select`, `success`, `none`; does nothing on web and fails silently |
-| Loops | `components/visibleLoop.ts` | `useVisibleLoop`, `AMBIENT_REPEATS`, `useScreenFocused`, `isInViewport` |
+| Haptics | `haptic(kind)` (design-system/motion.tsx) | `tap`, `select`, `success`, `none`; does nothing on web and fails silently |
+| Loops | `design-system/visibleLoop.ts` | `useVisibleLoop`, `AMBIENT_REPEATS`, `useScreenFocused`, `isInViewport` |
 
 ### Haptic map
 
@@ -47,21 +47,21 @@ right.
 
 | Component | File | Use |
 |---|---|---|
-| `Blaze` | `components/Blaze.tsx` | a dimension's waymark (shape and paint on a white plate) |
-| `Pictogram` | `components/pictograms/Pictogram.tsx` | 18 trail-sign figures (tests and plan tasks); `sign` variant on a forest plate, `bare` variant on the shell; `isPictogram()` guards unknown codes |
-| `BadgeArt` | `components/BadgeArt.tsx` | achievement diamonds with glyphs; locked badges are outlined |
-| `Logo` | `components/Logo.tsx` | the Kinetra mark |
-| `TabIcon`, `Icon` | `components/` | 24-px line icons in the same stroke family |
+| `Blaze` | `components/brand/Blaze.tsx` | a dimension's waymark (shape and paint on a white plate) |
+| `Pictogram` | `components/brand/Pictogram.tsx` | 18 trail-sign figures (tests and plan tasks); `sign` variant on a forest plate, `bare` variant on the shell; `isPictogram()` guards unknown codes |
+| `BadgeArt` | `features/progression/BadgeArt.tsx` | achievement diamonds with glyphs; locked badges are outlined |
+| `Logo` | `components/brand/Logo.tsx` | the Kinetra mark |
+| `Icon`, `TabIcon` | `design-system/Icon.tsx`, `navigation/TabIcon.tsx` | 24-px line icons in the same stroke family |
 
-## 4. Layout and form primitives
+## 4. Layout, form and feedback primitives (`components/layout`, `components/forms`, `components/feedback`)
 
 `Screen` (scroll container that can show the header and footer and records scroll for `useVisibleLoop`),
 `Card`, `ListRow` and `ListGroup` (tones: default and danger), `SectionHeader`, `Notice` (info, success,
 warning, error, each with an icon), `States` (Loading, Error with retry, Empty with an action,
 Skeleton), `OfflineBanner`, `ServerStatusBanner`, `Button` (primary, secondary, ghost, danger;
 loading), `TextField` (label, error, password visibility toggle), `Checkbox`, `Choice`, `Stepper`,
-`SegmentedControl`, `DateOfBirthField`, `LanguagePicker`, `ThemeTiles` (preview tiles in Settings),
-`AuthHeader`.
+`SegmentedControl`, `DateOfBirthField`, `LanguagePicker`. Feature-owned: `ThemeTiles` (preview tiles,
+`features/settings`), `AuthHeader` (`features/auth`), `Timer` (`features/assessments`).
 
 ## 5. Data visualisation (`components/data`, `components/charts`)
 

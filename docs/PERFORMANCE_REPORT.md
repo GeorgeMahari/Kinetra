@@ -38,7 +38,7 @@ Conclusions:
 ### Changes
 
 - `useShimmer` cancels its loop on unmount (it did not before).
-- New `useVisibleLoop` (`mobile/src/components/visibleLoop.ts`): an infinite loop runs only while its
+- New `useVisibleLoop` (`mobile/src/design-system/visibleLoop.ts`): an infinite loop runs only while its
   screen is focused, its element is inside the scroll viewport (measured on the UI thread on every
   scroll; only a change crosses to JS), and Reduce Motion is off. Stopping cancels the animation and
   restores the rest position; unmounting cancels it.
@@ -101,7 +101,7 @@ screen, so it understated the cost.
 
 This resolves the open decision above with a fourth option. Ambient loops (Today beacon, Plan trail
 ring, streak flame, week "today" ring) now play `AMBIENT_REPEATS` = 4 times each time they come into
-view, then rest (`mobile/src/components/visibleLoop.ts`). They still start again when the element
+view, then rest (`mobile/src/design-system/visibleLoop.ts`). They still start again when the element
 re-enters the viewport or the screen regains focus, and they stay off under Reduce Motion.
 
 | Screen (idle, after settling) | Before this pass | After |

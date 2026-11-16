@@ -19,26 +19,51 @@ one FastAPI service, one PostgreSQL database and one Expo (React Native) app.
 
 ## Backend modules
 
+`backend/app` is a **domain-modular monolith**: each domain under `app/modules/<domain>/` owns its HTTP
+layer, contracts, data and rules, so a feature lives in one folder.
+
+```
+app/
+  main.py          app factory: middleware, error handlers, router registration
+  models.py        imports every models module (Alembic autogenerate sees the full metadata)
+  core/            infrastructure: config, db, security, errors, logging, middleware, rate limit, email
+  shared/          cross-domain building blocks: vocab.py (Dimension, IntensityCeiling, check_in), age.py
+  tools/           developer commands (send_test_email)
+  modules/<domain>/
+    router.py      HTTP only: parse, authorise (auth.deps), call the service
+    schemas.py     Pydantic request/response contracts
+    service.py     use cases and transactions; the only layer that talks to other domains
+    models.py      SQLAlchemy tables owned by the domain
+    rules.py / engine/ / knowledge.py   pure, versioned rule sets (no FastAPI, no SQLAlchemy)
+```
+
 | Module | Responsibility |
 |---|---|
 | `core` | Settings, DB engine and session, error envelope, logging, security middleware (headers, body limit) |
+| `shared` | The vocabulary every domain speaks (eight dimensions, test intensity ceiling, CHECK helper), age |
 | `health` | Liveness and readiness probes (drive the app's offline banner) |
 | `auth` | Register, login, rotating refresh tokens, logout, password policy, rate limiting |
-| `users` | `/me`: profile, language, export, deletion |
-| `onboarding` | Sports catalogue, goals, activity profiles, readiness screening, adaptive follow-ups, priorities |
-| `assessments` | Test catalogue, results (append-only), measurements, overview; **engine** (pure) |
-| `insights` | Progress series per protocol, coverage map, sourced recommendations |
-| `progression` | Points and levels, achievements, personal bests, weekly objectives and check-ins, streaks |
-| `devices` | Read-only Health Connect import into `measurements`, listing, removal (D38) |
-| `consent` | Parental consent for ages 14–15: locked accounts, the parent's link page, hourly purge of expired requests (D39) |
+| `users` | `/me`: profile, language, data export (assembles every domain's export), deletion |
+| `consent` | Parental consent for ages 14–15 (D39) |
+| `onboarding` | Sports catalogue, goals (ranked), activity profiles, readiness screening, adaptive follow-ups, dimension priorities |
+| `assessments` | Test catalogue, results (append-only), measurements, overview; **engine** (pure, engine-3) |
+| `personalization` | What matters to each person: capacities, sport/goal/test knowledge, the battery (D43, D44) |
+| `insights` | Progress series, profile map standings, general **and personal** recommendations (insights-4) |
+| `progression` | Points, levels, achievements, personal bests, weekly objectives, streaks |
+| `plans` | Health zones, the 8-week plan, daily tasks and targets (plan-2) |
+| `devices` | Read-only Health Connect import into `measurements` (D38) |
 
-All modules are complete as of Milestone 8. Every rule set (`engine`, `onboarding/rules`,
-`insights/rules`, `progression/rules`) is pure and versioned, and results store the version that
+**Dependency direction.** A domain that consumes another's results imports that domain's `service` (or
+its pure rules); the producer never imports the consumer. Personalisation reads onboarding;
+insights reads assessments, onboarding and personalisation; plans read insights and personalisation.
+Two narrow two-way links are deliberate: `plans` ↔ `progression` (a tick awards points; points read plan
+days) and `auth` ↔ `consent` (sign-up opens a consent; the consent page uses auth dependencies). The
+import graph has no cycles at module level (checked with an AST import graph, see
+`ARCHITECTURE_CURRENT.md`).
+
+Every rule set (`engine`, `onboarding/rules`, `personalization/engine`, `insights/rules`, `insights/personal`,
+`progression/rules`, `plans/rules`) is pure and versioned, and stored results keep the version that
 produced them.
-
-Each module owns `models.py`, `schemas.py` (Pydantic request/response), `service.py`
-(business logic, transactions) and `router.py` (HTTP only). Modules talk through services,
-never through each other's tables directly.
 
 ### The assessment engine boundary
 
@@ -78,31 +103,50 @@ is shown with an explicit "no validated reference for this group" note.
 
 ## Mobile app structure
 
+Dependencies point one way: `app → features → components → design-system`, with `api/` used by features.
+
 ```
 mobile/src/
-  app/            Expo Router routes only (screens and _layout files)
-  auth/           AuthProvider (session restore, token renewal) + secure token storage
-  components/     Reusable, themed UI building blocks (icons, fields, states, rows, banner)
-  features/       Feature logic and composite UI: auth forms, profile, dimensions, settings
-  theme/          Design tokens, ThemeProvider (light/dark/automatic), device preferences
-  i18n/           i18next setup + typed en/ro/ru dictionaries
-  api/            fetch client, error mapping, typed endpoint helpers
+  app/             Expo Router routes only (screens and _layout files); route flow tests in __tests__
+  api/             fetch client, error mapping, one typed module per backend domain
+  design-system/   foundations: tokens, ThemeProvider (light/dark/automatic), preferences, motion
+                   (PressableScale, haptics, entrances), visibleLoop, AppText, Icon
+  components/      reusable UI with no business logic, by role
+    layout/        Screen, Card, ListRow
+    forms/         Button, Checkbox, Choice, SegmentedControl, TextField, DateOfBirthField, LanguagePicker
+    feedback/      Notice, States (loading/error/empty/skeleton), OfflineBanner, ServerStatusBanner
+    brand/         Logo, Blaze (dimension waymarks), Pictogram (trail-sign figures)
+    charts/        LineChart, ProfileMap
+    data/          AnimatedNumber, BandBar, IntensityMeter, PercentileRuler, ZoneBadge
+  features/<domain>/   building blocks, hooks (TanStack Query) and pure logic per domain:
+                   assessments, auth (AuthProvider, tokenStorage, forms), body, devices, dimensions,
+                   insights, onboarding, personalization, plan, profile, progress, progression,
+                   settings, today
+  navigation/      TabIcon, afterSave
+  i18n/            i18next setup + typed en/ro/ru dictionaries (locales/<namespace>.<lang>.ts)
+  test-utils/      in-memory fake backend, Reanimated stand-in (wired in package.json "jest")
 ```
 
-Route tree:
+Conventions:
+- A component used by one feature lives in that feature. `components/` holds only what several features use.
+- Imports use the `@/` alias, except siblings in the same folder (`./x`) and a test importing its
+  subject (`../x`).
+- Tests sit next to their subject in `__tests__/`.
+- There are no global `hooks/`, `utils/`, `store/` or `types/` folders. Server state is TanStack Query
+  per feature, shared contracts are the `api/` types, and helpers live with the code that needs them.
+
+Route tree (file-based; unchanged by the restructuring):
 
 ```
 src/app/
-  _layout.tsx             providers; Stack.Protected splits signed-out / signed-in / dev-only
-  index.tsx               welcome (signed out)
-  sign-in.tsx, sign-up.tsx
-  dev-gallery.tsx         design-system reference (__DEV__ only)
-  (app)/_layout.tsx       signed-in stack + global offline banner
-  (app)/(tabs)/_layout.tsx  bottom tabs
-  (app)/(tabs)/today.tsx    greeting, profile completion, eight dimensions
-  (app)/(tabs)/profile.tsx  personal details, appearance, account & data link
-  (app)/edit-profile.tsx
-  (app)/settings.tsx      language, account, export, deletion, sign out
+  _layout.tsx               providers; Stack.Protected splits signed-out / signed-in / dev-only
+  index.tsx, welcome.tsx, sign-in.tsx, sign-up.tsx, forgot-password.tsx, parental-consent.tsx
+  dev-gallery.tsx           design-system reference (__DEV__ only)
+  (app)/_layout.tsx         signed-in stack + offline banner
+  (app)/(tabs)/             today, plan, assess, progress, profile (+ _layout: bottom tabs)
+  (app)/test/[code], record/[code], result/[id], progress/[code]
+  (app)/onboarding, edit-profile, sport-profile, settings, connected-data, verify-email,
+        achievements, body, profile-map
 ```
 
 ## Error contract
