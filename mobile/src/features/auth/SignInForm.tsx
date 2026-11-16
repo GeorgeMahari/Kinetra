@@ -6,7 +6,7 @@ import { errorMessage } from '@/api/errorMessage';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
 import { TextField, type TextInputHandle } from '@/components/TextField';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { validateEmail, type FieldErrors } from './validation';
 

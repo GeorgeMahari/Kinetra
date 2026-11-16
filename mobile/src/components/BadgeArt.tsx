@@ -5,8 +5,8 @@
  */
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { blazeColors, type BlazeColor } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { blazeColors, type BlazeColor } from '@/design-system/tokens';
 
 type Glyph = 'check' | 'flag' | 'steps' | 'flame' | 'star' | 'repeat' | 'peak' | 'target' | 'spectrum' | 'week';
 

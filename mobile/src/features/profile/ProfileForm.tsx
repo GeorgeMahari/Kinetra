@@ -4,16 +4,16 @@ import { useTranslation } from 'react-i18next';
 
 import type { Profile, ProfileUpdate, SexForNorms } from '@/api/auth';
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
-import { Icon } from '@/components/Icon';
-import { FadeInItem } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { FadeInItem } from '@/design-system/motion';
 import { Notice } from '@/components/Notice';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { parseHeight, type FieldError } from '@/features/auth/validation';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
 export function ProfileForm({
   profile,

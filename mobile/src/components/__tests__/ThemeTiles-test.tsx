@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { ThemeTiles } from '../settings/ThemeTiles';
 

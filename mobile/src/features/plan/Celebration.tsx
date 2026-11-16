@@ -21,11 +21,11 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze, type BlazeShape } from '@/components/Blaze';
-import { Icon } from '@/components/Icon';
-import { useTheme } from '@/theme/ThemeProvider';
-import type { BlazeColor } from '@/theme/tokens';
+import { Icon } from '@/design-system/Icon';
+import { useTheme } from '@/design-system/ThemeProvider';
+import type { BlazeColor } from '@/design-system/tokens';
 
 const SHAPES: BlazeShape[] = ['band', 'dot', 'cross', 'triangle'];
 const COLORS: BlazeColor[] = ['red', 'blue', 'yellow', 'green'];

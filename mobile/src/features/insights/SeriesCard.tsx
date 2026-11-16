@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import type { Provenance } from '@/api/assessments';
 import type { ProgressSeries } from '@/api/insights';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { LineChart } from '@/components/charts/LineChart';
 import { formatValue, ProvenanceBadge } from '@/features/assessments/ResultView';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { protocolLabel, signedChange } from './present';
 

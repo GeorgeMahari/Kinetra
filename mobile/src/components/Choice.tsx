@@ -2,12 +2,12 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
-import { haptic, PressableScale } from './motion';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { haptic, PressableScale } from '@/design-system/motion';
 
 /**
  * Selectable tile for single- or multi-choice questions. Selection is shown by shape and colour

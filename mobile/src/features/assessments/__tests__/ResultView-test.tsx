@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import type { TestResult } from '@/api/assessments';
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { formatNumber, ResultView } from '../ResultView';
 

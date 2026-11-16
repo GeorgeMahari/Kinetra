@@ -21,7 +21,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { motion } from '@/theme/tokens';
+import { motion } from '@/design-system/tokens';
 
 export type HapticKind = 'tap' | 'select' | 'success' | 'none';
 

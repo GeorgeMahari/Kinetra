@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /**
  * Thin meter: brand fill on a lighter step of the same hue (dataviz meter rule). `shell` draws it

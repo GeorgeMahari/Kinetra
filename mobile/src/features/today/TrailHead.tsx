@@ -19,12 +19,12 @@ import { useTranslation } from 'react-i18next';
 
 import type { Overview } from '@/api/assessments';
 import type { DimensionCode } from '@/api/onboarding';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Logo } from '@/components/Logo';
 import { useScreenScroll } from '@/components/Screen';
-import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/design-system/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /**
  * The trail head: the Today hero. A ridge carries eight waypoints, one per dimension in the

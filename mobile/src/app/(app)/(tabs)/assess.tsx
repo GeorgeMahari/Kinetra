@@ -17,11 +17,11 @@ import { useTranslation } from 'react-i18next';
 import type { TestInfo } from '@/api/assessments';
 import type { DimensionCode } from '@/api/onboarding';
 import type { BatteryTest, Tier } from '@/api/personalization';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { IntensityMeter } from '@/components/data/IntensityMeter';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 import { Notice } from '@/components/Notice';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
@@ -30,7 +30,7 @@ import { useOverview, useTests } from '@/features/assessments/useAssessments';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useBattery, useSportProfile } from '@/features/personalization/usePersonalization';
 import { reasonText } from '@/features/personalization/why';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 function TestTile({
   test,

@@ -22,9 +22,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
-import { AppText } from '@/components/AppText';
-import { haptic } from '@/components/motion';
-import { useTheme } from '@/theme/ThemeProvider';
+import { AppText } from '@/design-system/AppText';
+import { haptic } from '@/design-system/motion';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 

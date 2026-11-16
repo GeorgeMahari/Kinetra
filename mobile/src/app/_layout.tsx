@@ -17,7 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '@/auth/AuthProvider';
 import { LogoMark } from '@/components/Logo';
-import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/design-system/ThemeProvider';
 
 function Splash() {
   const { colors, spacing } = useTheme();

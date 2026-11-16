@@ -2,11 +2,11 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { ServerState } from '@/api/health';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon, type IconName } from './Icon';
+import { AppText } from '@/design-system/AppText';
+import { Icon, type IconName } from '@/design-system/Icon';
 
 /** Server reachability as a pill: an icon per state (not colour alone) and its word. */
 export function ServerStatusBanner({ state, onRetry }: { state: ServerState; onRetry: () => void }) {

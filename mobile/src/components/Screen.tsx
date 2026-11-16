@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, RefreshControl, View } from 'react-nati
 import Animated, { useAnimatedScrollHandler, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 const MAX_CONTENT_WIDTH = 560;
 

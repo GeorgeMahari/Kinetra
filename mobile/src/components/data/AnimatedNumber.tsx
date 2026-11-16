@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { AppText, type AppTextProps } from '@/components/AppText';
+import { AppText, type AppTextProps } from '@/design-system/AppText';
 
 export function AnimatedNumber({
   value,

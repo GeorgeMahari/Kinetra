@@ -7,8 +7,8 @@ import { View } from 'react-native';
 import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
-import { Icon } from '@/components/Icon';
-import { useTheme } from '@/theme/ThemeProvider';
+import { Icon } from '@/design-system/Icon';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export function TrailRail({ current, total }: { current: number; total: number }) {
   const { t } = useTranslation();

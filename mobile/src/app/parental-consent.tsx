@@ -10,17 +10,17 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { AuthHeader } from '@/components/auth/AuthHeader';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { TextField } from '@/components/TextField';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
 export interface ConsentStatus {
   status: 'not_required' | 'pending' | 'granted';

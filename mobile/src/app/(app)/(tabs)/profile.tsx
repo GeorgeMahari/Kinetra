@@ -3,16 +3,16 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { ListGroup, ListRow } from '@/components/ListRow';
-import { FadeInItem } from '@/components/motion';
+import { FadeInItem } from '@/design-system/motion';
 import { Screen } from '@/components/Screen';
 import { CompletionTrail } from '@/features/profile/CompletionTrail';
 import { ProfileHeader } from '@/features/profile/ProfileHeader';
 import { useProgression } from '@/features/progression/useProgression';
 import { LANGUAGE_NAMES, type Language } from '@/i18n';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function ProfileTab() {
   const { t, i18n } = useTranslation();

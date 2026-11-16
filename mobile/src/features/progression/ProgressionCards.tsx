@@ -6,19 +6,19 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import type { Progression } from '@/api/progression';
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { BadgeArt } from '@/components/BadgeArt';
-import { PressableScale } from '@/components/motion';
+import { PressableScale } from '@/design-system/motion';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Stepper } from '@/components/Choice';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { SectionHeader } from '@/components/ListRow';
 import { Notice } from '@/components/Notice';
 import { formatValue } from '@/features/assessments/ResultView';
 import { protocolLabel } from '@/features/insights/present';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { Meter } from './Meter';
 import { useSaveCheckin } from './useProgression';

@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export type PictogramName =
   | 'resting_hr'

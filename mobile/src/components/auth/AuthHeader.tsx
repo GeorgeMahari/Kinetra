@@ -8,9 +8,9 @@ import { View } from 'react-native';
 import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { LogoMark } from '@/components/Logo';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /** A ridge silhouette with a dashed trail climbing it, sized to its container. */
 export function TrailRidge({ height = 64, opacity = 0.1 }: { height?: number; opacity?: number }) {

@@ -1,5 +1,5 @@
 import type { BlazeSpec } from '@/components/Blaze';
-import type { IconName } from '@/components/Icon';
+import type { IconName } from '@/design-system/Icon';
 
 /**
  * The eight physical dimensions Kinetra assesses independently. There is deliberately

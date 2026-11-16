@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useServerStatus } from '@/api/health';
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { TrailRidge } from '@/components/auth/AuthHeader';
 import { Button } from '@/components/Button';
 import { LanguagePicker } from '@/components/LanguagePicker';
@@ -19,7 +19,7 @@ import { Notice } from '@/components/Notice';
 import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { ServerStatusBanner } from '@/components/ServerStatusBanner';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 const STORY: PictogramName[] = ['brisk_walk', 'cooper_12min', 'pushups', 'single_leg_stance'];
 

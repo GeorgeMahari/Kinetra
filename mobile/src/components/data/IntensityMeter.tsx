@@ -2,8 +2,8 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Intensity } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
-import { useTheme } from '@/theme/ThemeProvider';
+import { AppText } from '@/design-system/AppText';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 const LEVEL: Record<Intensity, number> = { non_exertional: 1, submaximal: 2, maximal: 3 };
 

@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next';
 import type { RegisterInput } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Checkbox } from '@/components/Checkbox';
 import { DateOfBirthField } from '@/components/DateOfBirthField';
 import { Notice } from '@/components/Notice';
 import { TextField } from '@/components/TextField';
 import { isSupportedLanguage } from '@/i18n';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import {
   fieldErrorsFromApi,

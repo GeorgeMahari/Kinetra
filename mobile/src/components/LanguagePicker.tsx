@@ -2,12 +2,12 @@ import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES, type Language } from '@/i18n';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
-import { haptic } from './motion';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { haptic } from '@/design-system/motion';
 
 /**
  * Without `onSelect` the language changes on this device only (signed-out screens).

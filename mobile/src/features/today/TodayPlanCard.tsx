@@ -7,13 +7,13 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { usePlan } from '@/features/plan/usePlan';
-import { useTheme } from '@/theme/ThemeProvider';
-import { blazeColors } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { blazeColors } from '@/design-system/tokens';
 
 export function TodayPlanCard() {
   const { t } = useTranslation();

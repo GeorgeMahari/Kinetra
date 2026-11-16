@@ -4,12 +4,12 @@ import Animated, { useAnimatedStyle, useReducedMotion } from 'react-native-reani
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type Overview } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze, type BlazeSpec } from '@/components/Blaze';
-import { FadeInItem, PressableScale, usePressProgress } from '@/components/motion';
+import { FadeInItem, PressableScale, usePressProgress } from '@/design-system/motion';
 import { Skeleton } from '@/components/States';
 import { formatValue } from '@/features/assessments/ResultView';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { DIMENSIONS } from './dimensions';
 

@@ -11,12 +11,12 @@ import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, w
 import { useTranslation } from 'react-i18next';
 
 import type { PlanTarget } from '@/api/plan';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { Button } from '@/components/Button';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { loose } from './format';
 

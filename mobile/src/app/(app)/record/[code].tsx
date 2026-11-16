@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { TestCode } from '@/api/assessments';
 import { ApiError } from '@/api/client';
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Checkbox } from '@/components/Checkbox';
 import { Notice } from '@/components/Notice';
@@ -17,7 +17,7 @@ import { TextField } from '@/components/TextField';
 import { Timer } from '@/components/Timer';
 import { FORMS, parseForm, type FieldError, type FormValues } from '@/features/assessments/forms';
 import { useAssessmentsApi, useInvalidateAssessments } from '@/features/assessments/useAssessments';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function RecordResult() {
   const { code } = useLocalSearchParams<{ code: string }>();

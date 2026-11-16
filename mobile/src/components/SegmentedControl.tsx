@@ -1,11 +1,11 @@
 import { View } from 'react-native';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
-import { PressableScale } from './motion';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 
 export interface Segment<T extends string> {
   value: T;

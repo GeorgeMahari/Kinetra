@@ -10,13 +10,13 @@ import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type TestResult } from '@/api/assessments';
 import type { Battery, BatteryTest, Capacity } from '@/api/personalization';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { PressableScale } from '@/components/motion';
+import { PressableScale } from '@/design-system/motion';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { formatValue } from '@/features/assessments/ResultView';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { useBattery, useSportProfile } from './usePersonalization';
 

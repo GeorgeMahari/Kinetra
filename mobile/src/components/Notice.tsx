@@ -1,11 +1,11 @@
 import { View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize, type ThemeColors } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize, type ThemeColors } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon, type IconName } from './Icon';
+import { AppText } from '@/design-system/AppText';
+import { Icon, type IconName } from '@/design-system/Icon';
 
 const TONE: Record<'error' | 'success' | 'info', { icon: IconName; ink: keyof ThemeColors; soft: keyof ThemeColors }> = {
   error: { icon: 'alert', ink: 'danger', soft: 'zoneAttentionSoft' },

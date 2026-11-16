@@ -8,12 +8,12 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { PlanView } from '@/api/plan';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { ZoneBadge } from '@/components/data/ZoneBadge';
-import { FadeInItem, PressableScale } from '@/components/motion';
+import { FadeInItem, PressableScale } from '@/design-system/motion';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export function ZoneList({ zones, focus }: { zones: PlanView['zones']; focus?: string }) {
   const { t } = useTranslation();

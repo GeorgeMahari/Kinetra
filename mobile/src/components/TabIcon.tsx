@@ -2,10 +2,10 @@ import { useEffect, useRef } from 'react';
 import type { ColorValue } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
-import { Icon, type IconName } from './Icon';
-import { haptic } from './motion';
+import { Icon, type IconName } from '@/design-system/Icon';
+import { haptic } from '@/design-system/motion';
 
 /**
  * A tab icon that sits on a soft pill when its tab is active: the pill grows in with a spring and

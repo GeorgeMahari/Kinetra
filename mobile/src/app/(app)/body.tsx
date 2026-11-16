@@ -13,11 +13,11 @@ import { useTranslation } from 'react-i18next';
 import { headlineIndicator, type TestCode, type TestResult } from '@/api/assessments';
 import type { DimensionCode } from '@/api/onboarding';
 import type { Zone } from '@/api/plan';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { ZONE_STYLE, ZoneBadge } from '@/components/data/ZoneBadge';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -29,7 +29,7 @@ import { BACK, FRONT, regionsForTests, testsForRegion, type BodyRegion } from '@
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useDashboard } from '@/features/insights/useInsights';
 import { usePlan } from '@/features/plan/usePlan';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function BodyScreen() {
   const { t, i18n } = useTranslation();

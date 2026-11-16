@@ -9,10 +9,10 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
-import { Icon, type IconName } from '@/components/Icon';
-import { FadeInItem } from '@/components/motion';
+import { Icon, type IconName } from '@/design-system/Icon';
+import { FadeInItem } from '@/design-system/motion';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
@@ -22,8 +22,8 @@ import {
   useHealthConnectDevice,
   useImportedData,
 } from '@/features/devices/useConnectedData';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize, type ThemeColors } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize, type ThemeColors } from '@/design-system/tokens';
 
 type Message = { tone: 'error' | 'success' | 'info'; message: string } | null;
 const KINDS: ImportKind[] = ['resting_hr_bpm', 'weight_kg', 'steps_daily'];

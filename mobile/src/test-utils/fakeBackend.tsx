@@ -11,7 +11,7 @@ import type { Me } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import type { OnboardingStatus, OnboardingSummary } from '@/api/onboarding';
 import { AuthContext, type AuthContextValue } from '@/auth/AuthProvider';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 export const TEST_USER: Me = {
   id: 'u1',

@@ -26,13 +26,13 @@ import Svg, { Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import type { Plan } from '@/api/plan';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
-import { Icon } from '@/components/Icon';
-import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
+import { Icon } from '@/design-system/Icon';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/design-system/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
-import { blazeColors } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { blazeColors } from '@/design-system/tokens';
 
 const AnimatedPath = createAnimatedComponent(Path);
 const HEIGHT = 96;

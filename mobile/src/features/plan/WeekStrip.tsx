@@ -16,11 +16,11 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 
 import type { PlanDay } from '@/api/plan';
-import { AppText } from '@/components/AppText';
-import { Icon } from '@/components/Icon';
-import { AMBIENT_REPEATS, useVisibleLoop } from '@/components/visibleLoop';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { AMBIENT_REPEATS, useVisibleLoop } from '@/design-system/visibleLoop';
 import { weekdayNames } from '@/features/progress/calendar';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 const SIZE = 34;
 

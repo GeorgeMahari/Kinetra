@@ -3,11 +3,11 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle } from 'react-native-svg';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
-import { AppText } from './AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from './Button';
-import { haptic } from './motion';
+import { haptic } from '@/design-system/motion';
 
 const RING = 216;
 const STROKE = 10;

@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
@@ -15,7 +15,7 @@ import { useAssessmentsApi, useInvalidateAssessments, useResult } from '@/featur
 import { nextSuggestedTest } from '@/features/insights/nextTest';
 import { useDashboard } from '@/features/insights/useInsights';
 import { goHome, goToTest } from '@/navigation/afterSave';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /** Shown right after a result is saved: go on to the next suggested test, or back to Today. */
 function AfterSaveActions({ done }: { done: TestCode }) {

@@ -12,8 +12,8 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSprin
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
-import { haptic } from '@/components/motion';
-import { useTheme } from '@/theme/ThemeProvider';
+import { haptic } from '@/design-system/motion';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import type { BodyRegion } from './regions';
 

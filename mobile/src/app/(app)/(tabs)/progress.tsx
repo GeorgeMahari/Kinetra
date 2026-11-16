@@ -3,9 +3,9 @@ import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { TestCode } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Card } from '@/components/Card';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingState, Skeleton } from '@/components/States';
 import { SeriesCard } from '@/features/insights/SeriesCard';
@@ -17,7 +17,7 @@ import { useProgression } from '@/features/progression/useProgression';
 import { useDashboard, useProgress } from '@/features/insights/useInsights';
 import { ActivityCalendar } from '@/features/progress/ActivityCalendar';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 function TestProgress({ code }: { code: TestCode }) {
   const { t } = useTranslation();

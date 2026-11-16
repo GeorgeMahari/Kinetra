@@ -10,13 +10,13 @@ import { useTranslation } from 'react-i18next';
 
 import type { DimensionCode } from '@/api/onboarding';
 import type { PlanView } from '@/api/plan';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { Button } from '@/components/Button';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { loose } from './format';
 

@@ -11,12 +11,12 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { ProfileMap } from '@/components/charts/ProfileMap';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { SectionHeader } from '@/components/ListRow';
-import { PressableScale } from '@/components/motion';
+import { PressableScale } from '@/design-system/motion';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { DimensionList } from '@/features/dimensions/DimensionList';
@@ -32,7 +32,7 @@ import { CompactBar } from '@/features/today/CompactBar';
 import { RecentStrip } from '@/features/today/RecentStrip';
 import { TodayPlanCard } from '@/features/today/TodayPlanCard';
 import { TrailHead } from '@/features/today/TrailHead';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 function Rise({ index, children }: { index: number; children: React.ReactNode }) {
   return (

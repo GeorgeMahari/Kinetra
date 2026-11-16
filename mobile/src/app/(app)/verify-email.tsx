@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Notice } from '@/components/Notice';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function VerifyEmail() {
   const { t } = useTranslation();

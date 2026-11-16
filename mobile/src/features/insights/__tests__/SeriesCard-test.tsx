@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ProfileMap } from '@/components/charts/ProfileMap';
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { SeriesCard } from '../SeriesCard';
 

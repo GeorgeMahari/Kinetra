@@ -9,14 +9,14 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import type { TestCode } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/States';
 import { SeriesCard } from '@/features/insights/SeriesCard';
 import { useProgress } from '@/features/insights/useInsights';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function ProgressDetail() {
   const { code } = useLocalSearchParams<{ code: string }>();

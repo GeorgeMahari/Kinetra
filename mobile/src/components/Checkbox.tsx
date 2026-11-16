@@ -2,12 +2,12 @@ import { Pressable, View } from 'react-native';
 import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
-import { haptic } from './motion';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { haptic } from '@/design-system/motion';
 
 /** A square checkbox: the mark pops in when ticked (static under Reduce Motion). */
 export function Checkbox({

@@ -2,7 +2,7 @@ import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import { loadDeviceLanguage, saveDeviceLanguage } from '@/theme/preferences';
+import { loadDeviceLanguage, saveDeviceLanguage } from '@/design-system/preferences';
 
 import en from './locales/en';
 import ro from './locales/ro';

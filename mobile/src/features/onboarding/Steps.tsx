@@ -15,15 +15,15 @@ import {
   type ReadinessQuestion,
   type Sport,
 } from '@/api/onboarding';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Card } from '@/components/Card';
 import { OptionCard, Stepper, YesNo } from '@/components/Choice';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { LoadingState } from '@/components/States';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
 import { MAX_GOALS } from './flow';
 

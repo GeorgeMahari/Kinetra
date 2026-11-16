@@ -10,11 +10,11 @@ import Animated, { FadeIn, FadeInDown, ReduceMotion } from 'react-native-reanima
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type TestCode } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { LineChart } from '@/components/charts/LineChart';
 import { IntensityMeter } from '@/components/data/IntensityMeter';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { Notice } from '@/components/Notice';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
@@ -24,7 +24,7 @@ import { formatNumber, formatValue, ProvenanceBadge, unitLabel } from '@/feature
 import { useResults, useTests } from '@/features/assessments/useAssessments';
 import { useBattery, useSportProfile } from '@/features/personalization/usePersonalization';
 import { whyLines } from '@/features/personalization/why';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 
 function Section({ title, children, testID }: { title: string; children: ReactNode; testID?: string }) {

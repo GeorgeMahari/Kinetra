@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 
 import { ApiError } from '@/api/client';
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { SignInForm } from '../SignInForm';
 import { SignUpForm } from '../SignUpForm';

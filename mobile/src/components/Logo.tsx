@@ -1,9 +1,9 @@
 import { View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Polygon, Stop } from 'react-native-svg';
 
-import { brand } from '@/theme/tokens';
+import { brand } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
+import { AppText } from '@/design-system/AppText';
 
 /**
  * The Kinetra mark: an eight-axis spectrum (one axis per physical dimension the

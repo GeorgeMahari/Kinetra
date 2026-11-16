@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ApiError } from '@/api/client';
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { OfflineBanner } from '../OfflineBanner';
 import { EmptyState, ErrorState, LoadingState } from '../States';

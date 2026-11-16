@@ -17,8 +17,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { Me } from '@/api/auth';
 import type { Progression } from '@/api/progression';
-import { AppText } from '@/components/AppText';
-import { useTheme } from '@/theme/ThemeProvider';
+import { AppText } from '@/design-system/AppText';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export function initialsOf(name: string | null, email: string): string {
   const source = (name ?? '').trim();

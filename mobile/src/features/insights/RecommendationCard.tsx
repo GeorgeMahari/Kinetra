@@ -3,11 +3,11 @@ import { Linking, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Recommendation } from '@/api/insights';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Card } from '@/components/Card';
-import { Icon, type IconName } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
-import { useTheme } from '@/theme/ThemeProvider';
+import { Icon, type IconName } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { recommendationText } from './present';
 

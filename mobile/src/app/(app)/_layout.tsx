@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useServerStatus } from '@/api/health';
 import { OfflineBanner } from '@/components/OfflineBanner';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export const unstable_settings = { anchor: '(tabs)' };
 

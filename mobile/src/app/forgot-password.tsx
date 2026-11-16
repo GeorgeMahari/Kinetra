@@ -12,7 +12,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { validateEmail, validateNewPassword } from '@/features/auth/validation';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /**
  * Two steps: ask for the email (the server always answers the same, so this screen never reveals

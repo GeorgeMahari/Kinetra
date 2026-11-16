@@ -4,11 +4,11 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { fontFamily, iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { fontFamily, iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
 
 /** Instance type of a TextInput ref (RN 0.88 types it separately from the component). */
 export type TextInputHandle = ComponentRef<typeof TextInput>;

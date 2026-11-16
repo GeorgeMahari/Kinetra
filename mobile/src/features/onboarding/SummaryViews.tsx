@@ -3,12 +3,12 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import type { OnboardingSummary } from '@/api/onboarding';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize, type ThemeColors } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize, type ThemeColors } from '@/design-system/tokens';
 
 type Readiness = NonNullable<OnboardingSummary['readiness']>;
 

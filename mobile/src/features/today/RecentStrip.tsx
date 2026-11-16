@@ -8,11 +8,11 @@ import Animated, { FadeInRight, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type TestResult } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
-import { PressableScale } from '@/components/motion';
+import { AppText } from '@/design-system/AppText';
+import { PressableScale } from '@/design-system/motion';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { formatValue } from '@/features/assessments/ResultView';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export function RecentStrip({ results }: { results: TestResult[] }) {
   const { t, i18n } = useTranslation();

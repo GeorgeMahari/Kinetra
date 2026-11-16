@@ -10,12 +10,12 @@ import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Card } from '@/components/Card';
-import { Icon } from '@/components/Icon';
-import { haptic } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { haptic } from '@/design-system/motion';
 import { useAssessmentsApi } from '@/features/assessments/useAssessments';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { dayKey, groupByDay, monthGrid, monthWindow, weekdayNames, type DayKey } from './calendar';
 

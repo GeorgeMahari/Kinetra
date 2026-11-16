@@ -6,10 +6,10 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Zone } from '@/api/plan';
-import { AppText } from '@/components/AppText';
-import { Icon, type IconName } from '@/components/Icon';
-import { useTheme } from '@/theme/ThemeProvider';
-import type { ThemeColors } from '@/theme/tokens';
+import { AppText } from '@/design-system/AppText';
+import { Icon, type IconName } from '@/design-system/Icon';
+import { useTheme } from '@/design-system/ThemeProvider';
+import type { ThemeColors } from '@/design-system/tokens';
 
 export const ZONE_STYLE: Record<Zone, { icon: IconName; ink: keyof ThemeColors; soft: keyof ThemeColors }> = {
   attention: { icon: 'alert', ink: 'zoneAttention', soft: 'zoneAttentionSoft' },

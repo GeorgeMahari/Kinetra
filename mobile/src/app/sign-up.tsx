@@ -8,7 +8,7 @@ import { Button } from '@/components/Button';
 import { Pictogram } from '@/components/pictograms/Pictogram';
 import { Screen } from '@/components/Screen';
 import { SignUpForm } from '@/features/auth/SignUpForm';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function SignUp() {
   const { t } = useTranslation();

@@ -8,8 +8,8 @@ import { View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
-import { useTheme } from '@/theme/ThemeProvider';
+import { AppText } from '@/design-system/AppText';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export interface Band {
   key: string;

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import i18n from '@/i18n';
 import { TrailRail } from '@/features/onboarding/TrailRail';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { OptionCard } from '../Choice';
 import { TextField } from '../TextField';

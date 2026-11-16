@@ -3,11 +3,11 @@ import { TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { DateParts } from '@/features/auth/validation';
-import { useTheme } from '@/theme/ThemeProvider';
-import { fontFamily, iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { fontFamily, iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
 import type { TextInputHandle } from './TextField';
 
 /**

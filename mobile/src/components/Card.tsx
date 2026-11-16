@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View, type ViewStyle } from 'react-native';
 
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
   const { colors, spacing, radius, elevation } = useTheme();

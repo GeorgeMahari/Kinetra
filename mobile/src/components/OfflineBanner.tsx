@@ -4,11 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import type { ServerState } from '@/api/health';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
-import { AppText } from './AppText';
-import { Icon } from './Icon';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
 
 /**
  * Shown across the signed-in app when the server or its database cannot be reached.

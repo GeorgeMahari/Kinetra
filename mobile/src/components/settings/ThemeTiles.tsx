@@ -6,12 +6,12 @@
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
-import type { ThemePreference } from '@/theme/preferences';
-import { useTheme } from '@/theme/ThemeProvider';
-import { colors as palettes, iconSize, type ThemeColors } from '@/theme/tokens';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
+import type { ThemePreference } from '@/design-system/preferences';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { colors as palettes, iconSize, type ThemeColors } from '@/design-system/tokens';
 
 function Mini({ c }: { c: ThemeColors }) {
   return (

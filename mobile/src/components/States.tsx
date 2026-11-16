@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import Reanimated from 'react-native-reanimated';
 
 import { errorMessage } from '@/api/errorMessage';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
-import { AppText } from './AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from './Button';
-import { Icon, type IconName } from './Icon';
-import { useShimmer } from './motion';
+import { Icon, type IconName } from '@/design-system/Icon';
+import { useShimmer } from '@/design-system/motion';
 
 export function LoadingState({ label }: { label?: string }) {
   const { t } = useTranslation();

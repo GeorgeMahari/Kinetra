@@ -10,11 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { ApiError } from '@/api/client';
 import { ProfileMap, ProfileMapLegend } from '@/components/charts/ProfileMap';
 import { SeriesCard } from '@/features/insights/SeriesCard';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Checkbox } from '@/components/Checkbox';
-import { Icon, type IconName } from '@/components/Icon';
+import { Icon, type IconName } from '@/design-system/Icon';
 import { Divider, ListRow, SectionHeader } from '@/components/ListRow';
 import { Logo } from '@/components/Logo';
 import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
@@ -26,8 +26,8 @@ import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { EmptyState, ErrorState, LoadingState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
-import { useTheme } from '@/theme/ThemeProvider';
-import type { ThemeColors, TypographyVariant } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import type { ThemeColors, TypographyVariant } from '@/design-system/tokens';
 
 const ICONS: IconName[] = [
   'today', 'profile', 'settings', 'chevronRight', 'offline', 'alert', 'check', 'unknown', 'cardio', 'recovery',

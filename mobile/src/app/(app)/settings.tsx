@@ -7,19 +7,19 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
 import { useAuth } from '@/auth/AuthProvider';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/Button';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/design-system/Icon';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { ListGroup, ListRow } from '@/components/ListRow';
-import { FadeInItem } from '@/components/motion';
+import { FadeInItem } from '@/design-system/motion';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { ThemeTiles } from '@/components/settings/ThemeTiles';
 import { TextField } from '@/components/TextField';
 import { deliverExport } from '@/features/settings/exportFile';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
 type Message = { tone: 'error' | 'success'; message: string } | null;
 

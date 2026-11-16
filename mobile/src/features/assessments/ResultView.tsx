@@ -11,16 +11,16 @@ import Animated, { FadeIn, FadeInDown, ReduceMotion } from 'react-native-reanima
 import { useTranslation } from 'react-i18next';
 
 import type { Indicator, Provenance, TestResult } from '@/api/assessments';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { AnimatedNumber } from '@/components/data/AnimatedNumber';
 import { BandBar } from '@/components/data/BandBar';
 import { PercentileRuler } from '@/components/data/PercentileRuler';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
 import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
 import { REGIONS_BY_TEST } from '@/features/body/regions';
 import i18n from '@/i18n';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 import { interpretationVisual } from './interpretationVisual';
 

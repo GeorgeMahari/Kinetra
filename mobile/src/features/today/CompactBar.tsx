@@ -2,10 +2,10 @@ import { View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { LogoMark } from '@/components/Logo';
 import { useScreenScroll } from '@/components/Screen';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /**
  * A slim trail-head bar that takes over once the hero has scrolled away, so the greeting and the

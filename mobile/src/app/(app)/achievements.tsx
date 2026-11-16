@@ -6,12 +6,12 @@ import { View } from 'react-native';
 import Animated, { FadeInDown, ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { AchievementsList } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function Achievements() {
   const { t } = useTranslation();

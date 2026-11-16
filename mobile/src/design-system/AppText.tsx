@@ -1,7 +1,7 @@
 import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 
-import { useTheme } from '@/theme/ThemeProvider';
-import { fontFamily, type FontWeightKey, type ThemeColors, type TypographyVariant } from '@/theme/tokens';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { fontFamily, type FontWeightKey, type ThemeColors, type TypographyVariant } from '@/design-system/tokens';
 
 export interface AppTextProps extends TextProps {
   variant?: TypographyVariant;

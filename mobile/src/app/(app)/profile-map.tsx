@@ -3,15 +3,15 @@ import { useWindowDimensions, View } from 'react-native';
 import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { ProfileMap, ProfileMapLegend, standingBand } from '@/components/charts/ProfileMap';
-import { FadeInItem, PressableScale } from '@/components/motion';
+import { FadeInItem, PressableScale } from '@/design-system/motion';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingState } from '@/components/States';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useDashboard } from '@/features/insights/useInsights';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /** The profile map on its own page: a large figure, the legend, and a key naming every spoke. */
 export default function ProfileMapScreen() {

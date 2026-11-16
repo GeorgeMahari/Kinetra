@@ -9,11 +9,11 @@ import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/api/auth';
-import { AppText } from '@/components/AppText';
-import { Icon } from '@/components/Icon';
-import { PressableScale } from '@/components/motion';
-import { useTheme } from '@/theme/ThemeProvider';
-import { iconSize } from '@/theme/tokens';
+import { AppText } from '@/design-system/AppText';
+import { Icon } from '@/design-system/Icon';
+import { PressableScale } from '@/design-system/motion';
+import { useTheme } from '@/design-system/ThemeProvider';
+import { iconSize } from '@/design-system/tokens';
 
 import { COMPLETION_TOTAL, missingProfileItems, type CompletionItem } from './completion';
 

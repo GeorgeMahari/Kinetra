@@ -20,7 +20,7 @@ import { useAbandonPlan, usePlan, useSetTask, useStartPlan } from '@/features/pl
 import { WeekStrip } from '@/features/plan/WeekStrip';
 import { ZoneList } from '@/features/plan/ZoneList';
 import { useProgression } from '@/features/progression/useProgression';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function PlanTab() {
   const { t } = useTranslation();

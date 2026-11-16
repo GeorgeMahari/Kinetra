@@ -21,10 +21,10 @@ import Svg, { Circle, Line, Polygon } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import type { Coverage } from '@/api/insights';
-import { AppText } from '@/components/AppText';
+import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/Blaze';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
-import { useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from '@/design-system/ThemeProvider';
 
 /** Where unrated dimensions sit: a hair off the centre, so the rings stay visible. */
 const UNRATED_AT = 0.1;

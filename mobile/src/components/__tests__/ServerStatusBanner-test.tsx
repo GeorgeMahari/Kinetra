@@ -3,7 +3,7 @@ import '@/i18n';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import i18n from '@/i18n';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider } from '@/design-system/ThemeProvider';
 
 import { ServerStatusBanner } from '../ServerStatusBanner';
 
