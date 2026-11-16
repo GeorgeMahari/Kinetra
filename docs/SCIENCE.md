@@ -234,3 +234,42 @@ small habit (mobility; balance for a mobility focus; wind-down for a lifestyle f
 **Target**: the value on the focus test at the group's median (when below it), else the 75th, then the
 90th percentile or the next category; 45 s for one-leg stance; a waist of 0.49 x height when the
 waist-to-height ratio is 0.5 or more. Retest at the end of the 8 weeks.
+
+## 9. Personalisation (`personalization-1`, `engine-3`, `insights-4`, `plan-2`; D43–D45)
+
+**Sport demands**: a weight of 1–3 per capacity, from abstracts read through Europe PMC.
+
+| Sport | Capacities | Source |
+|---|---|---|
+| Gym / strength | strength 3, muscle size 3, muscular endurance 2 | ACSM position stand, Med Sci Sports Exerc 2009, doi:10.1249/mss.0b013e3181915670 |
+| Tennis | speed 3, agility 3, power 2, aerobic 2 | Kovacs, Sports Med 2007, doi:10.2165/00007256-200737030-00001 |
+| Volleyball | power 3, strength 2, agility 2, speed 2, aerobic 1 | Lidor & Ziv, J Strength Cond Res 2010, doi:10.1519/jsc.0b013e3181ddf835 |
+| Football | aerobic 3, speed 3, agility 2, power 2, balance 1 | Stølen et al., Sports Med 2005, doi:10.2165/00007256-200535060-00004 |
+| Basketball | power 3, agility 3, speed 2, aerobic 2 | Ziv & Lidor, Sports Med 2009, doi:10.2165/00007256-200939070-00003 |
+| Cycling | aerobic 3, power 2 | Faria et al., Sports Med 2005, doi:10.2165/00007256-200535040-00003 |
+| Running | aerobic 3, heart-rate recovery 1 | Joyner & Coyle, J Physiol 2008, doi:10.1113/jphysiol.2007.143834 |
+| Swimming | aerobic 3 (weak: the abstract lists no capacities) | Pyne & Sharp, IJSNEM 2014, doi:10.1123/ijsnem.2014-0047 |
+| Boxing | aerobic 3, power 3, strength 2 | Chaabène et al., Sports Med 2015, doi:10.1007/s40279-014-0274-7 |
+
+**Other sports.** Every other sport uses its category default (`knowledge.CATEGORY_DEMANDS`). This is a
+design choice that mirrors the onboarding priorities, not a cited claim. The ranking factors (frequency,
+level, goal rank) are also design choices. They only order tests and are never shown as measurements.
+
+**Test modules** (`engine-3`). Every module shows only your own trend, except two that add a flag based
+on a documented threshold.
+
+| Test | Capacity | Reading | Key source |
+|---|---|---|---|
+| Standing broad jump | power | own trend; a learning effect of about 12 cm between the first sessions | Marin-Jimenez 2024, PMC11369318 |
+| Vertical jump (jump and reach) | power | own trend; norms exist but their values were not read | Markovic 2004 |
+| 505 change of direction | agility | own trend; stopwatch timing is flagged | Barrera-Domínguez 2025, PMC11730434 |
+| 20 m sprint | speed | own trend; video or timing gates only | Haugen & Buchheit 2016 |
+| Ruler drop | reaction | own trend; t = √(2d/g); at least 3 catches needed | Eckner 2011, PMC3419153 |
+| Back scratch | shoulder mobility | own trend; norms exist only for people aged 60 and over | Albrecht 2021, PMC8074447 |
+| Single-leg forward reach | balance | flag if the difference is above 4 cm; the evidence is inconsistent | Plisky 2006; Plisky 2021 meta-analysis |
+| Single-leg hop | power, balance | flag if symmetry is below 90 %; from small or clinical samples | Munro & Herrington 2011 |
+| Circumferences (ISAK sites) | muscle size | own trend; measures fat and muscle together | Nácher-Fernández 2026, PMC13591961 |
+| 12-minute swim | aerobic (swimmers) | own trend; not a VO₂ estimate (r ≈ 0.4) | Conley 1991 |
+
+**Personal recommendations** fire only from real data (see D45). Training guidance cites WHO 2020 for
+aerobic and muscle-strengthening activity, and ACSM 2009 for resistance-training progression.

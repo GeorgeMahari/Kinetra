@@ -1,6 +1,7 @@
 # Sport- and goal-based personalisation: technical proposal
 
-**Status:** proposal, awaiting approval (the database changes in §4 are not applied).
+**Status:** implemented on 2026-11-16 (decisions D43–D45; migration 0010 applied after the owner
+confirmed the script, with a backup first). §9 lists where the result differs from this proposal.
 **Date:** 2026-11-16
 
 ## 1. What exists today (analysis)
@@ -112,4 +113,21 @@ afterwards. No existing row is modified or deleted.
 
 ## 8. Test catalogue
 
-See §8 below (filled from the source research).
+The ten engine-3 modules are listed, with protocol sources and how each result is read, in
+docs/SCIENCE.md §9 and decision D44. Their full instructions, safety notes and limitations are in the
+app in en/ro/ru (`mobile/src/i18n/locales/assess.*.ts`). Each module records its capacities, evidence
+label and retest interval in `backend/app/modules/personalization/knowledge.py`.
+
+## 9. What shipped, and how it differs from this proposal
+
+| Proposed | Shipped |
+|---|---|
+| `/profile/sport` endpoints | They are at `/personalization/profile` (GET/PUT) and `/personalization/battery`. |
+| New fields on `/assessments/tests` and `/assessments/overview` | Not added. The battery endpoint carries the tiers, reasons and evidence, so the existing contracts stay byte-for-byte the same. |
+| `focus_capacities` on the dashboard | Not added. The Today "Your goal" card reads the battery and the overview's latest results. |
+| A "Performance profile" on Progress | It is part of the Today "Your goal" card: importance bars, never levels. |
+| A capacity-priorities step in onboarding | It is in the sport profile editor only. Onboarding shows which goal is the main one, because the order of choice was already saved as the rank. |
+| Recommendations with context | As proposed (insights-4). In addition, a personal suggestion replaces the general one for the same test. |
+| (not foreseen) | `CORE_TESTS`: the generic rules stay on the ten general tests. Without it, "assess balance" would have suggested the ruler drop, which needs a helper. |
+| (not foreseen) | A test can be limited to certain sports (the swim test is shown only to swimmers and triathletes). |
+| (not foreseen) | The sprint accepts only video or timing-gate times. |

@@ -329,3 +329,73 @@ should I keep", with long-term goals and short daily steps ("1% better every day
   (first step, perfect day, 7-day and 30-day streaks, perfect week, plan finished, target reached).
   Ticks are serialised on the client so a slow answer never undoes a newer tick.
 - Not now (owner's decision): questions about smoking, alcohol or blood pressure.
+
+### D43 — Sport- and goal-based personalisation, as a layer above the health dimensions (2026-11-16)
+The product owner asked that tests, priorities and recommendations follow each person's sports, goals
+and priorities, so that a bodybuilder, a tennis player, a cyclist and a volleyball player with the same
+body do not get the same battery.
+
+- **Two layers.** The eight health dimensions (profile map, zones, plans, norms) are unchanged. Above
+  them sit 13 performance capacities, each belonging to one dimension (`personalization/capacities.py`).
+- **Knowledge as data.** The mappings sport → capacity demands, goal → capacities and test → capacities
+  live in one declarative module (`personalization/knowledge.py`). No screen branches on a sport.
+- **Sport demands are cited.** Nine sports have their own row, taken from a physical-demand review whose
+  abstract was read. Every other sport uses its category profile, labelled `category:<name>` as a design
+  default. Reaction time is never weighted by a sport, because no source read links it to performance.
+- **One combined battery.** Before any test is chosen, the weights are summed from all sports (× frequency
+  × level), from ranked goals (primary ×3, secondary ×2) and from explicit priorities. Gym + tennis
+  therefore gives one list, in which a shared test appears once with both reasons. Tiers:
+  - priority: at most 4, never above the safety ceiling;
+  - core: the ten general tests, always shown;
+  - additional;
+  - inactive: hidden.
+- **Every test says why** it is shown (sport, goal or priority) and **how its result can be read**:
+  validated norms, a documented threshold, or comparison with the person's own results only.
+- **Data** (migration 0010, additive only):
+  - a goal rank;
+  - three new goals (`build_muscle`, `power_speed`, `agility_coordination`);
+  - a level per sport;
+  - `user_capacity_priorities`;
+  - three athletics disciplines.
+
+  Goals saved earlier stay unranked. The editor asks for an order instead of inventing one.
+- **API** (additive only):
+  - `/personalization/profile` (GET/PUT). PUT writes a new activity snapshot and never touches the
+    safety screening.
+  - `/personalization/battery`.
+
+### D44 — engine-3: ten test modules, none rated against a norm (2026-11-16)
+The modules are standing broad jump, vertical jump (jump and reach), 505, 20 m sprint, ruler-drop
+reaction time, back-scratch, single-leg forward reach, single-leg hop, ISAK circumferences and
+12-minute swim.
+
+- **Flags, not ratings.** Results are compared only with the person's own earlier results. When a
+  documented threshold is crossed, they carry a **flag note**:
+  - forward-reach difference above 4 cm (Plisky 2006, with the caveat from the 2021 meta-analysis);
+  - hop symmetry below 90 % (Munro & Herrington 2011, from small and clinical samples).
+
+  No new interpretation is added, so the profile map, zones and scores cannot move.
+- **Test-specific limits.** The 20 m sprint accepts only video or timing-gate times, because hand timing
+  errs by about 0.15 s (Haugen & Buchheit 2016). The swim test is offered only to swimmers and
+  triathletes.
+- **Citations** contain only what the source research read: authors, journal, year and DOI. Titles that
+  were not verified were removed. Vertical-jump norms exist (Payne et al. 2000), but their values were
+  not read, so they are not used (see docs/SOURCE_VERIFICATION.md).
+- **Generic rules unchanged.** Suggested tests, "assess this dimension" and 8-week retests still use the
+  ten core tests (`CORE_TESTS`), exactly as before. The modules are offered through personalisation.
+
+### D45 — Personal recommendations need real data; plan focus weighs relevance, health first (2026-11-16)
+- **insights-4** adds the following personal recommendations:
+  - measure a priority test that has never been done;
+  - retest a priority test on its own interval;
+  - train a capacity only when it matters to the person **and** its dimension is in the attention zone
+    of a validated norm (WHO 2020 for aerobic, ACSM 2009 for resistance). Muscle size is never judged
+    from the BMI or waist standing;
+  - flag a priority test that declined three results in a row;
+  - show documented asymmetry flags.
+
+  Choosing a sport alone never produces training advice. Minors and people whose effort is blocked get
+  no training advice.
+- **plan-2.** If any dimension is in the attention zone, the focus is the lowest one (the plan-1 rule).
+  Otherwise it is the dimension that matters most to the person among those not yet a strength. Running
+  plan-1 plans keep their stored focus.

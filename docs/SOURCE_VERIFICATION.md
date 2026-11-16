@@ -55,3 +55,21 @@ Native-speaker review of safety and science wording: see `TRANSLATION_REVIEW.md`
 `cd mobile && npm run review-pack`).
 - [ ] Română reviewed by ________ on ________
 - [ ] Русский reviewed by ________ on ________
+
+## Personalisation sources to check (engine-3, D44)
+
+- **Payne N, Gledhill N, Katzmarzyk PT, Jamnik VK, Keir PJ.** Canadian musculoskeletal fitness norms.
+  Can J Appl Physiol 2000;25(6):430–442, doi:10.1139/h00-028.
+  - **What it holds:** vertical-jump norms by sex and age (15–69). Only the abstract was read.
+  - **If the tables can be read:** they could rate the vertical jump in `engine/catalog.py` →
+    `_vertical_jump`, which today shows only your own trend. Norms measured with a different method
+    (for example Vertec) are not comparable to a wall reach.
+- **Rikli & Jones, Senior Fitness Test manual** (Gerontologist 2013, doi:10.1093/geront/gns071).
+  - **To check:** the back-scratch trial count, units and sign convention, and the criterion values for
+    ages 60–94.
+  - Kinetra currently follows the protocol as described in Albrecht 2021.
+- **Noyes et al. 1991** (Am J Sports Med, doi:10.1177/036354659101900518). To check: the original
+  hop-test procedure.
+- **Sport-demand reviews** (docs/SCIENCE.md §9). Only the abstracts were read; the full texts may refine
+  the weights in `personalization/knowledge.py`.
+- [ ] Verified by ________ on ________
