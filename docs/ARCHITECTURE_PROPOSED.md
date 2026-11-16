@@ -118,3 +118,21 @@ attract code that belongs to a feature.
 4. Dead exports removed.
 5. Documentation: `ARCHITECTURE.md` rewritten to the result, `docs/README.md` index, path references
    updated, translation pack regenerated.
+
+## 7. Outcome (2026-11-16): all phases done
+
+| Check | Baseline | After |
+|---|---|---|
+| Backend pytest (run alone) | pass, about 455 tests | pass, about 455 tests |
+| ruff / mypy | clean / 87 files clean | clean / 89 files clean (2 new modules) |
+| Backend import cycles | none | none; the two-way edges B1 and B2 are gone |
+| Mobile tsc | 0 errors | 0 errors |
+| ESLint | 0 errors, 53 warnings | 0 errors, 53 warnings (unchanged, older style warnings) |
+| Jest | 33 suites, 193 tests | 33 suites, 193 tests |
+| Frontend import cycles | none | none |
+| expo-doctor | not run | 20/20 checks |
+| Route files | — | none added, removed or renamed |
+| Real app (emulator, Expo Go, local backend) | — | cold start, session restored, Today, Plan, Assess, Progress, Profile load real data; Android bundle builds |
+
+One run of the heavy-account timing test failed while Jest and expo-doctor ran at the same time on the
+same machine. Run alone, it passes: dashboard 0.105 s and export 0.08 s, against a 1 s budget.
