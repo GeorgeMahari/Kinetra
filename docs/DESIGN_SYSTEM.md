@@ -91,8 +91,8 @@ The conditions from the 2026-11-15 approval are built in:
 - **Illustrative, not medical.** The screen always shows the disclaimer (`body.disclaimer`): it says
   which areas tests involve, from their protocols, that it does not measure the areas, and that it is
   not a medical assessment.
-- **Protocol-based regions only.** `REGIONS_BY_TEST` and `REGIONS_BY_TASK` list the areas each
-  test's or task's written instructions use, and nothing else.
+- **Protocol-based regions only.** `REGIONS_BY_TEST` lists the areas each test's written
+  instructions use, and nothing else.
 - **No anatomical scores.** No area has a value. Areas are coloured only with the health zone of the
   selected dimension, the same `ZoneBadge` colours as everywhere else, and unselected areas stay neutral.
 - **Selecting an area** focuses the figure on it (a spring scale that is skipped under Reduce Motion)

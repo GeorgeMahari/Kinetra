@@ -65,12 +65,6 @@ export async function requestAccess(): Promise<number> {
   return grantedCount();
 }
 
-export async function revokeAccess(): Promise<void> {
-  const hc = required();
-  await hc.initialize();
-  await hc.revokeAllPermissions();
-}
-
 export function openSettings(): void {
   required().openHealthConnectSettings();
 }

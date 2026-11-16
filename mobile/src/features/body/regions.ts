@@ -46,20 +46,6 @@ export const REGIONS_BY_TEST: Record<TestCode, BodyRegion[]> = {
   swim_12min: ['heart', 'shoulders', 'upperBack', 'arms'],
 };
 
-/** Plan tasks, same rule: the areas the movement uses. */
-export const REGIONS_BY_TASK: Record<string, BodyRegion[]> = {
-  brisk_walk: ['heart', 'thighs', 'calves'],
-  steady_cardio: ['heart', 'thighs', 'calves'],
-  intervals: ['heart', 'thighs', 'hamstrings', 'calves'],
-  sit_to_stand: ['thighs', 'glutes'],
-  plank: ['core', 'lowerBack', 'shoulders'],
-  pushups: ['chest', 'shoulders', 'arms', 'core'],
-  balance_hold: ['ankles', 'glutes'],
-  mobility_flow: ['hamstrings', 'lowerBack', 'shoulders'],
-  daily_steps: ['heart', 'thighs', 'calves'],
-  wind_down: [],
-};
-
 /** Which side of the figure shows each region best. */
 export const FRONT: BodyRegion[] = ['heart', 'chest', 'shoulders', 'arms', 'core', 'waist', 'thighs', 'calves', 'ankles'];
 export const BACK: BodyRegion[] = ['shoulders', 'arms', 'upperBack', 'lowerBack', 'glutes', 'hamstrings', 'calves', 'ankles'];

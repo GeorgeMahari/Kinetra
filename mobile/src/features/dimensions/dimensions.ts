@@ -18,8 +18,3 @@ export const DIMENSIONS = [
 ] as const satisfies readonly { key: string; icon: IconName; blaze: BlazeSpec }[];
 
 export type DimensionKey = (typeof DIMENSIONS)[number]['key'];
-
-/** Each dimension's trail blaze: a unique shape + colour pair, so identity never rests on colour alone. */
-export function blazeFor(key: DimensionKey): BlazeSpec {
-  return DIMENSIONS.find((d) => d.key === key)!.blaze;
-}
