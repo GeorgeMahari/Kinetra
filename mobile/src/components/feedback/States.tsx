@@ -7,7 +7,7 @@ import { errorMessage } from '@/api/errorMessage';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 import { AppText } from '@/design-system/AppText';
-import { Button } from './Button';
+import { Button } from '@/components/forms/Button';
 import { Icon, type IconName } from '@/design-system/Icon';
 import { useShimmer } from '@/design-system/motion';
 

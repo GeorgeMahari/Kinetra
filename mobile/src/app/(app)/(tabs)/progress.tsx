@@ -4,19 +4,19 @@ import { useTranslation } from 'react-i18next';
 
 import type { TestCode } from '@/api/assessments';
 import { AppText } from '@/design-system/AppText';
-import { Card } from '@/components/Card';
+import { Card } from '@/components/layout/Card';
 import { Icon } from '@/design-system/Icon';
-import { Screen } from '@/components/Screen';
-import { EmptyState, ErrorState, LoadingState, Skeleton } from '@/components/States';
+import { Screen } from '@/components/layout/Screen';
+import { EmptyState, ErrorState, LoadingState, Skeleton } from '@/components/feedback/States';
 import { SeriesCard } from '@/features/insights/SeriesCard';
-import { Notice } from '@/components/Notice';
-import { Button } from '@/components/Button';
-import { SectionHeader } from '@/components/ListRow';
+import { Notice } from '@/components/feedback/Notice';
+import { Button } from '@/components/forms/Button';
+import { SectionHeader } from '@/components/layout/ListRow';
 import { AchievementsList, LevelCard, PersonalBests, WeekCard } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
 import { useDashboard, useProgress } from '@/features/insights/useInsights';
 import { ActivityCalendar } from '@/features/progress/ActivityCalendar';
-import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
+import { isPictogram, Pictogram } from '@/components/brand/Pictogram';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 function TestProgress({ code }: { code: TestCode }) {

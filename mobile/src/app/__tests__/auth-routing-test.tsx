@@ -7,11 +7,11 @@ import '@/i18n';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
-import { tokenStorage } from '@/auth/tokenStorage';
+import { tokenStorage } from '@/features/auth/tokenStorage';
 import i18n from '@/i18n';
 
 // jest-expo's SecureStore mock doesn't persist values; use an in-memory store with the same API.
-jest.mock('@/auth/tokenStorage', () => {
+jest.mock('@/features/auth/tokenStorage', () => {
   let value: string | null = null;
   return {
     tokenStorage: {

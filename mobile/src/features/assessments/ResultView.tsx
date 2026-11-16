@@ -17,7 +17,7 @@ import { BandBar } from '@/components/data/BandBar';
 import { PercentileRuler } from '@/components/data/PercentileRuler';
 import { Icon } from '@/design-system/Icon';
 import { PressableScale } from '@/design-system/motion';
-import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
+import { isPictogram, Pictogram } from '@/components/brand/Pictogram';
 import { REGIONS_BY_TEST } from '@/features/body/regions';
 import i18n from '@/i18n';
 import { useTheme } from '@/design-system/ThemeProvider';

@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { assessmentsApi, type TestCode } from '@/api/assessments';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 export function useAssessmentsApi() {
   const { request, user } = useAuth();

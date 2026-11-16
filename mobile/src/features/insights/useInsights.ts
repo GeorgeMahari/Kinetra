@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import type { TestCode } from '@/api/assessments';
 import { insightsApi } from '@/api/insights';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 function useApi() {
   const { request, user } = useAuth();

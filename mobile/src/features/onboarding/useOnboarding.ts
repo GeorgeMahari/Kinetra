@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { onboardingApi } from '@/api/onboarding';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 export const onboardingKeys = {
   status: ['onboarding', 'status'] as const,

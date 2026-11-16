@@ -10,10 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 import type { TestCode } from '@/api/assessments';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
-import { Screen } from '@/components/Screen';
-import { EmptyState, ErrorState, LoadingState } from '@/components/States';
+import { Button } from '@/components/forms/Button';
+import { isPictogram, Pictogram } from '@/components/brand/Pictogram';
+import { Screen } from '@/components/layout/Screen';
+import { EmptyState, ErrorState, LoadingState } from '@/components/feedback/States';
 import { SeriesCard } from '@/features/insights/SeriesCard';
 import { useProgress } from '@/features/insights/useInsights';
 import { useTheme } from '@/design-system/ThemeProvider';

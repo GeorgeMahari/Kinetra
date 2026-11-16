@@ -6,11 +6,11 @@ import type { RegisterInput } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import { errorMessage } from '@/api/errorMessage';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { Checkbox } from '@/components/Checkbox';
-import { DateOfBirthField } from '@/components/DateOfBirthField';
-import { Notice } from '@/components/Notice';
-import { TextField } from '@/components/TextField';
+import { Button } from '@/components/forms/Button';
+import { Checkbox } from '@/components/forms/Checkbox';
+import { DateOfBirthField } from '@/components/forms/DateOfBirthField';
+import { Notice } from '@/components/feedback/Notice';
+import { TextField } from '@/components/forms/TextField';
 import { isSupportedLanguage } from '@/i18n';
 import { useTheme } from '@/design-system/ThemeProvider';
 

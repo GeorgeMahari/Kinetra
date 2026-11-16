@@ -3,8 +3,8 @@ import Animated, { Extrapolation, interpolate, useAnimatedStyle, useReducedMotio
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/design-system/AppText';
-import { LogoMark } from '@/components/Logo';
-import { useScreenScroll } from '@/components/Screen';
+import { LogoMark } from '@/components/brand/Logo';
+import { useScreenScroll } from '@/components/layout/Screen';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 /**

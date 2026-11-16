@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { devicesApi, type ImportResult } from '@/api/devices';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 import * as hc from './healthConnect';
 import type { ImportKind } from './mapping';

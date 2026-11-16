@@ -15,8 +15,8 @@ import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { AuthProvider, useAuth } from '@/auth/AuthProvider';
-import { LogoMark } from '@/components/Logo';
+import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { LogoMark } from '@/components/brand/Logo';
 import { ThemeProvider, useTheme } from '@/design-system/ThemeProvider';
 
 function Splash() {

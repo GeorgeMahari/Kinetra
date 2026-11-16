@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import type { DimensionCode } from '@/api/onboarding';
 import { planApi, type PlanView, type TaskResult } from '@/api/plan';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { dayKey } from '@/features/progress/calendar';
 
 /** The phone's local calendar date, which is what the plan's days follow. */

@@ -11,10 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { headlineIndicator, type TestResult } from '@/api/assessments';
 import type { Battery, BatteryTest, Capacity } from '@/api/personalization';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Button } from '@/components/forms/Button';
+import { Card } from '@/components/layout/Card';
 import { PressableScale } from '@/design-system/motion';
-import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
+import { isPictogram, Pictogram } from '@/components/brand/Pictogram';
 import { formatValue } from '@/features/assessments/ResultView';
 import { useTheme } from '@/design-system/ThemeProvider';
 

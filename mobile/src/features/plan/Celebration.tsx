@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Blaze, type BlazeShape } from '@/components/Blaze';
+import { Blaze, type BlazeShape } from '@/components/brand/Blaze';
 import { Icon } from '@/design-system/Icon';
 import { useTheme } from '@/design-system/ThemeProvider';
 import type { BlazeColor } from '@/design-system/tokens';

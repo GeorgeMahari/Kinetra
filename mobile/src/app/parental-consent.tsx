@@ -9,16 +9,16 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { AppText } from '@/design-system/AppText';
-import { AuthHeader } from '@/components/auth/AuthHeader';
+import { AuthHeader } from '@/features/auth/AuthHeader';
 import { Icon } from '@/design-system/Icon';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Notice } from '@/components/Notice';
-import { Screen } from '@/components/Screen';
-import { ErrorState, LoadingState } from '@/components/States';
-import { TextField } from '@/components/TextField';
+import { Button } from '@/components/forms/Button';
+import { Card } from '@/components/layout/Card';
+import { Notice } from '@/components/feedback/Notice';
+import { Screen } from '@/components/layout/Screen';
+import { ErrorState, LoadingState } from '@/components/feedback/States';
+import { TextField } from '@/components/forms/TextField';
 import { useTheme } from '@/design-system/ThemeProvider';
 import { iconSize } from '@/design-system/tokens';
 

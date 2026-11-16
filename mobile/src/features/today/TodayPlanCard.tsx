@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/design-system/AppText';
 import { Icon } from '@/design-system/Icon';
 import { PressableScale } from '@/design-system/motion';
-import { isPictogram, Pictogram } from '@/components/pictograms/Pictogram';
+import { isPictogram, Pictogram } from '@/components/brand/Pictogram';
 import { usePlan } from '@/features/plan/usePlan';
 import { useTheme } from '@/design-system/ThemeProvider';
 import { blazeColors } from '@/design-system/tokens';

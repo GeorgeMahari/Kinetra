@@ -3,9 +3,9 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { Button } from '@/components/Button';
-import { Notice } from '@/components/Notice';
-import { TextField, type TextInputHandle } from '@/components/TextField';
+import { Button } from '@/components/forms/Button';
+import { Notice } from '@/components/feedback/Notice';
+import { TextField, type TextInputHandle } from '@/components/forms/TextField';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 import { validateEmail, type FieldErrors } from './validation';

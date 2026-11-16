@@ -7,8 +7,8 @@ import Animated, { FadeInDown, ReduceMotion, ZoomIn } from 'react-native-reanima
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Screen } from '@/components/Screen';
-import { ErrorState, LoadingState } from '@/components/States';
+import { Screen } from '@/components/layout/Screen';
+import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { AchievementsList } from '@/features/progression/ProgressionCards';
 import { useProgression } from '@/features/progression/useProgression';
 import { useTheme } from '@/design-system/ThemeProvider';

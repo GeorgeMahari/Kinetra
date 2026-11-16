@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 /**
  * "/" is the app's entry URL (cold start, deep link root, and where Stack.Protected falls back

@@ -4,11 +4,11 @@ import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Blaze } from '@/components/Blaze';
+import { Blaze } from '@/components/brand/Blaze';
 import { ProfileMap, ProfileMapLegend, standingBand } from '@/components/charts/ProfileMap';
 import { FadeInItem, PressableScale } from '@/design-system/motion';
-import { Screen } from '@/components/Screen';
-import { ErrorState, LoadingState } from '@/components/States';
+import { Screen } from '@/components/layout/Screen';
+import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useDashboard } from '@/features/insights/useInsights';
 import { useTheme } from '@/design-system/ThemeProvider';

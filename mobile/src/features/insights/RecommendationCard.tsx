@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { Recommendation } from '@/api/insights';
 import { AppText } from '@/design-system/AppText';
-import { Card } from '@/components/Card';
+import { Card } from '@/components/layout/Card';
 import { Icon, type IconName } from '@/design-system/Icon';
 import { PressableScale } from '@/design-system/motion';
 import { useTheme } from '@/design-system/ThemeProvider';

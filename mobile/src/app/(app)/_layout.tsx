@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useServerStatus } from '@/api/health';
-import { OfflineBanner } from '@/components/OfflineBanner';
+import { OfflineBanner } from '@/components/feedback/OfflineBanner';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 export const unstable_settings = { anchor: '(tabs)' };

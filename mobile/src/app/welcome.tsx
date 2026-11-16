@@ -9,16 +9,16 @@ import Animated, { FadeInDown, ReduceMotion, ZoomIn } from 'react-native-reanima
 import { useTranslation } from 'react-i18next';
 
 import { useServerStatus } from '@/api/health';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { AppText } from '@/design-system/AppText';
-import { TrailRidge } from '@/components/auth/AuthHeader';
-import { Button } from '@/components/Button';
-import { LanguagePicker } from '@/components/LanguagePicker';
-import { Logo } from '@/components/Logo';
-import { Notice } from '@/components/Notice';
-import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
-import { Screen } from '@/components/Screen';
-import { ServerStatusBanner } from '@/components/ServerStatusBanner';
+import { TrailRidge } from '@/features/auth/AuthHeader';
+import { Button } from '@/components/forms/Button';
+import { LanguagePicker } from '@/components/forms/LanguagePicker';
+import { Logo } from '@/components/brand/Logo';
+import { Notice } from '@/components/feedback/Notice';
+import { Pictogram, type PictogramName } from '@/components/brand/Pictogram';
+import { Screen } from '@/components/layout/Screen';
+import { ServerStatusBanner } from '@/components/feedback/ServerStatusBanner';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 const STORY: PictogramName[] = ['brisk_walk', 'cooper_12min', 'pushups', 'single_leg_stance'];

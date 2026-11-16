@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { PlanTarget } from '@/api/plan';
 import { AppText } from '@/design-system/AppText';
-import { Blaze } from '@/components/Blaze';
-import { Button } from '@/components/Button';
+import { Blaze } from '@/components/brand/Blaze';
+import { Button } from '@/components/forms/Button';
 import { Icon } from '@/design-system/Icon';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/design-system/ThemeProvider';

@@ -6,7 +6,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 import { AppText } from '@/design-system/AppText';
-import { Button } from './Button';
+import { Button } from '@/components/forms/Button';
 import { haptic } from '@/design-system/motion';
 
 const RING = 216;

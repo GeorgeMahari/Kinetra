@@ -8,9 +8,9 @@ import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { DimensionCode } from '@/api/onboarding';
-import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
-import { ErrorState, LoadingState } from '@/components/States';
+import { Button } from '@/components/forms/Button';
+import { Screen } from '@/components/layout/Screen';
+import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { Celebration } from '@/features/plan/Celebration';
 import { PlanHero } from '@/features/plan/PlanHero';
 import { StartPlan } from '@/features/plan/StartPlan';

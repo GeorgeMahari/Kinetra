@@ -78,7 +78,7 @@ describe('resumeStep', () => {
 
 describe('stepper nextValue', () => {
   // Imported lazily to keep this file free of React Native rendering.
-  const { nextValue } = jest.requireActual('@/components/Choice') as typeof import('@/components/Choice');
+  const { nextValue } = jest.requireActual('@/components/forms/Choice') as typeof import('@/components/forms/Choice');
   it('starts at the first real step, clamps, and allows an explicit zero', () => {
     expect(nextValue(null, 1, 0, 21)).toBe(1);
     expect(nextValue(null, 10, 10, 240)).toBe(10);

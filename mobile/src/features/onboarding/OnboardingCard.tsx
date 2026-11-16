@@ -4,10 +4,10 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Pictogram } from '@/components/pictograms/Pictogram';
-import { ErrorState, Skeleton } from '@/components/States';
+import { Button } from '@/components/forms/Button';
+import { Card } from '@/components/layout/Card';
+import { Pictogram } from '@/components/brand/Pictogram';
+import { ErrorState, Skeleton } from '@/components/feedback/States';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 import { PriorityList, readinessKey } from './SummaryViews';

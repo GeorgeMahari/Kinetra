@@ -1,5 +1,5 @@
-import { useAuth } from '@/auth/AuthProvider';
-import { Screen } from '@/components/Screen';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { Screen } from '@/components/layout/Screen';
 import { ProfileForm } from '@/features/profile/ProfileForm';
 import { goHome } from '@/navigation/afterSave';
 

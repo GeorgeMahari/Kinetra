@@ -3,7 +3,7 @@ import '@/i18n';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
-import type { AuthContextValue } from '@/auth/AuthProvider';
+import type { AuthContextValue } from '@/features/auth/AuthProvider';
 import * as hc from '@/features/devices/healthConnect';
 import i18n from '@/i18n';
 import { providers } from '@/test-utils/fakeBackend';

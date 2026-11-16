@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 
 import { authApi } from '@/api/auth';
 import { errorMessage } from '@/api/errorMessage';
-import { AuthHeader } from '@/components/auth/AuthHeader';
-import { Button } from '@/components/Button';
-import { Pictogram } from '@/components/pictograms/Pictogram';
-import { Notice } from '@/components/Notice';
-import { Screen } from '@/components/Screen';
-import { TextField } from '@/components/TextField';
+import { AuthHeader } from '@/features/auth/AuthHeader';
+import { Button } from '@/components/forms/Button';
+import { Pictogram } from '@/components/brand/Pictogram';
+import { Notice } from '@/components/feedback/Notice';
+import { Screen } from '@/components/layout/Screen';
+import { TextField } from '@/components/forms/TextField';
 import { validateEmail, validateNewPassword } from '@/features/auth/validation';
 import { useTheme } from '@/design-system/ThemeProvider';
 

@@ -9,7 +9,7 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { AppText } from '@/design-system/AppText';
-import { LogoMark } from '@/components/Logo';
+import { LogoMark } from '@/components/brand/Logo';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 /** A ridge silhouette with a dashed trail climbing it, sized to its container. */

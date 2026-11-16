@@ -4,13 +4,13 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { Notice } from '@/components/Notice';
-import { Pictogram } from '@/components/pictograms/Pictogram';
-import { Screen } from '@/components/Screen';
-import { TextField } from '@/components/TextField';
+import { Button } from '@/components/forms/Button';
+import { Notice } from '@/components/feedback/Notice';
+import { Pictogram } from '@/components/brand/Pictogram';
+import { Screen } from '@/components/layout/Screen';
+import { TextField } from '@/components/forms/TextField';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 export default function VerifyEmail() {

@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { Plan } from '@/api/plan';
 import { AppText } from '@/design-system/AppText';
-import { Blaze } from '@/components/Blaze';
+import { Blaze } from '@/components/brand/Blaze';
 import { Icon } from '@/design-system/Icon';
 import { AMBIENT_REPEATS, useVisibleLoop } from '@/design-system/visibleLoop';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';

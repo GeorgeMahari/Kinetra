@@ -25,7 +25,7 @@ import {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useScreenScroll } from '@/components/Screen';
+import { useScreenScroll } from '@/components/layout/Screen';
 
 /** Whether a box at `top` (window coordinates) with `height` overlaps a window of `windowHeight`. */
 /**

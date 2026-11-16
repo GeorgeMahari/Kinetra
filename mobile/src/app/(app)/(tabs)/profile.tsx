@@ -2,12 +2,12 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { ListGroup, ListRow } from '@/components/ListRow';
+import { Button } from '@/components/forms/Button';
+import { ListGroup, ListRow } from '@/components/layout/ListRow';
 import { FadeInItem } from '@/design-system/motion';
-import { Screen } from '@/components/Screen';
+import { Screen } from '@/components/layout/Screen';
 import { CompletionTrail } from '@/features/profile/CompletionTrail';
 import { ProfileHeader } from '@/features/profile/ProfileHeader';
 import { useProgression } from '@/features/progression/useProgression';

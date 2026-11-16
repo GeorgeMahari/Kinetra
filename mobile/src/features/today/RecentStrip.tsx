@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { headlineIndicator, type TestResult } from '@/api/assessments';
 import { AppText } from '@/design-system/AppText';
 import { PressableScale } from '@/design-system/motion';
-import { Pictogram } from '@/components/pictograms/Pictogram';
+import { Pictogram } from '@/components/brand/Pictogram';
 import { formatValue } from '@/features/assessments/ResultView';
 import { useTheme } from '@/design-system/ThemeProvider';
 

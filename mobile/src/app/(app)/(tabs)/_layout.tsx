@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router/js-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { TabIcon } from '@/components/TabIcon';
+import { TabIcon } from '@/navigation/TabIcon';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 export const unstable_settings = { anchor: 'today' };

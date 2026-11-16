@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
 import { AppText } from '@/design-system/AppText';
-import { Button } from '@/components/Button';
-import { Notice } from '@/components/Notice';
-import { Screen } from '@/components/Screen';
-import { ErrorState, LoadingState } from '@/components/States';
+import { Button } from '@/components/forms/Button';
+import { Notice } from '@/components/feedback/Notice';
+import { Screen } from '@/components/layout/Screen';
+import { ErrorState, LoadingState } from '@/components/feedback/States';
 import type { TestCode } from '@/api/assessments';
 import { ResultView } from '@/features/assessments/ResultView';
 import { useAssessmentsApi, useInvalidateAssessments, useResult } from '@/features/assessments/useAssessments';

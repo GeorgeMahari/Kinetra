@@ -1,4 +1,4 @@
-import type { BlazeSpec } from '@/components/Blaze';
+import type { BlazeSpec } from '@/components/brand/Blaze';
 import type { IconName } from '@/design-system/Icon';
 
 /**

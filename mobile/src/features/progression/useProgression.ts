@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { progressionApi, type CheckinInput, type Progression } from '@/api/progression';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 // Under the 'assessments' key family so recording a result also refreshes progression.
 const key = (userId?: string) => ['assessments', 'progression', userId];

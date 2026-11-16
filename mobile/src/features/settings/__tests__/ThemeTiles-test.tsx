@@ -6,7 +6,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import i18n from '@/i18n';
 import { ThemeProvider } from '@/design-system/ThemeProvider';
 
-import { ThemeTiles } from '../settings/ThemeTiles';
+import { ThemeTiles } from '../ThemeTiles';
 
 beforeEach(async () => {
   await AsyncStorage.clear();

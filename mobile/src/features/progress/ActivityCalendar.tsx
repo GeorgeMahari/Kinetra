@@ -11,7 +11,7 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Card } from '@/components/Card';
+import { Card } from '@/components/layout/Card';
 import { Icon } from '@/design-system/Icon';
 import { haptic } from '@/design-system/motion';
 import { useAssessmentsApi } from '@/features/assessments/useAssessments';

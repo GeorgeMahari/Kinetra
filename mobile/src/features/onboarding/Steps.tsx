@@ -16,12 +16,12 @@ import {
   type Sport,
 } from '@/api/onboarding';
 import { AppText } from '@/design-system/AppText';
-import { Card } from '@/components/Card';
-import { OptionCard, Stepper, YesNo } from '@/components/Choice';
+import { Card } from '@/components/layout/Card';
+import { OptionCard, Stepper, YesNo } from '@/components/forms/Choice';
 import { Icon } from '@/design-system/Icon';
-import { Pictogram, type PictogramName } from '@/components/pictograms/Pictogram';
-import { SegmentedControl } from '@/components/SegmentedControl';
-import { LoadingState } from '@/components/States';
+import { Pictogram, type PictogramName } from '@/components/brand/Pictogram';
+import { SegmentedControl } from '@/components/forms/SegmentedControl';
+import { LoadingState } from '@/components/feedback/States';
 import { useTheme } from '@/design-system/ThemeProvider';
 import { iconSize } from '@/design-system/tokens';
 

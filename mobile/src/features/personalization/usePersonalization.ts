@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { personalizationApi, type SportProfileIn } from '@/api/personalization';
-import { useAuth } from '@/auth/AuthProvider';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 // Under the 'assessments' family: recording a result changes the battery's status, and a profile change
 // changes priorities, recommendations and the plan's suggested focus, all of which live there too.

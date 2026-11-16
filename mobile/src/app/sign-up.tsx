@@ -2,11 +2,11 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '@/auth/AuthProvider';
-import { AuthHeader } from '@/components/auth/AuthHeader';
-import { Button } from '@/components/Button';
-import { Pictogram } from '@/components/pictograms/Pictogram';
-import { Screen } from '@/components/Screen';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { AuthHeader } from '@/features/auth/AuthHeader';
+import { Button } from '@/components/forms/Button';
+import { Pictogram } from '@/components/brand/Pictogram';
+import { Screen } from '@/components/layout/Screen';
 import { SignUpForm } from '@/features/auth/SignUpForm';
 import { useTheme } from '@/design-system/ThemeProvider';
 
