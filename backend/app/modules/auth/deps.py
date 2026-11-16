@@ -1,3 +1,5 @@
+import ipaddress
+
 from fastapi import Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -58,4 +60,21 @@ def get_login_limiter() -> SlidingWindowLimiter:
 
 
 def client_ip(request: Request) -> str:
-    return request.client.host if request.client else "unknown"
+    """The address rate limits are keyed on.
+
+    Behind Cloudflare Tunnel every connection comes from cloudflared on 127.0.0.1, so the
+    configured header (KINETRA_CLIENT_IP_HEADER) gives the real client. It is honoured only for
+    loopback peers: the API binds to 127.0.0.1, so nothing else can set it.
+    """
+    peer = request.client.host if request.client else "unknown"
+    header = get_settings().client_ip_header
+    if header and peer in _LOOPBACK:
+        forwarded = request.headers.get(header, "").strip()
+        try:
+            return str(ipaddress.ip_address(forwarded))
+        except ValueError:
+            return peer
+    return peer
+
+
+_LOOPBACK = frozenset({"127.0.0.1", "::1"})

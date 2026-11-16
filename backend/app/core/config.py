@@ -37,6 +37,11 @@ class Settings(BaseSettings):
 
     api_prefix: str = "/api/v1"
 
+    # Header that carries the real client address when the API sits behind a reverse proxy on
+    # this computer (Cloudflare Tunnel: "CF-Connecting-IP"). Empty = use the socket address.
+    # Only trusted for connections from the loopback interface, where the proxy runs.
+    client_ip_header: str = ""
+
     # --- Authentication
     # Signing key for access tokens. Read from the KINETRA_JWT_SECRET environment variable only.
     # In development/test, a random key is generated at startup when it is missing (tokens

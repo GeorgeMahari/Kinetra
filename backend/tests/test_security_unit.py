@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime, timedelta
 
 import jwt
 import pytest
+from starlette.requests import Request
 
 from app.core.config import get_settings
 from app.core.rate_limit import SlidingWindowLimiter
@@ -17,6 +18,7 @@ from app.core.security import (
     new_refresh_token,
     verify_password,
 )
+from app.modules.auth.deps import client_ip
 from app.modules.auth.passwords import password_problems
 from app.shared.age import age_on
 
@@ -125,3 +127,30 @@ def test_sliding_window_limiter() -> None:
     assert not limiter.hit("k", now=3)
     assert limiter.hit("other", now=3)
     assert limiter.hit("k", now=61)  # first event left the window
+
+
+class TestClientIp:
+    """Behind Cloudflare Tunnel every request reaches the API from cloudflared on this computer."""
+
+    @staticmethod
+    def _request(host: str, headers: dict[str, str] | None = None) -> Request:
+        raw = [(k.lower().encode(), v.encode()) for k, v in (headers or {}).items()]
+        return Request({"type": "http", "headers": raw, "client": (host, 50000)})
+
+    def test_uses_the_socket_address_by_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(get_settings(), "client_ip_header", "")
+        req = self._request("127.0.0.1", {"CF-Connecting-IP": "203.0.113.9"})
+        assert client_ip(req) == "127.0.0.1"
+
+    def test_trusts_the_configured_header_from_a_local_proxy(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(get_settings(), "client_ip_header", "CF-Connecting-IP")
+        assert client_ip(self._request("127.0.0.1", {"CF-Connecting-IP": "203.0.113.9"})) == "203.0.113.9"
+        assert client_ip(self._request("::1", {"CF-Connecting-IP": "2001:db8::1"})) == "2001:db8::1"
+
+    def test_ignores_the_header_from_a_remote_peer_or_when_malformed(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(get_settings(), "client_ip_header", "CF-Connecting-IP")
+        assert client_ip(self._request("198.51.100.7", {"CF-Connecting-IP": "203.0.113.9"})) == "198.51.100.7"
+        assert client_ip(self._request("127.0.0.1", {"CF-Connecting-IP": "not-an-ip"})) == "127.0.0.1"
+        assert client_ip(self._request("127.0.0.1")) == "127.0.0.1"
