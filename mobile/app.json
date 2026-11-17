@@ -52,6 +52,12 @@
     "scheme": "kinetra",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1f7709a1-ed9f-4480-8b07-4c7532627a7f"
+      }
+    },
+    "owner": "georgemahari"
   }
 }
