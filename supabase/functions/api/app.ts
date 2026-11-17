@@ -8,6 +8,9 @@
 import { getSettings } from "./core/config.ts";
 import { dispatch } from "./core/http.ts";
 import "./modules/health.ts";
+import "./modules/auth/routes.ts";
+import "./modules/users/routes.ts";
+import "./core/testing.ts";
 
 export function normalisePath(pathname: string): string {
   return pathname.startsWith("/api/api/") ? pathname.slice(4) : pathname;

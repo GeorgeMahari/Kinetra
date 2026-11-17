@@ -80,7 +80,17 @@ export class Validated {
       this.issues.push({ type: "missing", msg: "Field required", loc: ["body"] });
       return undefined as T;
     }
-    return this.parse(schema, ctx.rawBody, ["body"]);
+    const raw = ctx.rawBody;
+    // The top-level body model: FastAPI reports a non-object body as model_attributes_type.
+    if ((schema as { isModel?: boolean }).isModel && (typeof raw !== "object" || raw === null || Array.isArray(raw))) {
+      this.issues.push({
+        type: "model_attributes_type",
+        msg: "Input should be a valid dictionary or object to extract fields from",
+        loc: ["body"],
+      });
+      return undefined as T;
+    }
+    return this.parse(schema, raw, ["body"]);
   }
   /** Throws the 422 if anything failed (call after reading every parameter). */
   check(): void {
@@ -228,7 +238,8 @@ async function handle(req: Request, url: URL, path: string, peer: string, bytes:
   const matching = routes.filter((r) => r.regex.test(path));
   if (!matching.length) return errorResponse(NOT_FOUND());
   const r = matching.find((x) => x.method === req.method);
-  if (!r) return errorResponse(methodNotAllowed([...new Set(matching.map((x) => x.method))]));
+  // Starlette answers 405 with the methods of the first route whose path matched.
+  if (!r) return errorResponse(methodNotAllowed([matching[0].method]));
 
   // FastAPI parses a JSON body before resolving dependencies.
   let rawBody: unknown = undefined;
@@ -258,7 +269,9 @@ async function handle(req: Request, url: URL, path: string, peer: string, bytes:
     const result = await r.handler(ctx);
     if (result instanceof Response) return result;
     const status = r.status ?? 200;
-    return status === 204 ? new Response(null, { status }) : jsonResponse(status, result);
+    // An empty Response(status_code=...) in FastAPI: no body, no content type.
+    if (status === 204 || result === undefined) return new Response(null, { status });
+    return jsonResponse(status, result);
   };
   try {
     if (r.noDb) return await run(null as unknown as Db);

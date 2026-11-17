@@ -187,6 +187,19 @@ export function literal<T extends string | number | boolean>(values: readonly T[
   };
 }
 
+/** A Python Enum field: same check and message as a literal, but the error type is "enum". */
+export function enumOf<T extends string>(values: readonly T[]): Schema<T> {
+  const lit = literal(values);
+  return {
+    parse(v, loc, issues) {
+      const before = issues.length;
+      const out = lit.parse(v, loc, issues);
+      if (out === INVALID && issues.length > before) issues[issues.length - 1].type = "enum";
+      return out;
+    },
+  };
+}
+
 // ---------------------------------------------------------------- dates and times
 
 export class PyDate {
@@ -620,8 +633,9 @@ export interface ModelOpts<T> {
 export function model<T extends Record<string, unknown>>(
   fields: { [K in keyof T]: Schema<T[K]> },
   opts: ModelOpts<T>,
-): Schema<T> {
+): Schema<T> & { isModel: true } {
   return {
+    isModel: true,
     parse(v, loc, issues) {
       if (!isObject(v)) {
         return fail(issues, loc, "model_type", `Input should be a valid dictionary or instance of ${opts.name}`);
