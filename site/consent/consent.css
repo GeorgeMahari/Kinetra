@@ -1,0 +1,9 @@
+/* The same look as the API's server-rendered consent page (backend/app/modules/consent/pages.py). */
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto;padding:24px 16px;line-height:1.5;color:#1a1d24;background:#f6f7f9}
+h1{font-size:1.4rem}h2{font-size:1.05rem;margin-top:1.5rem}
+.card{background:#fff;border-radius:12px;padding:16px 20px;margin:16px 0}
+button{display:block;width:100%;padding:14px;margin:10px 0;border-radius:10px;font-size:1rem;cursor:pointer;border:1px solid #2f5bea}
+button:disabled{opacity:.6;cursor:progress}
+.agree{background:#2f5bea;color:#fff}.refuse{background:#fff;color:#2f5bea}
+.muted{opacity:.7}
+@media (prefers-color-scheme:dark){body{background:#0f1115;color:#e8eaf0}.card{background:#1a1d24}.refuse{background:#1a1d24;color:#9db3ff}}
