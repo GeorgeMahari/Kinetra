@@ -128,6 +128,10 @@ starts the local container. Verified with a production-mode API on Supabase: `/h
 `database: ok` and `/docs` returned 404. The first Supabase backup is `db/backups/supabase_20261117_131412.dump`
 (19 table data entries).
 
+TLS (done): the API connects with `sslmode=verify-full`, checking the server against
+`infra/supabase/supabase-root-2021-ca.crt` (Supabase Root 2021 CA, public, valid until 2031-04-26).
+Tested both ways: the real CA connects, while a self-signed CA is refused with "certificate verify failed".
+
 Still for the owner: in the dashboard,
 turn the Data API off and enable SSL enforcement, then move to `sslmode=verify-full`.
 
