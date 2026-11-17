@@ -2,7 +2,9 @@
 # target database, as its admin user. Idempotent: safe to run again after new migrations.
 #
 #   powershell -ExecutionPolicy Bypass -File infra\supabase\apply-security.ps1 `
-#       -TargetHost <host> -TargetUser postgres.<project-ref> [-SslMode require]
+#       -TargetHost <host> -TargetUser postgres.<project-ref> [-SslMode require] [-SkipRole] [-SkipJobs]
+#
+# 03_jobs.sql needs pg_cron (available on Supabase); pass -SkipJobs for a plain PostgreSQL target.
 #
 # Secrets (user environment variables, never files):
 #   SUPABASE_DB_PASSWORD     admin (postgres) password, typed by you in your own terminal
@@ -16,7 +18,8 @@ param(
     [string]$TargetDb = 'postgres',
     [string]$PasswordVariable = 'SUPABASE_DB_PASSWORD',
     [ValidateSet('disable', 'require', 'verify-full')] [string]$SslMode = 'require',
-    [switch]$SkipRole
+    [switch]$SkipRole,
+    [switch]$SkipJobs
 )
 
 $ErrorActionPreference = 'Stop'
@@ -58,5 +61,9 @@ if (-not $SkipRole) {
 }
 
 Invoke-SqlFile "$Root\db\sql\supabase\02_security.sql"
-Remove-Item Env:PGPASSWORD
 Write-Host 'Privileges and RLS: applied'
+if (-not $SkipJobs) {
+    Invoke-SqlFile "$Root\db\sql\supabase\03_jobs.sql"
+    Write-Host 'Scheduled jobs (pg_cron): applied'
+}
+Remove-Item Env:PGPASSWORD
