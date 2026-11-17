@@ -25,11 +25,13 @@ def params_from_json(d: dict[str, Any]) -> rules.PlanParams:
 
 
 def plans(db: Session, user: User) -> list[ImprovementPlan]:
+    """Oldest first. Plans started on the same day (abandoned, then restarted) keep their creation
+    order, so the most recent one is the one `rules` reads last and gives priority to."""
     return list(
         db.scalars(
             select(ImprovementPlan)
             .where(ImprovementPlan.user_id == user.id)
-            .order_by(ImprovementPlan.started_on)
+            .order_by(ImprovementPlan.started_on, ImprovementPlan.created_at)
         ).all()
     )
 

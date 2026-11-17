@@ -112,6 +112,19 @@ class TestPlan:
         )
         assert resp.status_code == 422
 
+    def test_a_plan_restarted_the_same_day_takes_priority(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        today = {"today": TODAY.isoformat()}
+        for primary in ("lifestyle", "cardio", "balance"):
+            api.post("/api/v1/plan", headers=user, json={**today, "primary": primary})
+            api.post("/api/v1/plan/abandon", headers=user, json=today)
+        api.post("/api/v1/plan", headers=user, json={**today, "primary": "strength"})
+        for c in [t["code"] for t in plan(api, user)["plan"]["today"]]:
+            last = tick(api, user, c)
+        assert last["day_complete"] is True
+        assert last["view"]["streak"] == 1 and last["view"]["perfect_days"] == 1
+
     def test_abandon_ends_the_plan(self, api: TestClient, user: dict[str, str]) -> None:
         api.post("/api/v1/plan", headers=user, json={"today": TODAY.isoformat()})
         resp = api.post("/api/v1/plan/abandon", headers=user, json={"today": TODAY.isoformat()})
