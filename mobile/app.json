@@ -33,7 +33,14 @@
       "expo-localization",
       "expo-font",
       "react-native-health-connect",
-      "expo-build-properties",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
       "expo-asset",
       [
         "expo-splash-screen",
