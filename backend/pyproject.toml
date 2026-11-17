@@ -36,7 +36,7 @@ testpaths = ["tests"]
 addopts = "-q"
 markers = [
     "db: tests that need a running PostgreSQL database",
-    "python_only: patches Python internals, so it cannot run against another API over HTTP",
+    "python_only: needs the Python process (patches internals, or FastAPI development docs), so it does not run against another API over HTTP",
 ]
 
 [tool.ruff]

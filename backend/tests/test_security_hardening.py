@@ -19,6 +19,7 @@ def test_security_headers_on_success_and_error(client: TestClient) -> None:
         assert "server" not in h
 
 
+@pytest.mark.python_only  # FastAPI development docs (off in production), not part of the API contract
 def test_docs_keep_working_without_the_strict_csp(client: TestClient) -> None:
     resp = client.get("/docs")
     assert resp.status_code == 200

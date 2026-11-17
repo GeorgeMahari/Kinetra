@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.db import get_db
@@ -31,6 +32,7 @@ def test_unknown_route_uses_error_envelope(client: TestClient) -> None:
     assert set(body["error"]) == {"code", "message", "details"}
 
 
+@pytest.mark.python_only  # FastAPI development docs (off in production), not part of the API contract
 def test_openapi_schema_is_published(client: TestClient) -> None:
     resp = client.get("/openapi.json")
     assert resp.status_code == 200

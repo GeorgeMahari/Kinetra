@@ -33,7 +33,7 @@ API_URL = os.environ.get("KINETRA_TEST_API_URL", "").strip()
 def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     if not API_URL:
         return
-    skip = pytest.mark.skip(reason="python_only: patches Python internals; covered by the TypeScript tests")
+    skip = pytest.mark.skip(reason="python_only: needs the Python process (internals or FastAPI dev docs)")
     for item in items:
         if "python_only" in item.keywords:
             item.add_marker(skip)
