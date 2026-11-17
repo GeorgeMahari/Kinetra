@@ -588,14 +588,14 @@ export function list<T>(item: Schema<T>, opts: { min?: number; max?: number } = 
   };
 }
 
-export function dict<T>(value: Schema<T>, key: Schema<string> = str()): Schema<Record<string, T>> {
+export function dict<T, K extends string = string>(value: Schema<T>, key: Schema<K> = str() as unknown as Schema<K>): Schema<Record<K, T>> {
   return {
     parse(v, loc, issues) {
       if (!isObject(v)) return fail(issues, loc, "dict_type", "Input should be a valid dictionary");
-      const out: Record<string, T> = {};
+      const out = {} as Record<K, T>;
       let bad = false;
       for (const [k, x] of Object.entries(v)) {
-        const kk = key.parse(k, [...loc, `[key]`], issues);
+        const kk = key.parse(k, [...loc, k, "[key]"], issues);
         const r = value.parse(x, [...loc, k], issues);
         if (kk === INVALID || r === INVALID) bad = true;
         else out[kk] = r;

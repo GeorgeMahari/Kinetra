@@ -55,7 +55,19 @@ class Recorder:
         return resp
 
 
+def numbers_by_value(x: Any) -> Any:
+    """JSON numbers compare by value: Python writes 175.0 where JavaScript writes 175."""
+    if isinstance(x, float) and x.is_integer():
+        return int(x)
+    if isinstance(x, list):
+        return [numbers_by_value(v) for v in x]
+    if isinstance(x, dict):
+        return {k: numbers_by_value(v) for k, v in x.items()}
+    return x
+
+
 def normalise(entries: list[dict[str, Any]], tag: str) -> str:
+    entries = numbers_by_value(entries)
     text = json.dumps(entries, ensure_ascii=False, sort_keys=True, indent=1).replace(tag, "<run>")
     seen: dict[str, str] = {}
 
@@ -220,7 +232,115 @@ def scenario_minor(r: Recorder) -> None:
     r.call("POST", "/auth/email/verify/request", headers=h)
 
 
-SCENARIOS = {"auth": scenario_auth, "minor": scenario_minor}
+def signed_up(r: Recorder, name: str, years: int = 30, sex: str | None = None) -> dict[str, str]:
+    reg = r.call(
+        "POST",
+        "/auth/register",
+        json={
+            "email": r.email(name),
+            "password": PASSWORD,
+            "date_of_birth": adult(years),
+            "privacy_consent": True,
+        },
+    ).json()
+    h = {"Authorization": f"Bearer {reg['access_token']}"}
+    if sex:
+        r.call("PATCH", "/me/profile", headers=h, json={"sex_for_norms": sex, "height_cm": 175})
+    return h
+
+
+NO = {
+    "heart_condition": False,
+    "chest_pain": False,
+    "dizziness_or_fainting": False,
+    "chronic_condition": False,
+    "musculoskeletal": False,
+    "supervised_only": False,
+}
+
+
+def answers(**over: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "goals": ["improve_endurance", "get_stronger"],
+        "activity": {
+            "activity_level": "active",
+            "exercise_sessions_per_week": 4,
+            "typical_session_minutes": 60,
+            "training_experience": "one_to_three_years",
+            "sports": [{"code": "cycling", "sessions_per_week": 3, "level": "intermediate"}],
+        },
+        "follow_ups": {
+            "strength_sessions_per_week": 0,
+            "mobility_practice": "occasional",
+            "sleep_hours": 7.5,
+        },
+        "readiness": {**NO, "pregnancy": False},
+    }
+    base.update(over)
+    return base
+
+
+def scenario_onboarding(r: Recorder) -> None:
+    r.call("GET", "/catalog/sports")
+    h = signed_up(r, "onb")
+    r.call("GET", "/onboarding", headers=h)
+    r.call("GET", "/onboarding/summary", headers=h)
+    r.call(
+        "PUT",
+        "/onboarding/draft",
+        headers=h,
+        json={"step": 2, "answers": {"goals": ["get_stronger"], "zzz": 1}},
+    )
+    r.call("PUT", "/onboarding/draft", headers=h, json={"step": 99, "answers": []})
+    r.call("PUT", "/onboarding/draft", headers=h, json={"step": 2, "answers": {"goals": ["x" * 25000]}})
+    r.call(
+        "PUT",
+        "/onboarding/draft",
+        headers=h,
+        json={"step": 3, "answers": {"goals": ["get_stronger"], "activity": {"a": [1, 2.5, None, True]}}},
+    )
+    r.call("GET", "/onboarding", headers=h)
+    r.call("POST", "/onboarding/follow-up-questions", headers=h, json={"activity": answers()["activity"]})
+    sed = {"activity_level": "sedentary", "exercise_sessions_per_week": 0, "training_experience": "none"}
+    r.call("POST", "/onboarding/follow-up-questions", headers=h, json={"activity": sed})
+    r.call(
+        "POST",
+        "/onboarding/follow-up-questions",
+        headers=h,
+        json={"activity": {**sed, "sports": [{"code": "nope", "sessions_per_week": 1}]}},
+    )
+    bad = answers(goals=["get_stronger", "get_stronger", "x"], readiness={"bad": True, "chest_pain": "maybe"})
+    bad["activity"]["sports"] = [
+        {"code": "cycling", "sessions_per_week": 1},
+        {"code": "cycling", "sessions_per_week": 30},
+    ]
+    bad["follow_ups"] = {"sleep_hours": 7.55, "mobility_practice": "daily", "extra": 1}
+    r.call("POST", "/onboarding/complete", headers=h, json=bad)
+    r.call("POST", "/onboarding/complete", headers=h, json=answers(goals=[], readiness={"chest_pain": False}))
+    r.call("POST", "/onboarding/complete", headers=h, json=answers(readiness=dict(NO)))
+    r.call("POST", "/onboarding/complete", headers=h, json=answers())
+    r.call("GET", "/onboarding/summary", headers=h)
+    r.call("GET", "/onboarding", headers=h)
+    r.call(
+        "POST",
+        "/onboarding/complete",
+        headers=h,
+        json=answers(
+            goals=["sport_performance", "know_baseline"],
+            readiness={**NO, "pregnancy": False, "musculoskeletal": True},
+        ),
+    )
+    r.call("GET", "/onboarding/summary", headers=h)
+    m = signed_up(r, "male", sex="male")
+    r.call("POST", "/onboarding/complete", headers=m, json=answers(readiness={**NO, "chest_pain": True}))
+    r.call("GET", "/onboarding/summary", headers=m)
+    teen = signed_up(r, "teen", years=17)
+    r.call("POST", "/onboarding/complete", headers=teen, json=answers())
+    old = signed_up(r, "old", years=70)
+    r.call("POST", "/onboarding/follow-up-questions", headers=old, json={"activity": answers()["activity"]})
+
+
+SCENARIOS = {"auth": scenario_auth, "minor": scenario_minor, "onboarding": scenario_onboarding}
 
 
 def main() -> int:
