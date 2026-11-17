@@ -38,6 +38,8 @@ export interface RouteDef {
   handler: Handler;
   /** The route manages its own transaction (or needs none). */
   noDb?: boolean;
+  /** The handler reads the body itself (as text); it is never parsed as JSON. */
+  rawBody?: boolean;
 }
 
 interface Compiled extends RouteDef {
@@ -246,7 +248,10 @@ async function handle(req: Request, url: URL, path: string, peer: string, bytes:
   let hasBody = false;
   if (bytes && bytes.length) {
     const ctype = (req.headers.get("content-type") ?? "").toLowerCase();
-    if (!ctype || ctype.includes("json")) {
+    if (r.rawBody) {
+      rawBody = new TextDecoder().decode(bytes);
+      hasBody = true;
+    } else if (!ctype || ctype.includes("json")) {
       const text = new TextDecoder().decode(bytes);
       try {
         rawBody = JSON.parse(text);
