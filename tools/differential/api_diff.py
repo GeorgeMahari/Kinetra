@@ -340,7 +340,132 @@ def scenario_onboarding(r: Recorder) -> None:
     r.call("POST", "/onboarding/follow-up-questions", headers=old, json={"activity": answers()["activity"]})
 
 
-SCENARIOS = {"auth": scenario_auth, "minor": scenario_minor, "onboarding": scenario_onboarding}
+RESULTS = [
+    ("resting_hr", {"bpm": 62, "method": "manual_pulse"}),
+    (
+        "hrr_step",
+        {
+            "recovery_mode": "passive_seated",
+            "hr_end": 150,
+            "hr_60": 120,
+            "hr_120": 100,
+            "beats_first_minute": 98,
+        },
+    ),
+    ("hrr_step", {"recovery_mode": "passive_seated", "hr_end": 100, "hr_60": 120}),
+    ("cooper_12min", {"distance_m": 2650, "mode": "run"}),
+    ("pushups", {"variant": "toes", "reps": 28}),
+    ("pulls", {"variant": "pullup", "reps": 7}),
+    ("chair_stand_30s", {"reps": 17}),
+    ("plank", {"seconds": 95}),
+    ("sit_reach", {"reach_cm": 4.5}),
+    ("single_leg_stance", {"left_s": 38, "right_s": 60}),
+    ("body_measurements", {"weight_kg": 72.4, "waist_cm": 84.5}),
+    ("broad_jump", {"attempt_1_cm": 210, "attempt_2_cm": 221}),
+    ("vertical_jump", {"standing_reach_cm": 230, "jump_reach_cm": 281}),
+    ("agility_505", {"left_s": 2.41, "right_s": 2.58, "start": "standing", "timing": "stopwatch"}),
+    ("sprint_20m", {"time_s": 3.21, "timing": "video_app"}),
+    ("ruler_drop", {"drops_cm": [12.5, 18, 61, 20.5, 15]}),
+    ("back_scratch", {"right_over_cm": 3.5, "left_over_cm": -2}),
+    ("anterior_reach", {"left_cm": 70.5, "right_cm": 65, "leg_length_cm": 92}),
+    ("single_leg_hop", {"left_cm": 150, "right_cm": 128}),
+    ("circumferences", {"arm_left_cm": 32.1, "arm_right_cm": 33, "chest_cm": 101.5}),
+    ("swim_12min", {"distance_m": 520, "stroke": "freestyle"}),
+    ("plank", {"seconds": -1, "extra": 1}),
+    ("ruler_drop", {"drops_cm": [1, 2, 3]}),
+    ("nope", {"x": 1}),
+]
+
+
+def scenario_assessments(r: Recorder) -> None:
+    h = signed_up(r, "assess", sex="male")
+    r.call("GET", "/assessments/tests", headers=h)
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "cooper_12min", "inputs": {"distance_m": 2400, "mode": "run"}},
+    )
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "plank", "inputs": {"seconds": 60}})
+    r.call("POST", "/onboarding/complete", headers=h, json=answers(readiness=dict(NO)))
+    r.call("GET", "/assessments/tests", headers=h)
+    r.call("GET", "/assessments/overview", headers=h)
+    ids = []
+    for code, inputs in RESULTS:
+        resp = r.call("POST", "/assessments/results", headers=h, json={"test_code": code, "inputs": inputs})
+        if resp.status_code == 201:
+            ids.append(resp.json()["id"])
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={
+            "test_code": "plank",
+            "inputs": {"seconds": 70},
+            "stopped_early": True,
+            "performed_at": "2026-01-02T10:00:00+02:00",
+        },
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "plank", "inputs": {"seconds": 70}, "performed_at": "2026-01-02T10:00:00"},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "plank", "inputs": {"seconds": 70}, "performed_at": "2099-01-02T10:00:00Z"},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "plank", "inputs": {"seconds": 70}, "performed_at": "2001-01-02T10:00:00Z"},
+    )
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "", "inputs": [], "other": 1})
+    r.call("GET", "/assessments/results", headers=h)
+    r.call("GET", "/assessments/results", headers=h, params={"test_code": "plank", "limit": 2})
+    r.call("GET", "/assessments/results", headers=h, params={"limit": 0})
+    r.call(
+        "GET",
+        "/assessments/activity",
+        headers=h,
+        params={"since": "2025-12-01T00:00:00Z", "until": "2027-01-01T00:00:00+02:00"},
+    )
+    r.call(
+        "GET",
+        "/assessments/activity",
+        headers=h,
+        params={"since": "2020-01-01T00:00:00Z", "until": "2027-01-01T00:00:00Z"},
+    )
+    r.call("GET", "/assessments/activity", headers=h, params={"since": "2026-01-01T00:00:00"})
+    r.call("GET", "/assessments/overview", headers=h)
+    r.call("GET", f"/assessments/results/{ids[0]}", headers=h)
+    r.call("GET", "/assessments/results/not-a-uuid", headers=h)
+    other = signed_up(r, "other")
+    r.call("GET", f"/assessments/results/{ids[0]}", headers=other)
+    r.call("DELETE", f"/assessments/results/{ids[0]}", headers=other)
+    r.call("DELETE", f"/assessments/results/{ids[0]}", headers=h)
+    r.call("GET", f"/assessments/results/{ids[0]}", headers=h)
+    teen = signed_up(r, "teen17", years=17)
+    r.call("POST", "/onboarding/complete", headers=teen, json=answers())
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=teen,
+        json={"test_code": "cooper_12min", "inputs": {"distance_m": 2400, "mode": "run"}},
+    )
+    r.call("GET", "/assessments/tests", headers=teen)
+
+
+SCENARIOS = {
+    "auth": scenario_auth,
+    "minor": scenario_minor,
+    "onboarding": scenario_onboarding,
+    "assessments": scenario_assessments,
+}
 
 
 def main() -> int:

@@ -11,6 +11,7 @@ import "./modules/health.ts";
 import "./modules/auth/routes.ts";
 import "./modules/users/routes.ts";
 import "./modules/onboarding/routes.ts";
+import "./modules/assessments/routes.ts";
 import "./core/testing.ts";
 
 export function normalisePath(pathname: string): string {
