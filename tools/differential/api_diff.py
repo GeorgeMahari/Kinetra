@@ -15,7 +15,7 @@ import re
 import sys
 import uuid
 from collections.abc import Callable
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -620,7 +620,131 @@ def scenario_insights(r: Recorder) -> None:
     r.call("GET", "/dashboard", headers=old)
 
 
+def scenario_plans(r: Recorder) -> None:
+    today = datetime.now(UTC).date()
+    t, y = today.isoformat(), (today - timedelta(days=1)).isoformat()
+    h = signed_up(r, "plan", sex="female")
+    r.call("GET", "/plan", headers=h, params={"today": t})
+    r.call("GET", "/progression", headers=h)
+    r.call("GET", "/plan", headers=h)
+    r.call("GET", "/plan", headers=h, params={"today": "2020-01-01"})
+    r.call("GET", "/plan", headers=h, params={"today": "nope"})
+    r.call("POST", "/onboarding/complete", headers=h, json=answers())
+    tests = [
+        ("cooper_12min", {"distance_m": 2100, "mode": "run"}),
+        ("resting_hr", {"bpm": 72, "method": "manual_pulse"}),
+        ("chair_stand_30s", {"reps": 18}),
+        ("plank", {"seconds": 50}),
+        ("pushups", {"variant": "knees", "reps": 11}),
+        ("sit_reach", {"reach_cm": -4.5}),
+        ("single_leg_stance", {"left_s": 21, "right_s": 30}),
+        ("hrr_step", {"recovery_mode": "passive_seated", "hr_end": 150, "hr_60": 120}),
+        ("body_measurements", {"weight_kg": 80, "waist_cm": 95}),
+    ]
+    for code, inputs in tests:
+        r.call("POST", "/assessments/results", headers=h, json={"test_code": code, "inputs": inputs})
+    r.call("GET", "/plan", headers=h, params={"today": t})
+    for primary in (
+        "cardio",
+        "recovery",
+        "strength",
+        "muscularEndurance",
+        "mobility",
+        "balance",
+        "body",
+        "lifestyle",
+    ):
+        r.call("POST", "/plan", headers=h, json={"today": t, "primary": primary})
+        r.call("POST", "/plan", headers=h, json={"today": t})
+        r.call("POST", "/plan/abandon", headers=h, json={"today": t})
+    r.call("POST", "/plan/abandon", headers=h, json={"today": t})
+    r.call("POST", "/plan", headers=h, json={"today": y, "primary": "nope", "extra": 1})
+    r.call("POST", "/plan", headers=h, json={"today": "2001-01-01"})
+    plan = r.call("POST", "/plan", headers=h, json={"today": y}).json()
+    tasks = plan["plan"]["today"] if plan.get("plan") else []
+    for task in tasks:
+        r.call(
+            "PUT",
+            "/plan/tasks",
+            headers=h,
+            json={"today": t, "day": y, "task_code": task["code"], "done": True},
+        )
+    view = r.call("GET", "/plan", headers=h, params={"today": t}).json()
+    for task in (view.get("plan") or {}).get("today", []):
+        r.call(
+            "PUT",
+            "/plan/tasks",
+            headers=h,
+            json={"today": t, "day": t, "task_code": task["code"], "done": True},
+        )
+    if tasks:
+        code = tasks[0]["code"]
+        r.call("PUT", "/plan/tasks", headers=h, json={"today": t, "day": y, "task_code": code, "done": False})
+        r.call("PUT", "/plan/tasks", headers=h, json={"today": t, "day": y, "task_code": code, "done": False})
+        r.call("PUT", "/plan/tasks", headers=h, json={"today": t, "day": y, "task_code": code, "done": True})
+    r.call(
+        "PUT", "/plan/tasks", headers=h, json={"today": t, "day": t, "task_code": "intervals_x", "done": True}
+    )
+    r.call(
+        "PUT",
+        "/plan/tasks",
+        headers=h,
+        json={"today": t, "day": "2020-01-01", "task_code": "x", "done": True},
+    )
+    r.call(
+        "PUT", "/plan/tasks", headers=h, json={"today": t, "day": t, "task_code": "x" * 41, "done": "maybe"}
+    )
+    r.call("PUT", "/plan/tasks", headers=h, json=[])
+    r.call("GET", "/plan", headers=h, params={"today": t})
+    r.call("GET", "/progression", headers=h)
+    r.call("PUT", "/progression/checkin", headers=h, json={"sessions": 3, "strength_sessions": 1})
+    r.call(
+        "PUT",
+        "/progression/checkin",
+        headers=h,
+        json={"week": "previous", "sessions": 5, "active_minutes": 200},
+    )
+    r.call("PUT", "/progression/checkin", headers=h, json={"sessions": 3, "strength_sessions": 1})
+    r.call(
+        "PUT",
+        "/progression/checkin",
+        headers=h,
+        json={"week": "older", "sessions": 22, "active_minutes": -1, "x": 1},
+    )
+    r.call("PUT", "/progression/checkin", headers=h, json={})
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "plank", "inputs": {"seconds": 70}})
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "plank", "inputs": {"seconds": 95}})
+    r.call("GET", "/progression", headers=h)
+    r.call("DELETE", "/plan", headers=h)
+    r.call("GET", "/plan", headers={"Authorization": "Bearer nope"}, params={"today": t})
+    reg = r.call(
+        "POST",
+        "/auth/register",
+        json={
+            "email": r.email("planminor"),
+            "password": PASSWORD,
+            "date_of_birth": adult(17),
+            "privacy_consent": True,
+            "parent_email": r.email("planparent"),
+        },
+    ).json()
+    minor = {"Authorization": f"Bearer {reg['access_token']}"}
+    r.call("POST", "/plan", headers=minor, json={"today": t})
+    r.call("GET", "/progression", headers=minor)
+    old = signed_up(r, "planold", years=72, sex="male")
+    r.call("POST", "/onboarding/complete", headers=old, json=answers(readiness={**NO, "chest_pain": True}))
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=old,
+        json={"test_code": "chair_stand_30s", "inputs": {"reps": 9}},
+    )
+    r.call("POST", "/plan", headers=old, json={"today": t, "primary": "strength"})
+    r.call("GET", "/progression", headers=old)
+
+
 SCENARIOS = {
+    "plans": scenario_plans,
     "insights": scenario_insights,
     "personalization": scenario_personalization,
     "auth": scenario_auth,

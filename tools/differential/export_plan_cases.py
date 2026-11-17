@@ -39,7 +39,9 @@ def params_json(p: rules.PlanParams) -> dict[str, Any]:
 
 def focus_case() -> dict[str, Any]:
     lv = levels()
-    rel = rng.choice([None, {}, {d: rng.choice([0.0, 0.5, 1.0, rng.random() * 3]) for d in rng.sample(DIMS, 4)}])
+    rel = rng.choice(
+        [None, {}, {d: rng.choice([0.0, 0.5, 1.0, rng.random() * 3]) for d in rng.sample(DIMS, 4)}]
+    )
     ceiling = rng.choice(CEILINGS)
     adult = rng.random() < 0.8
     primary, secondary = rules.choose_focus(lv, rel)
@@ -54,9 +56,7 @@ def focus_case() -> dict[str, Any]:
         "focus": [primary, secondary],
         "params": params_json(p),
         "started_on": started.isoformat(),
-        "days": [
-            [d.isoformat(), [asdict(t) for t in rules.day_tasks(p, started, d)]] for d in days
-        ],
+        "days": [[d.isoformat(), [asdict(t) for t in rules.day_tasks(p, started, d)]] for d in days],
     }
 
 
@@ -114,7 +114,11 @@ def targets_case() -> dict[str, Any]:
         "sit_reach": [round(rng.uniform(-25, 30), 1), age, sex],
         "stance": [round(rng.uniform(0, 50), 1), age],
         "recovery": [float(rng.randint(60, 160)), age, sex],
-        "waist": [round(rng.uniform(0.35, 0.75), 3), rng.choice([None, rng.uniform(140, 200)]), rng.uniform(55, 130)],
+        "waist": [
+            round(rng.uniform(0.35, 0.75), 3),
+            rng.choice([None, rng.uniform(140, 200)]),
+            rng.uniform(55, 130),
+        ],
     }
     fns = {
         "cooper": targets.cardio_from_cooper,
@@ -226,7 +230,14 @@ def main() -> None:
     cases = {
         "level_thresholds": list(prog.LEVEL_THRESHOLDS),
         "doses": [
-            [code, base, i, rules.dose(rules.PlanParams("cardio", "strength", IntensityCeiling.maximal, {code: base}), code, i)]
+            [
+                code,
+                base,
+                i,
+                rules.dose(
+                    rules.PlanParams("cardio", "strength", IntensityCeiling.maximal, {code: base}), code, i
+                ),
+            ]
             for code, t in rules.TASKS.items()
             for base in t.base
             for i in range(rules.PLAN_WEEKS * 7)
