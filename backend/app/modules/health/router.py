@@ -4,12 +4,12 @@ an unavailable server and show the offline state."""
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.core.db import DB
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/health", tags=["health"])
@@ -30,7 +30,7 @@ def live() -> HealthStatus:
 
 
 @router.get("/ready", response_model=HealthStatus)
-def ready(response: Response, db: Session = Depends(get_db)) -> HealthStatus:
+def ready(response: Response, db: Session = DB) -> HealthStatus:
     try:
         db.execute(text("SELECT 1"))
     except Exception:

@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.db import get_db
+from app.core.db import DB
 from app.modules.auth.deps import get_user_allow_pending
 from app.modules.consent import pages, service
 from app.modules.users.models import User
@@ -43,13 +43,13 @@ def _out(s: service.ConsentStatus) -> ConsentStatusOut:
 
 @me_router.get("", response_model=ConsentStatusOut)
 def consent_status(
-    user: User = Depends(get_user_allow_pending), db: Session = Depends(get_db)
+    user: User = Depends(get_user_allow_pending), db: Session = DB
 ) -> ConsentStatusOut:
     return _out(service.get_status(db, user))
 
 
 @me_router.post("/resend", response_model=ConsentStatusOut)
-def resend(user: User = Depends(get_user_allow_pending), db: Session = Depends(get_db)) -> ConsentStatusOut:
+def resend(user: User = Depends(get_user_allow_pending), db: Session = DB) -> ConsentStatusOut:
     return _out(service.resend(db, user))
 
 
@@ -58,7 +58,7 @@ def _html(content: str, status_code: int = 200) -> HTMLResponse:
 
 
 @public_router.get("/parental/{token}", response_class=HTMLResponse, include_in_schema=False)
-def consent_page(token: str, db: Session = Depends(get_db)) -> HTMLResponse:
+def consent_page(token: str, db: Session = DB) -> HTMLResponse:
     target = service.find(db, token)
     if target is None:
         return _html(pages.message("en", "invalid"), 404)
@@ -67,7 +67,7 @@ def consent_page(token: str, db: Session = Depends(get_db)) -> HTMLResponse:
 
 
 @public_router.post("/parental/{token}", response_class=HTMLResponse, include_in_schema=False)
-async def consent_decision(token: str, request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
+async def consent_decision(token: str, request: Request, db: Session = DB) -> HTMLResponse:
     # A plain HTML form post; parsed here to avoid a multipart dependency for one field.
     form = parse_qs((await request.body()).decode("utf-8", "replace"))
     decision = (form.get("decision") or [""])[0]

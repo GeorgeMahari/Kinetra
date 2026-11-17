@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.db import get_db
+from app.core.db import DB
 from app.core.errors import AppError
 from app.core.rate_limit import SlidingWindowLimiter
 from app.core.security import decode_access_token
@@ -20,7 +20,7 @@ def _unauthorized() -> AppError:
 
 def get_user_allow_pending(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
-    db: Session = Depends(get_db),
+    db: Session = DB,
 ) -> User:
     """The signed-in user, even while their account waits for a parent's consent. Only for routes
     that add no personal data: reading the account, the consent status, export and deletion."""

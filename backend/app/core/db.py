@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from datetime import datetime
 from functools import lru_cache
 
+from fastapi import Depends
 from sqlalchemy import DateTime, Engine, MetaData, create_engine, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
@@ -62,3 +63,8 @@ def get_db() -> Iterator[Session]:
         raise
     finally:
         session.close()
+
+
+# The request's session as a FastAPI dependency. scope="function" commits before the response is
+# sent, so a client's next request always sees this one's writes (tests/test_db_session_scope.py).
+DB = Depends(get_db, scope="function")

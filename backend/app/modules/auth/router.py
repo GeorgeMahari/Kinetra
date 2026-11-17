@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.core.db import DB
 from app.core.errors import AppError
 from app.core.rate_limit import SlidingWindowLimiter
 from app.modules.auth import recovery, service
@@ -33,7 +33,7 @@ def _enforce_limit(limiter: SlidingWindowLimiter, key: str) -> None:
 def register(
     body: RegisterRequest,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> TokenPair:
     _enforce_limit(limiter, f"register:{client_ip(request)}")
@@ -46,7 +46,7 @@ def register(
 def login(
     body: LoginRequest,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> TokenPair:
     _enforce_limit(limiter, f"login:{body.email}:{client_ip(request)}")
@@ -55,12 +55,12 @@ def login(
 
 
 @router.post("/refresh", response_model=TokenPair)
-def refresh(body: RefreshRequest, db: Session = Depends(get_db)) -> TokenPair:
+def refresh(body: RefreshRequest, db: Session = DB) -> TokenPair:
     return service.rotate_refresh_token(db, body.refresh_token)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(body: RefreshRequest, db: Session = Depends(get_db)) -> Response:
+def logout(body: RefreshRequest, db: Session = DB) -> Response:
     service.logout(db, body.refresh_token)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -69,7 +69,7 @@ def logout(body: RefreshRequest, db: Session = Depends(get_db)) -> Response:
 def request_verification(
     request: Request,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     """(Re)sends a 6-digit code to the account's email. No-op once verified."""
@@ -82,7 +82,7 @@ def request_verification(
 def confirm_verification(
     body: CodeIn,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     _enforce_limit(limiter, f"verify-confirm:{user.id}")
@@ -94,7 +94,7 @@ def confirm_verification(
 def forgot_password(
     body: ForgotPasswordIn,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     """Always 202, whether or not the email has an account."""
@@ -107,7 +107,7 @@ def forgot_password(
 def reset_password(
     body: ResetPasswordIn,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     """Sets a new password with the emailed code and signs the account out everywhere."""
