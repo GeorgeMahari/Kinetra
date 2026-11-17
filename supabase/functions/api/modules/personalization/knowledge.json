@@ -1,0 +1,425 @@
+{
+ "capacities": [
+  "aerobic_endurance",
+  "recovery_hr",
+  "max_strength",
+  "hypertrophy",
+  "muscular_endurance",
+  "power",
+  "speed",
+  "agility",
+  "reaction",
+  "mobility",
+  "balance",
+  "body_composition",
+  "sleep_recovery"
+ ],
+ "dimension_of": {
+  "aerobic_endurance": "cardio",
+  "recovery_hr": "recovery",
+  "max_strength": "strength",
+  "hypertrophy": "body",
+  "muscular_endurance": "muscularEndurance",
+  "power": "strength",
+  "speed": "strength",
+  "agility": "balance",
+  "reaction": "balance",
+  "mobility": "mobility",
+  "balance": "balance",
+  "body_composition": "body",
+  "sleep_recovery": "lifestyle"
+ },
+ "goal_capacities": {
+  "improve_endurance": {
+   "aerobic_endurance": 3,
+   "recovery_hr": 2,
+   "muscular_endurance": 1
+  },
+  "get_stronger": {
+   "max_strength": 3,
+   "muscular_endurance": 2,
+   "power": 1
+  },
+  "build_muscle": {
+   "hypertrophy": 3,
+   "max_strength": 2,
+   "muscular_endurance": 1
+  },
+  "power_speed": {
+   "power": 3,
+   "speed": 3,
+   "max_strength": 1
+  },
+  "agility_coordination": {
+   "agility": 3,
+   "reaction": 2,
+   "balance": 2
+  },
+  "improve_mobility": {
+   "mobility": 3
+  },
+  "improve_balance": {
+   "balance": 3
+  },
+  "healthy_weight": {
+   "body_composition": 3,
+   "aerobic_endurance": 2
+  },
+  "better_recovery": {
+   "sleep_recovery": 3,
+   "recovery_hr": 2
+  },
+  "general_wellbeing": {
+   "aerobic_endurance": 2,
+   "mobility": 1,
+   "body_composition": 1,
+   "max_strength": 1
+  },
+  "sport_performance": {},
+  "know_baseline": {}
+ },
+ "sport_references": {
+  "acsm_resistance_2009": "American College of Sports Medicine. Med Sci Sports Exerc. 2009. doi:10.1249/mss.0b013e3181915670 [position stand, resistance training progression]",
+  "kovacs_tennis_2007": "Kovacs MS. Sports Med. 2007. doi:10.2165/00007256-200737030-00001 [tennis physiology]",
+  "lidor_ziv_volleyball_2010": "Lidor R, Ziv G. J Strength Cond Res. 2010. doi:10.1519/jsc.0b013e3181ddf835 [physical attributes of volleyball players]",
+  "stolen_soccer_2005": "Stolen T, et al. Sports Med. 2005. doi:10.2165/00007256-200535060-00004 [physiology of soccer]",
+  "ziv_lidor_basketball_2009": "Ziv G, Lidor R. Sports Med. 2009. doi:10.2165/00007256-200939070-00003 [physical attributes of basketball players]",
+  "faria_cycling_2005": "Faria EW, et al. Sports Med. 2005. doi:10.2165/00007256-200535040-00003 [science of cycling, part 2]",
+  "joyner_coyle_running_2008": "Joyner MJ, Coyle EF. J Physiol. 2008. doi:10.1113/jphysiol.2007.143834 [endurance performance physiology]",
+  "pyne_sharp_swimming_2014": "Pyne DB, Sharp RL. Int J Sport Nutr Exerc Metab. 2014. doi:10.1123/ijsnem.2014-0047 [demands of competitive swimming; abstract gives no capacity list: weak]",
+  "chaabene_boxing_2015": "Chaabene H, et al. Sports Med. 2015. doi:10.1007/s40279-014-0274-7 [amateur boxing attributes]"
+ },
+ "category_demands": {
+  "endurance": {
+   "aerobic_endurance": 3,
+   "recovery_hr": 1
+  },
+  "strength": {
+   "max_strength": 3,
+   "muscular_endurance": 2
+  },
+  "team": {
+   "aerobic_endurance": 2,
+   "speed": 2,
+   "agility": 2,
+   "power": 2
+  },
+  "racket": {
+   "agility": 2,
+   "speed": 2,
+   "aerobic_endurance": 1
+  },
+  "combat": {
+   "aerobic_endurance": 2,
+   "power": 2,
+   "max_strength": 2
+  },
+  "mind_body": {
+   "mobility": 3,
+   "balance": 2
+  },
+  "mixed": {
+   "max_strength": 2,
+   "aerobic_endurance": 2,
+   "muscular_endurance": 1
+  }
+ },
+ "sport_demands": {
+  "gym_strength": {
+   "capacities": {
+    "max_strength": 3,
+    "hypertrophy": 3,
+    "muscular_endurance": 2
+   },
+   "reference": "acsm_resistance_2009",
+   "extra": {}
+  },
+  "tennis": {
+   "capacities": {
+    "speed": 3,
+    "agility": 3,
+    "power": 2,
+    "aerobic_endurance": 2
+   },
+   "reference": "kovacs_tennis_2007",
+   "extra": {}
+  },
+  "volleyball": {
+   "capacities": {
+    "power": 3,
+    "max_strength": 2,
+    "agility": 2,
+    "speed": 2,
+    "aerobic_endurance": 1
+   },
+   "reference": "lidor_ziv_volleyball_2010",
+   "extra": {}
+  },
+  "football": {
+   "capacities": {
+    "aerobic_endurance": 3,
+    "speed": 3,
+    "agility": 2,
+    "power": 2,
+    "balance": 1
+   },
+   "reference": "stolen_soccer_2005",
+   "extra": {}
+  },
+  "basketball": {
+   "capacities": {
+    "power": 3,
+    "agility": 3,
+    "speed": 2,
+    "aerobic_endurance": 2
+   },
+   "reference": "ziv_lidor_basketball_2009",
+   "extra": {}
+  },
+  "cycling": {
+   "capacities": {
+    "aerobic_endurance": 3,
+    "power": 2
+   },
+   "reference": "faria_cycling_2005",
+   "extra": {}
+  },
+  "running": {
+   "capacities": {
+    "aerobic_endurance": 3,
+    "recovery_hr": 1
+   },
+   "reference": "joyner_coyle_running_2008",
+   "extra": {}
+  },
+  "swimming": {
+   "capacities": {
+    "aerobic_endurance": 3
+   },
+   "reference": "pyne_sharp_swimming_2014",
+   "extra": {}
+  },
+  "boxing": {
+   "capacities": {
+    "aerobic_endurance": 3,
+    "power": 3,
+    "max_strength": 2
+   },
+   "reference": "chaabene_boxing_2015",
+   "extra": {}
+  }
+ },
+ "test_profiles": {
+  "resting_hr": {
+   "capacities": {
+    "aerobic_endurance": "secondary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": null
+  },
+  "hrr_step": {
+   "capacities": {
+    "recovery_hr": "primary",
+    "aerobic_endurance": "secondary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": null
+  },
+  "cooper_12min": {
+   "capacities": {
+    "aerobic_endurance": "primary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "pushups": {
+   "capacities": {
+    "muscular_endurance": "primary",
+    "max_strength": "secondary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "pulls": {
+   "capacities": {
+    "max_strength": "primary",
+    "muscular_endurance": "secondary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "chair_stand_30s": {
+   "capacities": {
+    "max_strength": "primary",
+    "muscular_endurance": "secondary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "plank": {
+   "capacities": {
+    "muscular_endurance": "primary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "sit_reach": {
+   "capacities": {
+    "mobility": "primary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "single_leg_stance": {
+   "capacities": {
+    "balance": "primary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "body_measurements": {
+   "capacities": {
+    "body_composition": "primary"
+   },
+   "evidence": "validated_norms",
+   "retest_weeks": 8,
+   "core": true,
+   "only_for_sports": [],
+   "better": null
+  },
+  "broad_jump": {
+   "capacities": {
+    "power": "primary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "vertical_jump": {
+   "capacities": {
+    "power": "primary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "agility_505": {
+   "capacities": {
+    "agility": "primary",
+    "speed": "secondary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": "down"
+  },
+  "sprint_20m": {
+   "capacities": {
+    "speed": "primary",
+    "power": "secondary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": "down"
+  },
+  "ruler_drop": {
+   "capacities": {
+    "reaction": "primary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": "down"
+  },
+  "back_scratch": {
+   "capacities": {
+    "mobility": "primary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 8,
+   "core": false,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "anterior_reach": {
+   "capacities": {
+    "balance": "primary"
+   },
+   "evidence": "documented_threshold",
+   "retest_weeks": 8,
+   "core": false,
+   "only_for_sports": [],
+   "better": null
+  },
+  "single_leg_hop": {
+   "capacities": {
+    "power": "primary",
+    "balance": "secondary"
+   },
+   "evidence": "documented_threshold",
+   "retest_weeks": 8,
+   "core": false,
+   "only_for_sports": [],
+   "better": "up"
+  },
+  "circumferences": {
+   "capacities": {
+    "hypertrophy": "primary",
+    "body_composition": "secondary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 6,
+   "core": false,
+   "only_for_sports": [],
+   "better": null
+  },
+  "swim_12min": {
+   "capacities": {
+    "aerobic_endurance": "primary"
+   },
+   "evidence": "self_comparison",
+   "retest_weeks": 8,
+   "core": false,
+   "only_for_sports": [
+    "swimming",
+    "triathlon"
+   ],
+   "better": "up"
+  }
+ }
+}

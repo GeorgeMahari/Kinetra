@@ -460,7 +460,61 @@ def scenario_assessments(r: Recorder) -> None:
     r.call("GET", "/assessments/tests", headers=teen)
 
 
+def scenario_personalization(r: Recorder) -> None:
+    h = signed_up(r, "pers", sex="female")
+    r.call("GET", "/personalization/profile", headers=h)
+    r.call("GET", "/personalization/battery", headers=h)
+    r.call("PUT", "/personalization/profile", headers=h, json={"goals": ["get_stronger"]})
+    r.call("POST", "/onboarding/complete", headers=h, json=answers())
+    r.call("GET", "/personalization/profile", headers=h)
+    r.call("GET", "/personalization/battery", headers=h)
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=h,
+        json={
+            "sports": [
+                {"code": "tennis", "sessions_per_week": 3, "level": "advanced"},
+                {"code": "running", "sessions_per_week": 5},
+            ],
+            "goals": ["sport_performance", "power_speed", "build_muscle"],
+            "priorities": [{"capacity": "agility", "weight": 3}, {"capacity": "mobility", "weight": 1}],
+        },
+    )
+    r.call("GET", "/personalization/battery", headers=h)
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=h,
+        json={"sports": [{"code": "nope", "sessions_per_week": 1}], "goals": ["get_stronger"]},
+    )
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=h,
+        json={
+            "sports": [
+                {"code": "tennis", "sessions_per_week": 1},
+                {"code": "tennis", "sessions_per_week": 2},
+            ],
+            "goals": [],
+            "priorities": [{"capacity": "agility", "weight": 5}, {"capacity": "x", "weight": 1}],
+            "extra": True,
+        },
+    )
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "plank", "inputs": {"seconds": 80}})
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=h,
+        json={"sports": [{"code": "swimming", "sessions_per_week": 4}], "goals": ["improve_endurance"]},
+    )
+    r.call("GET", "/personalization/battery", headers=h)
+    r.call("GET", "/onboarding/summary", headers=h)
+
+
 SCENARIOS = {
+    "personalization": scenario_personalization,
     "auth": scenario_auth,
     "minor": scenario_minor,
     "onboarding": scenario_onboarding,
