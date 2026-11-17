@@ -33,6 +33,7 @@ def test_oversized_body_is_rejected_before_parsing(client: TestClient) -> None:
     assert resp.headers["x-content-type-options"] == "nosniff"
 
 
+@pytest.mark.python_only  # over real HTTP the socket is reset before the 413 can be read
 def test_streamed_oversized_body_without_content_length_is_rejected(client: TestClient) -> None:
     def chunks():  # type: ignore[no-untyped-def]
         for _ in range(MAX_BODY_BYTES // 1000 + 5):

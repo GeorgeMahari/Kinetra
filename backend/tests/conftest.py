@@ -20,8 +20,23 @@ from app.core.config import get_settings
 from app.core.db import get_db
 from app.main import create_app
 from app.modules.auth.deps import get_login_limiter
+from tests.http_client import HttpClient
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+# When set, the API tests run over HTTP against that server (for example the Supabase Edge Function
+# serving the same test database) instead of the FastAPI app in-process.
+API_URL = os.environ.get("KINETRA_TEST_API_URL", "").strip()
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    if not API_URL:
+        return
+    skip = pytest.mark.skip(reason="python_only: patches Python internals; covered by the TypeScript tests")
+    for item in items:
+        if "python_only" in item.keywords:
+            item.add_marker(skip)
 
 
 def alembic_config(url: URL) -> Config:
@@ -45,7 +60,10 @@ def migrated_engine(test_db_url: URL) -> Iterator[Engine]:
     engine = create_engine(test_db_url, connect_args={"connect_timeout": 3})
     try:
         with engine.begin() as conn:
-            conn.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+            # Over HTTP a separately started server already holds connections (with prepared
+            # statements) to these tables: bring the schema up to date instead of recreating it.
+            if not API_URL:
+                conn.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
     except OperationalError as exc:
         pytest.skip(f"Test database unreachable: {exc.orig}")
     command.upgrade(alembic_config(test_db_url), "head")
@@ -55,6 +73,9 @@ def migrated_engine(test_db_url: URL) -> Iterator[Engine]:
 
 @pytest.fixture
 def client() -> Iterator[TestClient]:
+    if API_URL:
+        yield HttpClient(API_URL)  # type: ignore[misc]
+        return
     with TestClient(create_app(background_jobs=False)) as c:
         yield c
 
@@ -68,7 +89,12 @@ def api(migrated_engine: Engine) -> Iterator[TestClient]:
                 "TRUNCATE users, user_profiles, refresh_tokens, user_goals, activity_profiles, activity_profile_sports, readiness_screenings, onboarding_states, test_results, measurements, activity_checkins, user_achievements, auth_codes, parental_consents CASCADE"
             )
         )
+        if API_URL and conn.execute(text("SELECT to_regclass('public.rate_limit_events')")).scalar():
+            conn.execute(text("TRUNCATE rate_limit_events"))
     get_login_limiter().reset()
+    if API_URL:
+        yield HttpClient(API_URL)  # type: ignore[misc]
+        return
 
     factory = sessionmaker(bind=migrated_engine, expire_on_commit=False)
 

@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, text
 
 from app.core.email import ConsoleEmailSender, get_email_sender
+from tests.conftest import API_URL
+from tests.http_client import HttpOutbox
 from tests.test_auth_api import PASSWORD, auth, register_ok
 
 pytestmark = pytest.mark.db
@@ -16,6 +18,8 @@ NEW_PASSWORD = "green kite above the hill"
 
 @pytest.fixture(autouse=True)
 def outbox() -> ConsoleEmailSender:
+    if API_URL:
+        return HttpOutbox(API_URL)  # type: ignore[return-value]
     get_email_sender.cache_clear()
     sender = get_email_sender()
     assert isinstance(sender, ConsoleEmailSender)

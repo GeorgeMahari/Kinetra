@@ -78,6 +78,10 @@ def create_app(background_jobs: bool = True) -> FastAPI:
         devices_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
+    if settings.environment == "test":
+        from app.core.testing import router as testing_router
+
+        app.include_router(testing_router, prefix=settings.api_prefix)
     return app
 
 

@@ -34,7 +34,10 @@ include = ["app*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-markers = ["db: tests that need a running PostgreSQL database"]
+markers = [
+    "db: tests that need a running PostgreSQL database",
+    "python_only: patches Python internals, so it cannot run against another API over HTTP",
+]
 
 [tool.ruff]
 line-length = 110

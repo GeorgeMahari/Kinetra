@@ -11,6 +11,8 @@ from sqlalchemy import Engine, text
 
 from app.core.email import ConsoleEmailSender, get_email_sender
 from app.modules.consent import jobs
+from tests.conftest import API_URL
+from tests.http_client import HttpOutbox
 from tests.test_auth_api import PASSWORD, auth
 
 pytestmark = pytest.mark.db
@@ -22,6 +24,8 @@ PARENT = "parent@example.com"
 
 @pytest.fixture(autouse=True)
 def outbox() -> ConsoleEmailSender:
+    if API_URL:
+        return HttpOutbox(API_URL)  # type: ignore[return-value]
     get_email_sender.cache_clear()
     sender = get_email_sender()
     assert isinstance(sender, ConsoleEmailSender)
@@ -35,7 +39,13 @@ def dob(age: int) -> str:
 def register(api: TestClient, age: int, **extra: Any) -> Any:
     return api.post(
         f"{V}/auth/register",
-        json={"email": CHILD, "password": PASSWORD, "date_of_birth": dob(age), "privacy_consent": True, **extra},
+        json={
+            "email": CHILD,
+            "password": PASSWORD,
+            "date_of_birth": dob(age),
+            "privacy_consent": True,
+            **extra,
+        },
     )
 
 
@@ -61,7 +71,9 @@ class TestRegistration:
         assert register(api, 14).json()["error"]["code"] == "parent_email_required"
         assert register(api, 15, parent_email=CHILD).json()["error"]["code"] == "parent_email_same"
 
-    def test_16_needs_no_consent_and_a_parent_email_is_not_stored(self, api: TestClient, migrated_engine: Engine) -> None:
+    def test_16_needs_no_consent_and_a_parent_email_is_not_stored(
+        self, api: TestClient, migrated_engine: Engine
+    ) -> None:
         resp = register(api, 16, parent_email=PARENT)
         assert resp.status_code == 201
         me = api.get(f"{V}/me", headers=auth(resp.json()["access_token"])).json()
@@ -69,7 +81,9 @@ class TestRegistration:
         with migrated_engine.connect() as c:
             assert c.execute(text("SELECT count(*) FROM parental_consents")).scalar() == 0
 
-    def test_parent_gets_one_link_in_the_child_language(self, api: TestClient, outbox: ConsoleEmailSender) -> None:
+    def test_parent_gets_one_link_in_the_child_language(
+        self, api: TestClient, outbox: ConsoleEmailSender
+    ) -> None:
         pending_child(api, outbox)
         sent = [m for m in outbox.outbox if m.to == PARENT]
         assert len(sent) == 1 and sent[0].subject == "Copilul tău a cerut să folosească Kinetra"
@@ -77,7 +91,9 @@ class TestRegistration:
 
 
 class TestLockedAccount:
-    def test_only_account_routes_work_until_consent(self, api: TestClient, outbox: ConsoleEmailSender) -> None:
+    def test_only_account_routes_work_until_consent(
+        self, api: TestClient, outbox: ConsoleEmailSender
+    ) -> None:
         h, _ = pending_child(api, outbox)
         me = api.get(f"{V}/me", headers=h).json()
         assert me["parental_consent"] == "pending"
@@ -166,15 +182,25 @@ class TestExpiry:
         with migrated_engine.connect() as c:
             assert c.execute(text("SELECT count(*) FROM users")).scalar() == 0
 
+    @pytest.mark.python_only
     def test_purge_removes_only_expired_pending_accounts(
-        self, api: TestClient, outbox: ConsoleEmailSender, migrated_engine: Engine, monkeypatch: pytest.MonkeyPatch
+        self,
+        api: TestClient,
+        outbox: ConsoleEmailSender,
+        migrated_engine: Engine,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         from sqlalchemy.orm import sessionmaker
 
         pending_child(api, outbox)
         adult = api.post(
             f"{V}/auth/register",
-            json={"email": "adult@example.com", "password": PASSWORD, "date_of_birth": dob(30), "privacy_consent": True},
+            json={
+                "email": "adult@example.com",
+                "password": PASSWORD,
+                "date_of_birth": dob(30),
+                "privacy_consent": True,
+            },
         )
         assert adult.status_code == 201
         # Not expired yet: nothing is purged.
