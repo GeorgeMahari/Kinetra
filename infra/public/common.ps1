@@ -80,6 +80,25 @@ function Test-DatabaseMigrated {
     return [pscustomobject]@{ Ok = [bool]($headId -and $current -match [regex]::Escape($headId)); Current = $current; Head = $heads }
 }
 
+function Initialize-JwtSecret {
+    # Creates KINETRA_JWT_SECRET as a user environment variable on first use (never a file).
+    # Changing it later signs everyone out once; no data is lost.
+    if (Get-UserSecret 'KINETRA_JWT_SECRET') { return }
+    $bytes = New-Object byte[] 48
+    [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    $secret = [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+    [Environment]::SetEnvironmentVariable('KINETRA_JWT_SECRET', $secret, 'User')
+    Write-Host 'Created the KINETRA_JWT_SECRET user environment variable (not written to any file).'
+}
+
+function Get-Tailscale {
+    $cmd = Get-Command tailscale -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    $p = "$env:ProgramFiles\Tailscale\tailscale.exe"
+    if (Test-Path $p) { return $p }
+    throw 'Tailscale is not installed: https://tailscale.com/download'
+}
+
 function Get-Cloudflared {
     $cmd = Get-Command cloudflared -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }

@@ -52,12 +52,6 @@ Set-Content -Path $configPath -Value $config -Encoding utf8
 & $cf tunnel --config $configPath ingress validate
 if ($LASTEXITCODE -ne 0) { throw 'Tunnel ingress configuration is invalid' }
 
-if (-not (Get-UserSecret 'KINETRA_JWT_SECRET')) {
-    $bytes = New-Object byte[] 48
-    [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
-    $secret = [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
-    [Environment]::SetEnvironmentVariable('KINETRA_JWT_SECRET', $secret, 'User')
-    Write-Host 'Created the KINETRA_JWT_SECRET user environment variable (not written to any file).'
-}
+Initialize-JwtSecret
 
 Write-Host "Tunnel '$tunnel' ($id) -> https://$hostname/api/v1/ is configured: $configPath"
