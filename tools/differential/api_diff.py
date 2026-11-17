@@ -79,6 +79,7 @@ def normalise(entries: list[dict[str, Any]], tag: str) -> str:
 
     text = UUID_RE.sub(stable("id"), text)
     text = TS_RE.sub("<ts>", text)
+    text = re.sub(r"parental/[\w-]{20,}", "parental/<token>", text)
     # JWTs and refresh tokens
     text = re.sub(r"eyJ[\w-]+\.[\w-]+\.[\w-]+", "<jwt>", text)
     text = re.sub(r'"refresh_token": "[\w-]{40,}"', '"refresh_token": "<refresh>"', text)
@@ -743,7 +744,92 @@ def scenario_plans(r: Recorder) -> None:
     r.call("GET", "/progression", headers=old)
 
 
+def consent_token(r: Recorder, parent: str) -> str:
+    mails = r.http.request("GET", V + "/__test__/outbox").json()
+    body = [m["body"] for m in mails if m["to"] == parent][-1]
+    return re.search(r"/consent/parental/([\w-]+)", body).group(1)  # type: ignore[union-attr]
+
+
+def scenario_consent_export(r: Recorder) -> None:
+    def minor(name: str, locale: str) -> tuple[dict[str, str], str]:
+        parent = r.email(f"{name}-parent")
+        reg = r.call(
+            "POST",
+            "/auth/register",
+            json={
+                "email": r.email(name),
+                "password": PASSWORD,
+                "date_of_birth": adult(15),
+                "privacy_consent": True,
+                "parent_email": parent,
+                "preferred_locale": locale,
+            },
+        ).json()
+        return {"Authorization": f"Bearer {reg['access_token']}"}, parent
+
+    h, parent = minor("teen", "ro")
+    r.call("GET", "/me/parental-consent", headers=h)
+    r.call("POST", "/me/parental-consent/resend", headers=h)
+    r.call("GET", "/me/export", headers=h)
+    token = consent_token(r, parent)
+    r.call("GET", f"/consent/parental/{token}")
+    r.call("GET", "/consent/parental/not-a-real-token")
+    r.call("POST", f"/consent/parental/{token}", data={"decision": "maybe"})
+    r.call("POST", f"/consent/parental/{token}", content="decision=&decision=grant&x=%ZZ")
+    r.call(
+        "POST",
+        f"/consent/parental/{token}",
+        content="%64ecision=grant",
+        headers={"Content-Type": "text/plain"},
+    )
+    r.call("GET", f"/consent/parental/{token}")
+    r.call("POST", f"/consent/parental/{token}", data={"decision": "grant"})
+    r.call("GET", "/me/parental-consent", headers=h)
+    r.call("POST", "/me/parental-consent/resend", headers=h)
+    r.call("PUT", "/progression/checkin", headers=h, json={"sessions": 2, "active_minutes": 45})
+    r.call("POST", "/assessments/results", headers=h, json={"test_code": "plank", "inputs": {"seconds": 30}})
+    r.call("GET", "/progression", headers=h)
+    r.call("GET", "/me/export", headers=h)
+
+    h2, parent2 = minor("teen2", "ru")
+    token2 = consent_token(r, parent2)
+    r.call("GET", f"/consent/parental/{token2}")
+    r.call("POST", f"/consent/parental/{token2}", data={"decision": "refuse"})
+    r.call("GET", "/me", headers=h2)
+    r.call("POST", f"/consent/parental/{token2}", data={"decision": "grant"})
+
+    a = signed_up(r, "exp", sex="male")
+    r.call("POST", "/onboarding/complete", headers=a, json=answers())
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=a,
+        json={
+            "sports": [{"code": "cycling", "sessions_per_week": 4}],
+            "goals": ["improve_endurance"],
+            "priorities": [{"capacity": "max_strength", "weight": 2}],
+        },
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=a,
+        json={"test_code": "pushups", "inputs": {"variant": "toes", "reps": 9}},
+    )
+    items = [
+        {"kind": "weight_kg", "value": 80.25, "measured_at": "2026-11-10T07:00:00Z", "external_id": "w1"}
+    ]
+    r.call("POST", "/measurements/import", headers=a, json={"source": "health_connect", "items": items})
+    r.call("PUT", "/progression/checkin", headers=a, json={"week": "previous", "sessions": 3})
+    r.call("GET", "/progression", headers=a)
+    r.call("GET", "/me/parental-consent", headers=a)
+    r.call("POST", "/me/parental-consent/resend", headers=a)
+    r.call("GET", "/me/export", headers=a)
+    r.call("GET", "/me/export")
+
+
 SCENARIOS = {
+    "consent_export": scenario_consent_export,
     "plans": scenario_plans,
     "insights": scenario_insights,
     "personalization": scenario_personalization,

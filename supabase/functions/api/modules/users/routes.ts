@@ -6,6 +6,7 @@ import { todayUtc } from "../../core/values.ts";
 import * as v from "../../core/validation.ts";
 import { ageOn } from "../../shared/age.ts";
 import { currentUser, userAllowPending, userOf } from "../auth/deps.ts";
+import { exportData } from "./export.ts";
 import { getUser, type User } from "./repo.ts";
 
 const SEX = ["female", "male", "not_specified"] as const;
@@ -91,6 +92,14 @@ route({
       await ctx.db.sql`UPDATE user_profiles SET height_cm = ${body.height_cm}, updated_at = now() WHERE user_id = ${user.id}`;
     }
     return await reload(ctx, user.id);
+  },
+});
+
+route({
+  method: "GET", path: "/api/v1/me/export", deps: [userAllowPending],
+  handler: (ctx) => {
+    const user = userOf(ctx);
+    return exportData(ctx.db, user, toMe(user).profile);
   },
 });
 
