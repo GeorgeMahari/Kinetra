@@ -34,4 +34,3 @@ the way they are.
 | [REDESIGN_AUDIT.md](REDESIGN_AUDIT.md), [REDESIGN_IMPLEMENTATION_PLAN.md](REDESIGN_IMPLEMENTATION_PLAN.md) | Kinetra Hybrid redesign: audit and plan. File paths in them are from before the restructuring |
 | [PERFORMANCE_REPORT.md](PERFORMANCE_REPORT.md), [REGRESSION_TEST_REPORT.md](REGRESSION_TEST_REPORT.md) | Measured performance and regression checks |
 | [ROADMAP.md](ROADMAP.md) | Milestones |
-| `plans/`, `specs/`, `superpowers/` | Working plans and specs from earlier milestones |
