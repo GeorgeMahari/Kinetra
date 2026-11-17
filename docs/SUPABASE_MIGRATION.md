@@ -88,7 +88,8 @@ destructive, so it runs only with explicit approval.
 ## 6. Backups and restore
 
 - **Local (unchanged):** `infra/public/backup-db.ps1` writes `db/backups/kinetra_<date>.dump`.
-- **Supabase:** dump with a PostgreSQL 17 client, so the file restores on 17:
+- **Supabase:** `powershell -ExecutionPolicy Bypass -File infra\supabaseackup-supabase.ps1` writes
+  `db/backups/supabase_<date>.dump` with a PostgreSQL 17 client, so the file restores on 17. It runs this:
   ```powershell
   $env:PGPASSWORD = [Environment]::GetEnvironmentVariable('SUPABASE_DB_PASSWORD','User')
   docker run --rm -e PGPASSWORD -v "${PWD}\db\backups:/backups" postgres:17-alpine `
@@ -121,7 +122,13 @@ The API connects as `kinetra_app.vrdwcgzcgukzmyzyuedm`, migrations run as `postg
 | 4 Data | one transaction; all 19 tables match the local ones in row count and md5 |
 | 5 Tests | `smoke_test.py` passed 24/24 through the API as `kinetra_app` (auth, CRUD, relations, isolation, persistence, database checks, cleanup). An existing account migrated from local signs in; its profile, results, dashboard, plan and progression return 200, and it has the same number of results |
 
-Not done yet: step 6 (the public deployment still uses the local database). In the dashboard,
+Step 6 (done): `infra/public/.env.public` has `KINETRA_DB_TARGET=supabase`. `start-public.ps1` then
+connects the API as `kinetra_app` and checks that Supabase is at the latest migration. It no longer
+starts the local container. Verified with a production-mode API on Supabase: `/health/ready` showed
+`database: ok` and `/docs` returned 404. The first Supabase backup is `db/backups/supabase_20261117_131412.dump`
+(19 table data entries).
+
+Still for the owner: in the dashboard,
 turn the Data API off and enable SSL enforcement, then move to `sslmode=verify-full`.
 
 Since step 4 the local database and Supabase are two separate copies. Keep using the local one only

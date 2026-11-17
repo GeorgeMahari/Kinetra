@@ -11,10 +11,13 @@ EAS CLI is run as `npx eas-cli@latest …` (Node 24: `$env:Path = "$env:LOCALAPP
 
 ```
 phone ──HTTPS──▶ Cloudflare edge ──outbound tunnel──▶ cloudflared (this PC)
-                 api.<your-domain>/api/v1/*            └─▶ FastAPI 127.0.0.1:8000 ─▶ PostgreSQL 127.0.0.1:5433
+                 api.<your-domain>/api/v1/*            └─▶ FastAPI 127.0.0.1:8000 ──TLS──▶ Supabase PostgreSQL
+                                                                                         (Session Pooler, as kinetra_app)
 ```
 
-No port is opened on the router, PostgreSQL is never published, and only `/api/v1/*` passes the tunnel.
+No port is opened on the router and only `/api/v1/*` passes the tunnel. The database is chosen by
+`KINETRA_DB_TARGET` in `infra/public/.env.public`: `supabase` (the default since 2026-11-17, see
+`SUPABASE_MIGRATION.md`) or `local` (the Docker PostgreSQL, never published).
 
 ## 0. One-time setup
 
@@ -24,6 +27,8 @@ No port is opened on the router, PostgreSQL is never published, and only `/api/v
 |---|---|---|
 | `POSTGRES_PASSWORD` | database password | already set |
 | `KINETRA_JWT_SECRET` | token signing key | created by `setup-tunnel.ps1` if missing |
+| `KINETRA_APP_DB_PASSWORD` | the API's Supabase role (`kinetra_app`) | created by `infra/supabase/apply-security.ps1` |
+| `SUPABASE_DB_PASSWORD` | Supabase admin, for migrations and backups only | typed by you in your own terminal |
 | `KINETRA_SMTP_PASSWORD` | SMTP password | `[Environment]::SetEnvironmentVariable('KINETRA_SMTP_PASSWORD', '<password>', 'User')` typed in your own terminal |
 
 Changing `KINETRA_JWT_SECRET` signs everyone out once. No data is lost.
@@ -67,7 +72,7 @@ A `preview` or `production` build stops with an error if the variable is missing
 
 | Task | Command |
 |---|---|
-| Start everything (PostgreSQL, API in production mode, tunnel) | `powershell -ExecutionPolicy Bypass -File infra\public\start-public.ps1` |
+| Start everything (database check, API in production mode, tunnel) | `powershell -ExecutionPolicy Bypass -File infra\public\start-public.ps1` |
 | Stop the API and the tunnel | `powershell -ExecutionPolicy Bypass -File infra\public\stop-public.ps1` |
 | Status | `powershell -ExecutionPolicy Bypass -File infra\public\status-public.ps1` |
 | PostgreSQL only | `docker compose up -d db` (stop: `docker compose stop db`) |
@@ -166,10 +171,10 @@ A backend-only change needs no new app build: restart with `stop-public.ps1` and
 
 ## 5. Checking that data was saved (read-only)
 
-```powershell
-docker exec kinetra-db-1 psql -U kinetra -d kinetra -c "SELECT id, created_at FROM users ORDER BY created_at DESC LIMIT 5;"
-docker exec kinetra-db-1 psql -U kinetra -d kinetra -c "SELECT user_id, test_code, created_at FROM test_results ORDER BY created_at DESC LIMIT 5;"
-```
+On Supabase: the dashboard's Table Editor or SQL Editor, for example
+`SELECT id, created_at FROM users ORDER BY created_at DESC LIMIT 5;` and
+`SELECT user_id, test_code, created_at FROM test_results ORDER BY created_at DESC LIMIT 5;`.
+On the local database: the same queries through `docker exec kinetra-db-1 psql -U kinetra -d kinetra -c "…"`.
 
 These queries show IDs and dates only. Email addresses and results are personal data, so leave them
 out of screenshots. Table and column names are in the SQLAlchemy models (`backend/app/modules/*/models.py`).
@@ -191,14 +196,16 @@ out of screenshots. Table and column names are in the SQLAlchemy models (`backen
 ## 7. Backup and restore
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File infra\public\backup-db.ps1   # -> db\backups\kinetra_<date>.dump
+powershell -ExecutionPolicy Bypass -File infra\supabase\backup-supabase.ps1   # Supabase -> db\backups\supabase_<date>.dump
+powershell -ExecutionPolicy Bypass -File infra\public\backup-db.ps1          # local    -> db\backups\kinetra_<date>.dump
 ```
 
 Back up before every migration, and regularly while people use the app. The dumps contain personal
 data, so keep them off cloud folders that are shared.
 
-Restoring replaces the data, so review it first and keep a fresh backup. Copy the dump into the
-container, then run:
+Restoring replaces the data, so review it first and keep a fresh backup. Restoring into Supabase is
+described in `SUPABASE_MIGRATION.md` §6. For the local database, copy the dump into the container,
+then run:
 
 ```powershell
 docker cp db\backups\<file>.dump kinetra-db-1:/tmp/restore.dump
@@ -210,8 +217,8 @@ docker exec kinetra-db-1 pg_restore -U kinetra -d kinetra --clean --if-exists /t
 - **The PC is off, asleep, or without internet:** the app shows the "server unavailable" state. People can
   open it, but cannot load or save. Saved data is safe. After the PC is back, run `start-public.ps1`.
   Phones reconnect by themselves, and no new build is needed.
-- **Docker or PostgreSQL stopped:** `/health/ready` returns 503 and the app shows the same state. Run
-  `start-public.ps1`, which starts the database first.
+- **Supabase unreachable** (or, with `KINETRA_DB_TARGET=local`, Docker stopped): `/health/ready` returns
+  503 and the app shows the same state. It recovers on its own when the database is back.
 - **A Cloudflare outage:** nothing to do locally. The public URL works again when Cloudflare recovers.
 - **This PC fails for good:** restore the latest dump on another machine with the same setup (sections 0
   and 7). The public hostname moves with the tunnel (`setup-tunnel.ps1` on the new PC). Phones keep
