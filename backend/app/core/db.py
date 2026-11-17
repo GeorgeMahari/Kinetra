@@ -34,10 +34,16 @@ class TimestampMixin:
 
 @lru_cache
 def get_engine() -> Engine:
-    url = get_settings().database_url()
+    s = get_settings()
     # Fail fast when PostgreSQL is down so health checks and requests return a clear
     # error instead of hanging (refused connections can stall for ~20s on Windows).
-    return create_engine(url, pool_pre_ping=True, connect_args={"connect_timeout": 3})
+    return create_engine(
+        s.database_url(),
+        pool_pre_ping=True,
+        pool_size=s.db_pool_size,
+        max_overflow=s.db_max_overflow,
+        connect_args={"connect_timeout": s.db_connect_timeout_seconds},
+    )
 
 
 @lru_cache

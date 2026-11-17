@@ -27,10 +27,21 @@ class Settings(BaseSettings):
     db_user: str = "kinetra"
     db_name: str = "kinetra"
     test_db_name: str = "kinetra_test"
+    # KINETRA_DB_PASSWORD (a managed database such as Supabase) wins over POSTGRES_PASSWORD (the
+    # local Docker database), which is a user-level variable and therefore always present.
     db_password: SecretStr = Field(
         default=SecretStr(""),
-        validation_alias=AliasChoices("POSTGRES_PASSWORD", "KINETRA_DB_PASSWORD"),
+        validation_alias=AliasChoices("KINETRA_DB_PASSWORD", "POSTGRES_PASSWORD"),
     )
+    # TLS to the database. Empty = libpq default (local Docker). Supabase: "require" at least,
+    # "verify-full" with the project's CA certificate in db_sslrootcert.
+    db_sslmode: Literal["", "disable", "prefer", "require", "verify-ca", "verify-full"] = ""
+    db_sslrootcert: str = ""
+    # Connection pool per API process. The Supabase session pooler gives each client connection
+    # its own server connection, so this bounds what the API takes from the project's pool.
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
+    db_connect_timeout_seconds: int = 3
 
     # Origins allowed to call the API from a browser (Expo web dev server).
     cors_origins: list[str] = ["http://localhost:8081"]
@@ -82,6 +93,11 @@ class Settings(BaseSettings):
             raise ValueError("Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST")
 
     def database_url(self, *, test: bool = False) -> URL:
+        query: dict[str, str] = {}
+        if self.db_sslmode:
+            query["sslmode"] = self.db_sslmode
+        if self.db_sslrootcert:
+            query["sslrootcert"] = self.db_sslrootcert
         return URL.create(
             "postgresql+psycopg",
             username=self.db_user,
@@ -89,6 +105,7 @@ class Settings(BaseSettings):
             host=self.db_host,
             port=self.db_port,
             database=self.test_db_name if test else self.db_name,
+            query=query,
         )
 
 

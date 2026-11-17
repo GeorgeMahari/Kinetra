@@ -33,7 +33,11 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = create_engine(_url(), poolclass=pool.NullPool, connect_args={"connect_timeout": 3})
+    connectable = create_engine(
+        _url(),
+        poolclass=pool.NullPool,
+        connect_args={"connect_timeout": get_settings().db_connect_timeout_seconds},
+    )
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
         with context.begin_transaction():
