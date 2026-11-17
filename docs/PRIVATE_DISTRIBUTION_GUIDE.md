@@ -40,7 +40,23 @@ Copy `infra/public/public.env.example` to `infra/public/.env.public` (git ignore
 - `KINETRA_PUBLIC_HOSTNAME`, for example `api.<your-domain>`, on a domain that is active in your Cloudflare account;
 - SMTP host, user and sender.
 
-### 0.3 Cloudflare Tunnel
+### 0.3 Tunnel: Tailscale Funnel (in use, free) or Cloudflare Tunnel (needs a domain)
+
+`KINETRA_TUNNEL_PROVIDER` in `.env.public` selects the tunnel.
+
+**Tailscale Funnel** (`KINETRA_TUNNEL_PROVIDER=tailscale`, the current setup): the public address is
+`https://desktop-3gjskfq.taild3f821.ts.net`, which stays the same as long as the machine name and the
+tailnet do not change. One-time setup:
+
+1. Install Tailscale and sign in.
+2. In the admin console, turn on MagicDNS and HTTPS Certificates.
+3. Approve Funnel for this machine. The first `tailscale funnel` prints the approval link.
+
+`start-public.ps1` publishes only `/api/v1` (`tailscale funnel --bg --set-path /api/v1 …`).
+`stop-public.ps1` turns Funnel off. The API trusts `X-Forwarded-For`, which Funnel overwrites with the
+real client address (tested: a forged value is replaced).
+
+**Cloudflare Tunnel** (`KINETRA_TUNNEL_PROVIDER=cloudflare`):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File infra\public\setup-tunnel.ps1
@@ -76,7 +92,7 @@ A `preview` or `production` build stops with an error if the variable is missing
 | Stop the API and the tunnel | `powershell -ExecutionPolicy Bypass -File infra\public\stop-public.ps1` |
 | Status | `powershell -ExecutionPolicy Bypass -File infra\public\status-public.ps1` |
 | PostgreSQL only | `docker compose up -d db` (stop: `docker compose stop db`) |
-| Is the API online? | open `https://api.<your-domain>/api/v1/health/ready`. It should show `{"status":"ok","database":"ok",…}` |
+| Is the API online? | open `https://desktop-3gjskfq.taild3f821.ts.net/api/v1/health/ready` (or your Cloudflare host). It should show `{"status":"ok","database":"ok",…}` |
 
 The start script refuses to run in four cases:
 
@@ -87,8 +103,8 @@ The start script refuses to run in four cases:
 
 Logs are in `infra\public\run\` (`api.log`, `api.err.log`, `tunnel.err.log`).
 
-**What must stay on:** this computer (awake, not sleeping), Docker Desktop with `kinetra-db-1`, the API
-process and `cloudflared`. Set Windows sleep to "Never" while plugged in.
+**What must stay on:** this computer (awake, not sleeping), Tailscale (or `cloudflared`), and the API
+process. Set Windows sleep to "Never" while plugged in. Docker is needed only with `KINETRA_DB_TARGET=local`.
 
 ## 2. Android: build and share the APK
 
@@ -105,6 +121,24 @@ On the phone, open the link, download the APK, allow "Install unknown apps" for 
 and install. It is a standalone app: no Expo Go, no development server.
 
 Before sharing, sign in on your own phone once and check that Today loads (section 6).
+
+### 2.1 Publishing the APK as a GitHub release
+
+The repository is public, so the release is public. Anyone with the link can install the app and
+create an account.
+
+1. Download the APK from the build page (expo.dev → project → Builds → the build → **Download**).
+   Rename it `Kinetra-<version>.apk`.
+2. On GitHub, open **Releases → Draft a new release**.
+3. Create a tag such as `v1.0.0` on branch `main`. Give the release a title and short notes,
+   including the installation steps from section 9.
+4. Attach the APK, then click **Publish release**.
+
+The download link has the form
+`https://github.com/GeorgeMahari/Kinetra/releases/download/v1.0.0/Kinetra-1.0.0.apk`.
+
+Each later build is a new release (`v1.0.1`, …). It installs over the previous version and keeps the
+sign-in, because EAS signs every build with the same key.
 
 ## 3. iPhone
 
