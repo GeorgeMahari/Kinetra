@@ -1,0 +1,21 @@
+# Free Supabase projects pause after a week without activity. Twice a week this asks the API's
+# readiness check, which runs a query, so the project and its database stay awake.
+# Nothing secret is needed: the URL is public, and the check returns only {"status","database","version"}.
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "23 6 * * 1,4"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Readiness check
+        run: |
+          curl --fail --silent --show-error --max-time 60 --retry 3 --retry-delay 20 \
+            https://vrdwcgzcgukzmyzyuedm.supabase.co/functions/v1/api/api/v1/health/ready
