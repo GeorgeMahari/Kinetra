@@ -24,7 +24,7 @@ Restore point before any change: git tag `pre-private-distribution` (commit `c74
 | Rate limiting | The login, registration and password-reset limits are keyed on the client IP. Behind a tunnel every request comes from 127.0.0.1, so all users would share one key |
 | Security headers | `nosniff`, `Cache-Control: no-store`, HSTS in production, 64 KB body limit |
 | Tunnel | `cloudflared` was not installed. No domain is configured anywhere in the project |
-| Git | Branch `George`, clean (only the untracked `.claude/`). Push needs the GeorgeMahari credential, from the owner's terminal |
+| Git | Branch `George`, clean. Push needs the GeorgeMahari credential, from the owner's terminal |
 
 ## 2. What was added (no product logic changed)
 

@@ -73,6 +73,4 @@ Android emulator, 1080×2400, Romanian locale, the seeded account (20 rounds of 
 
 1. Emulator navigation through `adb` deep links is unreliable under load: a deep link sometimes lands
    on the previously open tab. This is a test-harness issue, not an app bug.
-2. Leftover agent worktrees under `.claude/worktrees` (untracked) could not be removed from the agent
-   session. They can be deleted by hand.
-3. The ESLint warnings (51) are older style warnings, unchanged by the redesign.
+2. The ESLint warnings (51) are older style warnings, unchanged by the redesign.

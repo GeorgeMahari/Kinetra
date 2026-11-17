@@ -172,7 +172,7 @@ docker exec kinetra-db-1 psql -U kinetra -d kinetra -c "SELECT user_id, test_cod
 ```
 
 These queries show IDs and dates only. Email addresses and results are personal data, so leave them
-out of screenshots. Table and column names are documented in `~/.claude/db-docs/Kinetra.md`.
+out of screenshots. Table and column names are in the SQLAlchemy models (`backend/app/modules/*/models.py`).
 
 ## 6. Acceptance check (run after every new build)
 

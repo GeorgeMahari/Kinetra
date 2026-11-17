@@ -70,7 +70,7 @@ sit-and-reach and so on, unchanged), priority **circumferences** (because of the
 | Seed `sports`: `athletics_sprints`, `athletics_jumps_throws`, `athletics_distance` | athletics was missing | Insert only |
 
 The rendered SQL will be saved as `db/sql/0010_sport_personalization.sql` and the migration will be
-reversible (downgrade drops only what it adds). `~/.claude/db-docs/Kinetra.md` will be updated
+reversible (downgrade drops only what it adds). The database documentation will be updated
 afterwards. No existing row is modified or deleted.
 
 ## 5. API (additive; no existing field changes meaning)
