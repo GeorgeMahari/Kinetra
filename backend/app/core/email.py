@@ -9,6 +9,7 @@
 import logging
 import smtplib
 import ssl
+from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from email.message import EmailMessage
 from functools import lru_cache
@@ -41,10 +42,35 @@ class ConsoleEmailSender:
 
 
 class SmtpEmailSender:
+    """Delivers in the background, one message at a time.
+
+    An SMTP conversation (connect, STARTTLS, login, send) takes seconds, which would hold up the
+    sign-up or password-reset request past the app's timeout. Every caller already treats delivery
+    as best effort (failures are logged, never shown), so `send` queues the message and returns;
+    a single worker thread delivers it and logs any failure.
+    """
+
     def __init__(self, host: str, port: int, user: str, password: str, sender: str) -> None:
         self.host, self.port, self.user, self.password, self.sender = host, port, user, password, sender
+        self._worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="smtp")
+        self._pending: Future[None] | None = None
 
     def send(self, message: OutgoingEmail) -> None:
+        self._pending = self._worker.submit(self._deliver_logged, message)
+
+    def wait_idle(self, timeout: float | None = None) -> None:
+        """Blocks until everything queued so far was attempted (tests, orderly shutdown)."""
+        pending = self._pending
+        if pending is not None:
+            wait([pending], timeout=timeout)
+
+    def _deliver_logged(self, message: OutgoingEmail) -> None:
+        try:
+            self._deliver(message)
+        except Exception:
+            logger.exception("Email delivery failed subject=%s", message.subject)
+
+    def _deliver(self, message: OutgoingEmail) -> None:
         msg = EmailMessage()
         msg["From"] = self.sender
         msg["To"] = message.to
