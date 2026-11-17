@@ -106,3 +106,23 @@ destructive, so it runs only with explicit approval.
   Restoring over existing data replaces it, so it needs a fresh backup and an explicit decision.
 - **Back to local:** the local database is untouched. Point `KINETRA_DB_*` back to the defaults, or
   remove the variables.
+
+## 7. Outcome (2026-11-17): steps 0–5 done
+
+Project `vrdwcgzcgukzmyzyuedm`, region eu-west-1, Session Pooler `aws-0-eu-west-1.pooler.supabase.com:5432`.
+The API connects as `kinetra_app.vrdwcgzcgukzmyzyuedm`, migrations run as `postgres.vrdwcgzcgukzmyzyuedm`.
+
+| Step | Result |
+|---|---|
+| 0 Backup | `db/backups/kinetra_20261117_125632.dump`, readable (19 table data entries). The local API was stopped and no clients were connected |
+| 1 Pre-flight | PostgreSQL 17.12. `public` was empty. Our connection used TLS 1.3 (AES-256-GCM). The default grants to `anon` and `authenticated` were present, as expected |
+| 2 Schema | `alembic upgrade head` 0001→0010; the catalog matches the local one line for line, and so does the `sports` seed |
+| 3 Security | `kinetra_app` is not a superuser, cannot create roles, has no RLS bypass and a connection limit of 20. TRUNCATE, CREATE, DROP and writing `alembic_version` are denied. `anon` and `authenticated` hold 0 privileges, and RLS is on all 19 tables |
+| 4 Data | one transaction; all 19 tables match the local ones in row count and md5 |
+| 5 Tests | `smoke_test.py` passed 24/24 through the API as `kinetra_app` (auth, CRUD, relations, isolation, persistence, database checks, cleanup). An existing account migrated from local signs in; its profile, results, dashboard, plan and progression return 200, and it has the same number of results |
+
+Not done yet: step 6 (the public deployment still uses the local database). In the dashboard,
+turn the Data API off and enable SSL enforcement, then move to `sslmode=verify-full`.
+
+Since step 4 the local database and Supabase are two separate copies. Keep using the local one only
+for development, or treat Supabase as the source of truth from the moment step 6 is done.
