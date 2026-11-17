@@ -210,7 +210,7 @@ async function readBody(req: Request): Promise<{ bytes: Uint8Array | null; tooLa
   return { bytes: out, tooLarge: false };
 }
 
-function finalise(req: Request, res: Response): Response {
+function finalise(_req: Request, res: Response): Response {
   // Response headers from `new Response(...)` may be immutable in some runtimes: copy them.
   const out = new Response(res.body, { status: res.status, headers: new Headers(res.headers) });
   securityHeaders(out.headers);
