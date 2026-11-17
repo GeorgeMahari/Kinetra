@@ -173,10 +173,17 @@ function withSimpleCors(req: Request, res: Response): Response {
 
 // ---------------------------------------------------------------- client address
 
+/**
+ * The client address for rate limits. KINETRA_CLIENT_IP_HEADER names the header a trusted proxy sets;
+ * "name:last" takes the last entry of a list (a proxy that appends the address it saw), otherwise the
+ * first. Which one is safe depends on the platform: infra/supabase/probe-client-ip.ps1 measures it.
+ */
 function clientIp(req: Request, peer: string): string {
-  const header = getSettings().clientIpHeader;
-  if (header) {
-    const value = (req.headers.get(header) ?? "").split(",")[0].trim();
+  const spec = getSettings().clientIpHeader;
+  if (spec) {
+    const [header, position] = spec.split(":");
+    const entries = (req.headers.get(header) ?? "").split(",");
+    const value = (position === "last" ? entries[entries.length - 1] : entries[0]).trim();
     if (/^[0-9a-fA-F:.]+$/.test(value) && value.length <= 45) return value;
   }
   return peer;
