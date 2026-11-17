@@ -15,6 +15,12 @@ if ($hostname) {
     # Anything outside /api/v1/ must not be served through the tunnel.
     Write-Host ("Outside the API (https://$hostname/docs): HTTP " + (Test-Http "https://$hostname/docs") + ' (expected 404)')
 }
+if ($s['KINETRA_TUNNEL_PROVIDER'] -eq 'tailscale') {
+    $ErrorActionPreference = 'Continue'
+    $funnel = (& (Get-Tailscale) funnel status 2>&1 | ForEach-Object { "$_" }) -join ' '
+    $ErrorActionPreference = 'Stop'
+    Write-Host ('Tailscale Funnel: ' + ($(if ($funnel -match 'Funnel on') { 'on' } else { 'off' })))
+}
 foreach ($name in 'api', 'tunnel') {
     $pidFile = Join-Path $RunDir "$name.pid"
     $alive = (Test-Path $pidFile) -and (Get-Process -Id ([int](Get-Content $pidFile)) -ErrorAction SilentlyContinue)

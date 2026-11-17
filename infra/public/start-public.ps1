@@ -1,4 +1,5 @@
-# Starts the public Kinetra API: PostgreSQL (Docker), FastAPI in production mode, Cloudflare Tunnel.
+# Starts the public Kinetra API: database check, FastAPI in production mode, and the tunnel that
+# publishes /api/v1 (KINETRA_TUNNEL_PROVIDER: tailscale = Tailscale Funnel, cloudflare = Cloudflare Tunnel).
 #   powershell -ExecutionPolicy Bypass -File infra\public\start-public.ps1
 # Stop with infra\public\stop-public.ps1, check with infra\public\status-public.ps1.
 #
@@ -9,11 +10,19 @@
 . "$PSScriptRoot\common.ps1"
 $s = Get-PublicSettings
 $hostname = $s['KINETRA_PUBLIC_HOSTNAME']
-$tunnel = if ($s['KINETRA_TUNNEL_NAME']) { $s['KINETRA_TUNNEL_NAME'] } else { 'kinetra-api' }
+$provider = if ($s['KINETRA_TUNNEL_PROVIDER']) { $s['KINETRA_TUNNEL_PROVIDER'] } else { 'cloudflare' }
 if (-not $hostname) { throw 'Set KINETRA_PUBLIC_HOSTNAME in infra\public\.env.public' }
-$configPath = Get-TunnelConfigPath $tunnel
-if (-not (Test-Path $configPath)) { throw "No tunnel config at $configPath. Run infra\public\setup-tunnel.ps1 first." }
+if ($provider -eq 'cloudflare') {
+    $tunnel = if ($s['KINETRA_TUNNEL_NAME']) { $s['KINETRA_TUNNEL_NAME'] } else { 'kinetra-api' }
+    $configPath = Get-TunnelConfigPath $tunnel
+    if (-not (Test-Path $configPath)) { throw "No tunnel config at $configPath. Run infra\public\setup-tunnel.ps1 first." }
+} elseif ($provider -eq 'tailscale') {
+    $tailscale = Get-Tailscale
+} else {
+    throw "Unknown KINETRA_TUNNEL_PROVIDER '$provider' (tailscale or cloudflare)"
+}
 
+Initialize-JwtSecret
 foreach ($name in 'KINETRA_JWT_SECRET', 'KINETRA_SMTP_PASSWORD') {
     $v = Get-UserSecret $name
     if (-not $v) { throw "User environment variable $name is not set." }
@@ -43,7 +52,9 @@ if ($dbTarget -eq 'supabase') {
 
 # 2. Production settings for this process tree only (nothing is written to disk).
 $env:KINETRA_ENVIRONMENT = 'production'
-$env:KINETRA_CLIENT_IP_HEADER = 'CF-Connecting-IP'
+# The header that carries the real client address. Each proxy overwrites its own header; the other
+# one would pass through from the client unchanged, so only the matching header is trusted.
+$env:KINETRA_CLIENT_IP_HEADER = if ($provider -eq 'tailscale') { 'X-Forwarded-For' } else { 'CF-Connecting-IP' }
 $env:KINETRA_PUBLIC_BASE_URL = "https://$hostname"
 $env:KINETRA_EMAIL_BACKEND = 'smtp'
 $env:KINETRA_SMTP_HOST = $s['KINETRA_SMTP_HOST']
@@ -71,13 +82,27 @@ do { Start-Sleep -Seconds 1; $code = Test-Http 'http://127.0.0.1:8000/api/v1/hea
 if ($code -ne 200) { throw "API did not become ready (see $RunDir\api.err.log)" }
 Write-Host 'API: ready on 127.0.0.1:8000 (production mode)'
 
-# 5. Cloudflare Tunnel
-$cf = Get-Cloudflared
-$tun = Start-Process -FilePath $cf -ArgumentList 'tunnel', '--config', $configPath, 'run', $tunnel `
-    -WindowStyle Hidden -PassThru `
-    -RedirectStandardOutput (Join-Path $RunDir 'tunnel.log') -RedirectStandardError (Join-Path $RunDir 'tunnel.err.log')
-Set-Content (Join-Path $RunDir 'tunnel.pid') $tun.Id
-$deadline = (Get-Date).AddSeconds(45)
-do { Start-Sleep -Seconds 2; $code = Test-Http "https://$hostname/api/v1/health/ready" } while ($code -ne 200 -and (Get-Date) -lt $deadline -and -not $tun.HasExited)
-if ($code -ne 200) { throw "Public endpoint not reachable yet (HTTP $code). See $RunDir\tunnel.err.log" }
+# 5. Tunnel: only /api/v1 is published.
+if ($provider -eq 'tailscale') {
+    # Funnel runs inside the Tailscale service; the --bg configuration survives restarts until
+    # stop-public.ps1 turns it off.
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $tailscale funnel --bg --set-path /api/v1 http://127.0.0.1:8000/api/v1 2>&1 | Out-Null
+    $funnelExit = $LASTEXITCODE
+    $ErrorActionPreference = $previous
+    if ($funnelExit -ne 0) { throw 'tailscale funnel failed (is Tailscale running and Funnel enabled for this machine?)' }
+    $deadline = (Get-Date).AddSeconds(45)
+    do { Start-Sleep -Seconds 2; $code = Test-Http "https://$hostname/api/v1/health/ready" } while ($code -ne 200 -and (Get-Date) -lt $deadline)
+    if ($code -ne 200) { throw "Public endpoint not reachable yet (HTTP $code). Check: tailscale funnel status" }
+} else {
+    $cf = Get-Cloudflared
+    $tun = Start-Process -FilePath $cf -ArgumentList 'tunnel', '--config', $configPath, 'run', $tunnel `
+        -WindowStyle Hidden -PassThru `
+        -RedirectStandardOutput (Join-Path $RunDir 'tunnel.log') -RedirectStandardError (Join-Path $RunDir 'tunnel.err.log')
+    Set-Content (Join-Path $RunDir 'tunnel.pid') $tun.Id
+    $deadline = (Get-Date).AddSeconds(45)
+    do { Start-Sleep -Seconds 2; $code = Test-Http "https://$hostname/api/v1/health/ready" } while ($code -ne 200 -and (Get-Date) -lt $deadline -and -not $tun.HasExited)
+    if ($code -ne 200) { throw "Public endpoint not reachable yet (HTTP $code). See $RunDir\tunnel.err.log" }
+}
 Write-Host "Public API: https://$hostname/api/v1 is online"
