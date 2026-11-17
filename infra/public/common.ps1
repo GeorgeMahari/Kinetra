@@ -30,6 +30,50 @@ function Get-UserSecret([string]$Name) {
     return $value
 }
 
+function Set-DatabaseEnvironment([hashtable]$Settings) {
+    # Points this process (and the API it starts) at the database chosen in .env.public.
+    # KINETRA_DB_TARGET=supabase: the Session Pooler as kinetra_app over TLS; password from the
+    # KINETRA_APP_DB_PASSWORD user variable. Anything else: the local Docker database.
+    # Returns 'supabase' or 'local'.
+    if ($Settings['KINETRA_DB_TARGET'] -eq 'supabase') {
+        foreach ($name in 'KINETRA_DB_HOST', 'KINETRA_DB_USER') {
+            if (-not $Settings[$name]) { throw "Set $name in infra\public\.env.public" }
+        }
+        $pw = Get-UserSecret 'KINETRA_APP_DB_PASSWORD'
+        if (-not $pw) { throw 'User environment variable KINETRA_APP_DB_PASSWORD is not set.' }
+        $env:KINETRA_DB_PASSWORD = $pw
+        $env:KINETRA_DB_HOST = $Settings['KINETRA_DB_HOST']
+        $env:KINETRA_DB_PORT = if ($Settings['KINETRA_DB_PORT']) { $Settings['KINETRA_DB_PORT'] } else { '5432' }
+        $env:KINETRA_DB_USER = $Settings['KINETRA_DB_USER']
+        $env:KINETRA_DB_NAME = if ($Settings['KINETRA_DB_NAME']) { $Settings['KINETRA_DB_NAME'] } else { 'postgres' }
+        $env:KINETRA_DB_SSLMODE = if ($Settings['KINETRA_DB_SSLMODE']) { $Settings['KINETRA_DB_SSLMODE'] } else { 'require' }
+        if ($Settings['KINETRA_DB_SSLROOTCERT']) { $env:KINETRA_DB_SSLROOTCERT = $Settings['KINETRA_DB_SSLROOTCERT'] }
+        $env:KINETRA_DB_CONNECT_TIMEOUT_SECONDS = '15'
+        return 'supabase'
+    }
+    $pw = Get-UserSecret 'POSTGRES_PASSWORD'
+    if (-not $pw) { throw 'User environment variable POSTGRES_PASSWORD is not set.' }
+    $env:POSTGRES_PASSWORD = $pw
+    return 'local'
+}
+
+function Test-DatabaseMigrated {
+    # True when the configured database is at the latest Alembic revision (read-only check).
+    # Alembic logs INFO lines to stderr; Windows PowerShell would turn them into terminating errors.
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    Push-Location $Backend
+    try {
+        $current = (& .\.venv\Scripts\alembic.exe current 2>$null) -join ' '
+        $heads = (& .\.venv\Scripts\alembic.exe heads 2>$null) -join ' '
+    } finally {
+        Pop-Location
+        $ErrorActionPreference = $previous
+    }
+    $headId = ($heads -split '\s+')[0]
+    return [pscustomobject]@{ Ok = [bool]($headId -and $current -match [regex]::Escape($headId)); Current = $current; Head = $heads }
+}
+
 function Get-Cloudflared {
     $cmd = Get-Command cloudflared -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }

@@ -3,8 +3,12 @@
 $s = Get-PublicSettings
 $hostname = $s['KINETRA_PUBLIC_HOSTNAME']
 
-$db = docker inspect -f '{{.State.Health.Status}}' kinetra-db-1 2>$null
-Write-Host ('PostgreSQL (container kinetra-db-1): ' + ($(if ($db) { $db } else { 'not running' })))
+if ($s['KINETRA_DB_TARGET'] -eq 'supabase') {
+    Write-Host "Database: Supabase ($($s['KINETRA_DB_HOST'])); its state shows in /health/ready below"
+} else {
+    $db = docker inspect -f '{{.State.Health.Status}}' kinetra-db-1 2>$null
+    Write-Host ('Database: local PostgreSQL (container kinetra-db-1): ' + ($(if ($db) { $db } else { 'not running' })))
+}
 Write-Host ('API local  /health/ready: HTTP ' + (Test-Http 'http://127.0.0.1:8000/api/v1/health/ready'))
 if ($hostname) {
     Write-Host ("API public https://$hostname/api/v1/health/ready: HTTP " + (Test-Http "https://$hostname/api/v1/health/ready"))

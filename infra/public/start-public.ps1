@@ -14,7 +14,7 @@ if (-not $hostname) { throw 'Set KINETRA_PUBLIC_HOSTNAME in infra\public\.env.pu
 $configPath = Get-TunnelConfigPath $tunnel
 if (-not (Test-Path $configPath)) { throw "No tunnel config at $configPath. Run infra\public\setup-tunnel.ps1 first." }
 
-foreach ($name in 'POSTGRES_PASSWORD', 'KINETRA_JWT_SECRET', 'KINETRA_SMTP_PASSWORD') {
+foreach ($name in 'KINETRA_JWT_SECRET', 'KINETRA_SMTP_PASSWORD') {
     $v = Get-UserSecret $name
     if (-not $v) { throw "User environment variable $name is not set." }
     Set-Item -Path "Env:$name" -Value $v
@@ -23,18 +23,23 @@ foreach ($name in 'KINETRA_SMTP_HOST', 'KINETRA_SMTP_USER', 'KINETRA_EMAIL_FROM'
     if (-not $s[$name]) { throw "Set $name in infra\public\.env.public" }
 }
 
-# 1. PostgreSQL
-Push-Location $Root
-docker compose up -d db | Out-Null
-Pop-Location
-$deadline = (Get-Date).AddSeconds(60)
-do {
-    $health = docker inspect -f '{{.State.Health.Status}}' kinetra-db-1 2>$null
-    if ($health -eq 'healthy') { break }
-    Start-Sleep -Seconds 2
-} while ((Get-Date) -lt $deadline)
-if ($health -ne 'healthy') { throw 'PostgreSQL did not become healthy within 60 s' }
-Write-Host 'PostgreSQL: healthy (127.0.0.1:5433, not published to the internet)'
+# 1. Database: Supabase (KINETRA_DB_TARGET=supabase) or the local Docker PostgreSQL.
+$dbTarget = Set-DatabaseEnvironment $s
+if ($dbTarget -eq 'supabase') {
+    Write-Host "Database: Supabase, $($env:KINETRA_DB_HOST) as $($env:KINETRA_DB_USER) (sslmode=$($env:KINETRA_DB_SSLMODE))"
+} else {
+    Push-Location $Root
+    docker compose up -d db | Out-Null
+    Pop-Location
+    $deadline = (Get-Date).AddSeconds(60)
+    do {
+        $health = docker inspect -f '{{.State.Health.Status}}' kinetra-db-1 2>$null
+        if ($health -eq 'healthy') { break }
+        Start-Sleep -Seconds 2
+    } while ((Get-Date) -lt $deadline)
+    if ($health -ne 'healthy') { throw 'PostgreSQL did not become healthy within 60 s' }
+    Write-Host 'Database: local PostgreSQL, healthy (127.0.0.1:5433, not published to the internet)'
+}
 
 # 2. Production settings for this process tree only (nothing is written to disk).
 $env:KINETRA_ENVIRONMENT = 'production'
@@ -47,13 +52,9 @@ $env:KINETRA_SMTP_USER = $s['KINETRA_SMTP_USER']
 $env:KINETRA_EMAIL_FROM = $s['KINETRA_EMAIL_FROM']
 
 # 3. Migrations must already be applied; this script never changes the schema.
-Push-Location $Backend
-$current = (& .\.venv\Scripts\alembic.exe current 2>$null) -join ' '
-$heads = (& .\.venv\Scripts\alembic.exe heads 2>$null) -join ' '
-Pop-Location
-$headId = ($heads -split '\s+')[0]
-if (-not $headId -or $current -notmatch [regex]::Escape($headId)) {
-    throw "Database is not at the latest migration (current: '$current', head: '$heads'). Apply it after review: alembic upgrade head"
+$migrated = Test-DatabaseMigrated
+if (-not $migrated.Ok) {
+    throw "Database is not at the latest migration (current: '$($migrated.Current)', head: '$($migrated.Head)'). Apply it after review (docs/SUPABASE_MIGRATION.md)."
 }
 
 # 4. FastAPI (one process: the login rate limiter is in-process)
