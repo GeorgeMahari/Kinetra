@@ -65,10 +65,16 @@ function Test-DatabaseMigrated {
     Push-Location $Backend
     try {
         $current = (& .\.venv\Scripts\alembic.exe current 2>$null) -join ' '
+        $currentExit = $LASTEXITCODE
         $heads = (& .\.venv\Scripts\alembic.exe heads 2>$null) -join ' '
+        $headsExit = $LASTEXITCODE
     } finally {
         Pop-Location
         $ErrorActionPreference = $previous
+    }
+    # A failing Alembic run (for example a broken alembic/env.py) is never treated as "migrated".
+    if ($currentExit -ne 0 -or $headsExit -ne 0) {
+        return [pscustomobject]@{ Ok = $false; Current = "alembic failed (exit $currentExit)"; Head = $heads }
     }
     $headId = ($heads -split '\s+')[0]
     return [pscustomobject]@{ Ok = [bool]($headId -and $current -match [regex]::Escape($headId)); Current = $current; Head = $heads }
