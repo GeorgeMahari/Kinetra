@@ -513,7 +513,115 @@ def scenario_personalization(r: Recorder) -> None:
     r.call("GET", "/onboarding/summary", headers=h)
 
 
+def scenario_insights(r: Recorder) -> None:
+    h = signed_up(r, "ins", sex="male")
+    r.call("GET", "/dashboard", headers=h)
+    r.call(
+        "POST",
+        "/onboarding/complete",
+        headers=h,
+        json=answers(follow_ups={"strength_sessions_per_week": 1, "sleep_hours": 6}),
+    )
+    r.call(
+        "PUT",
+        "/personalization/profile",
+        headers=h,
+        json={
+            "sports": [{"code": "cycling", "sessions_per_week": 4}],
+            "goals": ["improve_endurance", "get_stronger"],
+        },
+    )
+    r.call("GET", "/dashboard", headers=h)
+    for _d, (when, dist) in enumerate(
+        (("2026-06-01T08:00:00Z", 2900), ("2026-08-01T08:00:00Z", 2700), ("2026-10-01T08:00:00+03:00", 2300))
+    ):
+        r.call(
+            "POST",
+            "/assessments/results",
+            headers=h,
+            json={
+                "test_code": "cooper_12min",
+                "inputs": {"distance_m": dist, "mode": "run"},
+                "performed_at": when,
+            },
+        )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "cooper_12min", "inputs": {"distance_m": 2500, "mode": "walk_run"}},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "pushups", "inputs": {"variant": "toes", "reps": 9}},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "body_measurements", "inputs": {"weight_kg": 91, "waist_cm": 104}},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "anterior_reach", "inputs": {"left_cm": 70, "right_cm": 60}},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers=h,
+        json={"test_code": "plank", "inputs": {"seconds": 40}, "performed_at": "2026-05-01T10:00:00Z"},
+    )
+    r.call("GET", "/dashboard", headers=h)
+    r.call("GET", "/progress", headers=h, params={"test_code": "cooper_12min"})
+    r.call("GET", "/progress", headers=h, params={"test_code": "plank"})
+    r.call("GET", "/progress", headers=h, params={"test_code": "nope"})
+    r.call("GET", "/progress", headers=h)
+    items = [
+        {"kind": "weight_kg", "value": 90.5, "measured_at": "2026-11-10T07:00:00Z", "external_id": "w1"},
+        {
+            "kind": "steps_daily",
+            "value": 8000,
+            "measured_at": "2026-11-10T23:00:00+02:00",
+            "external_id": "steps:2026-11-10",
+        },
+        {
+            "kind": "steps_daily",
+            "value": 9000,
+            "measured_at": "2026-11-10T23:00:00+02:00",
+            "external_id": "steps:2026-11-10",
+        },
+        {
+            "kind": "resting_hr_bpm",
+            "value": 58,
+            "measured_at": "2099-01-01T00:00:00Z",
+            "external_id": "hr-future",
+        },
+    ]
+    r.call("POST", "/measurements/import", headers=h, json={"source": "health_connect", "items": items})
+    r.call("POST", "/measurements/import", headers=h, json={"source": "health_connect", "items": items[:1]})
+    bad = [
+        {"kind": "weight_kg", "value": 500.25, "measured_at": "2026-11-10T07:00:00", "external_id": ""},
+        {"kind": "x", "value": "1.234", "measured_at": "2026-11-10T07:00:00"},
+    ]
+    r.call("POST", "/measurements/import", headers=h, json={"source": "fitbit", "items": bad})
+    r.call("GET", "/measurements", headers=h, params={"days": 3650})
+    r.call("GET", "/measurements", headers=h, params={"kind": "weight_kg", "days": 0})
+    r.call("GET", "/measurements/sources/health_connect", headers=h)
+    r.call("GET", "/measurements/sources/fitbit", headers=h)
+    r.call("GET", "/dashboard", headers=h)
+    r.call("DELETE", "/measurements/sources/health_connect", headers=h)
+    r.call("GET", "/measurements/sources/health_connect", headers=h)
+    old = signed_up(r, "older", years=70)
+    r.call("POST", "/onboarding/complete", headers=old, json=answers(readiness={**NO, "chest_pain": True}))
+    r.call("GET", "/dashboard", headers=old)
+
+
 SCENARIOS = {
+    "insights": scenario_insights,
     "personalization": scenario_personalization,
     "auth": scenario_auth,
     "minor": scenario_minor,

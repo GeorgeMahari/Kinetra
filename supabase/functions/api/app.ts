@@ -13,6 +13,8 @@ import "./modules/users/routes.ts";
 import "./modules/onboarding/routes.ts";
 import "./modules/assessments/routes.ts";
 import "./modules/personalization/routes.ts";
+import "./modules/insights/routes.ts";
+import "./modules/devices/routes.ts";
 import "./core/testing.ts";
 
 export function normalisePath(pathname: string): string {
