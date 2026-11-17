@@ -4,8 +4,9 @@
     .venv\\Scripts\\python ..\\tools\\differential\\export_validation_cases.py
 
 For each field kind (constraints included) and each input, it records either the coerced value or
-the exact errors (type, msg, loc). Validation runs in Python mode on the decoded JSON, as FastAPI does. supabase/functions/api/tests/validation_test.ts replays the same
-cases against the TypeScript validator and must produce identical type and loc, and the same message.
+the exact errors (type, msg, loc). Validation runs in Python mode on the decoded JSON, as
+FastAPI does. supabase/functions/api/tests/validation_test.ts replays the same cases against
+the TypeScript validator, which must produce the same type, loc and message.
 """
 
 import json
@@ -50,13 +51,69 @@ KINDS: list[tuple[str, Any, Any]] = [
 ]
 
 INPUTS: list[Any] = [
-    None, True, False, 0, 1, -1, 5, 1.0, 1.5, 9.99, 10, 100, 101, 1000, 1e309, "",
-    "a", "abc", "ro", "en", "ru", "RO", " ro", "5", "5.0", "1.5", " 7 ", "abc1", "true", "false", "yes",
-    "0", "1", "123456", "12345", "2026-01-15", "2026-1-15", "2026-02-30", "2026-01-15T10:20:30",
-    "2026-01-15T10:20:30Z", "2026-01-15T10:20:30.123456+02:00", "15.01.2026", "not-a-date",
-    "3f7c2a9e-4b1d-4c8e-9f0a-1b2c3d4e5f60", "3f7c2a9e4b1d4c8e9f0a1b2c3d4e5f60", "not-a-uuid",
-    "ana@example.com", "Ana@Example.COM ", "ana@", "ana@localhost", "a" * 41, "x" * 129,
-    [], [1, 2], ["a"], ["a", "b", "c", "d"], [1, "x"], {}, {"a": 1}, {"a": "x"}, "12.34", "123.4", 123.45,
+    None,
+    True,
+    False,
+    0,
+    1,
+    -1,
+    5,
+    1.0,
+    1.5,
+    9.99,
+    10,
+    100,
+    101,
+    1000,
+    1e309,
+    "",
+    "a",
+    "abc",
+    "ro",
+    "en",
+    "ru",
+    "RO",
+    " ro",
+    "5",
+    "5.0",
+    "1.5",
+    " 7 ",
+    "abc1",
+    "true",
+    "false",
+    "yes",
+    "0",
+    "1",
+    "123456",
+    "12345",
+    "2026-01-15",
+    "2026-1-15",
+    "2026-02-30",
+    "2026-01-15T10:20:30",
+    "2026-01-15T10:20:30Z",
+    "2026-01-15T10:20:30.123456+02:00",
+    "15.01.2026",
+    "not-a-date",
+    "3f7c2a9e-4b1d-4c8e-9f0a-1b2c3d4e5f60",
+    "3f7c2a9e4b1d4c8e9f0a1b2c3d4e5f60",
+    "not-a-uuid",
+    "ana@example.com",
+    "Ana@Example.COM ",
+    "ana@",
+    "ana@localhost",
+    "a" * 41,
+    "x" * 129,
+    [],
+    [1, 2],
+    ["a"],
+    ["a", "b", "c", "d"],
+    [1, "x"],
+    {},
+    {"a": 1},
+    {"a": "x"},
+    "12.34",
+    "123.4",
+    123.45,
 ]
 
 
@@ -84,10 +141,16 @@ def main() -> None:
                 result = model.model_validate(json.loads(body))
                 out: dict[str, Any] = {"ok": json.loads(result.model_dump_json())["value"]}
             except ValidationError as exc:
-                out = {"errors": [{"type": e["type"], "msg": e["msg"], "loc": list(e["loc"])} for e in exc.errors()]}
+                out = {
+                    "errors": [
+                        {"type": e["type"], "msg": e["msg"], "loc": list(e["loc"])} for e in exc.errors()
+                    ]
+                }
             cases.append({"kind": name, "body": body, **out})
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"pydantic": __import__("pydantic").VERSION, "cases": cases}, indent=0), encoding="utf-8")
+    OUT.write_text(
+        json.dumps({"pydantic": __import__("pydantic").VERSION, "cases": cases}, indent=0), encoding="utf-8"
+    )
     print(f"{len(cases)} cases -> {OUT}")
 
 
