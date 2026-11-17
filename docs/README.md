@@ -14,6 +14,7 @@ the way they are.
 | [DATA_VISUALIZATION_MAPPING.md](DATA_VISUALIZATION_MAPPING.md) | Which visual each data type uses, and why |
 | [SECURITY.md](SECURITY.md) | Threat model, authentication, data protection |
 | [TESTING.md](TESTING.md) | Test layers, where tests live, how to run them |
+| [SUPABASE_MIGRATION.md](SUPABASE_MIGRATION.md) | Moving the database to Supabase: strategy, security (roles, RLS), rehearsal results, procedure, backup and restore |
 | [PRIVATE_DISTRIBUTION_GUIDE.md](PRIVATE_DISTRIBUTION_GUIDE.md) | Running the public API (Cloudflare Tunnel), building and sharing the Android APK and iPhone builds, backups |
 
 ## To verify or review by hand
