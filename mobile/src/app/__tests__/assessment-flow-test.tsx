@@ -68,6 +68,45 @@ it('records a result and shows it with provenance and no invented rating', async
   expect(post?.body).toEqual({ test_code: 'pushups', inputs: { variant: 'toes', reps: 27 }, stopped_early: false });
 });
 
+async function enterPushups(backend: ReturnType<typeof createFakeBackend>, reps: string) {
+  await renderRouter(routes, { initialUrl: '/record/pushups', wrapper: providers(backend.request) });
+  await fireEvent.press(await screen.findByRole('radio', { name: 'On toes' }));
+  await fireEvent.changeText(screen.getByTestId('field-reps'), reps);
+}
+
+const posts = (backend: ReturnType<typeof createFakeBackend>) =>
+  backend.calls.filter((c) => c.method === 'POST' && c.path === '/assessments/results');
+
+it('a save that reached the server but timed out is not saved twice when retried', async () => {
+  const backend = createFakeBackend({ status: 'completed' });
+  backend.timeoutNextSaves(1);
+  await enterPushups(backend, '27');
+  await fireEvent.press(screen.getByTestId('save-result'));
+  // The answer never arrived: the screen says so and stays on the form.
+  await waitFor(() => expect(posts(backend)).toHaveLength(1));
+  expect(screen).toHavePathname('/record/pushups');
+
+  await fireEvent.press(screen.getByTestId('save-result'));
+  await waitFor(() => expect(screen).toHavePathname('/result/r1'));
+  expect(backend.resultCount()).toBe(1);
+  const [first, retry] = posts(backend);
+  expect(first?.headers?.['Idempotency-Key']).toMatch(/^[0-9a-f-]{36}$/);
+  expect(retry?.headers?.['Idempotency-Key']).toBe(first?.headers?.['Idempotency-Key']);
+});
+
+it('changed values after a failed save are a new measurement, with a new key', async () => {
+  const backend = createFakeBackend({ status: 'completed' });
+  backend.timeoutNextSaves(1);
+  await enterPushups(backend, '27');
+  await fireEvent.press(screen.getByTestId('save-result'));
+  await waitFor(() => expect(posts(backend)).toHaveLength(1));
+  await fireEvent.changeText(screen.getByTestId('field-reps'), '28');
+  await fireEvent.press(screen.getByTestId('save-result'));
+  await waitFor(() => expect(screen).toHavePathname('/result/r2'));
+  const [first, second] = posts(backend);
+  expect(second?.headers?.['Idempotency-Key']).not.toBe(first?.headers?.['Idempotency-Key']);
+});
+
 it('locked tests offer no way to record a result', async () => {
   const backend = createFakeBackend({ status: 'completed' });
   await renderRouter(routes, { initialUrl: '/test/cooper_12min', wrapper: providers(backend.request) });

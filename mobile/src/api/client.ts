@@ -45,6 +45,8 @@ export interface RequestOptions {
   timeoutMs?: number;
   /** Treat these non-2xx statuses as a successful, parseable response. */
   acceptStatuses?: number[];
+  /** Extra request headers (for example Idempotency-Key). */
+  headers?: Record<string, string>;
   fetchImpl?: typeof fetch;
 }
 
@@ -56,13 +58,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     language,
     timeoutMs = DEFAULT_TIMEOUT_MS,
     acceptStatuses = [],
+    headers: extraHeaders = {},
     fetchImpl = fetch,
   } = options;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  const headers: Record<string, string> = { Accept: 'application/json' };
+  const headers: Record<string, string> = { Accept: 'application/json', ...extraHeaders };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (token) headers.Authorization = `Bearer ${token}`;
   if (language) headers['Accept-Language'] = language;

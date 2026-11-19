@@ -74,6 +74,7 @@ export interface Call {
   method: string;
   path: string;
   body?: unknown;
+  headers?: Record<string, string>;
 }
 
 export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
@@ -157,10 +158,17 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
   let battery: unknown = null;
   let extraTests: unknown[] = [];
   let sportProfile: unknown = null;
+  // Like the server (D46): a save with a known Idempotency-Key returns the result it saved.
+  const savedByKey = new Map<string, ReturnType<typeof pushupResult>>();
+  // Simulates the case the key exists for: the server saves, but the answer never reaches the app.
+  let timeoutsAfterSave = 0;
+  const timeoutNextSaves = (n = 1) => {
+    timeoutsAfterSave = n;
+  };
 
-  const request = jest.fn(async (path: string, options: { method?: string; body?: unknown } = {}) => {
+  const request = jest.fn(async (path: string, options: { method?: string; body?: unknown; headers?: Record<string, string> } = {}) => {
     const method = options.method ?? 'GET';
-    calls.push({ method, path, body: options.body });
+    calls.push({ method, path, body: options.body, headers: options.headers });
     const key = `${method} ${path}`;
     switch (key) {
       case 'GET /catalog/sports':
@@ -199,8 +207,17 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
         return results;
       case 'POST /assessments/results': {
         const b = options.body as { inputs: { reps: number } };
-        const r = pushupResult(b.inputs.reps, `r${results.length + 1}`);
-        results.unshift(r);
+        const idem = options.headers?.['Idempotency-Key'];
+        let r = idem ? savedByKey.get(idem) : undefined;
+        if (!r) {
+          r = pushupResult(b.inputs.reps, `r${results.length + 1}`);
+          results.unshift(r);
+          if (idem) savedByKey.set(idem, r);
+        }
+        if (timeoutsAfterSave > 0) {
+          timeoutsAfterSave -= 1;
+          throw new ApiError('timeout', 'AbortError', null);
+        }
         return r;
       }
       case 'GET /dashboard': {
@@ -339,7 +356,7 @@ export function createFakeBackend(initial: Partial<OnboardingStatus> = {}) {
   const setSportProfile = (p: unknown) => {
     sportProfile = p;
   };
-  return { calls, seedResult, setRecommendations, setReportedSleep, setBattery, setSportProfile, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
+  return { calls, timeoutNextSaves, resultCount: () => results.length, seedResult, setRecommendations, setReportedSleep, setBattery, setSportProfile, request: request as unknown as AuthContextValue['request'], getStatus: () => status };
 }
 
 const METRICS = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };

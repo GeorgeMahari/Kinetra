@@ -104,10 +104,15 @@ export function assessmentsApi(request: Request) {
     results: (testCode?: TestCode) =>
       request<TestResult[]>(`/assessments/results${testCode ? `?test_code=${testCode}` : ''}`),
     result: (id: string) => request<TestResult>(`/assessments/results/${id}`),
-    record: (testCode: TestCode, inputs: Record<string, unknown>, stoppedEarly: boolean) =>
+    /**
+     * `idempotencyKey`: one per measurement. Sending the same key again (a retry after a timeout)
+     * returns the result already saved instead of saving it twice (server D46).
+     */
+    record: (testCode: TestCode, inputs: Record<string, unknown>, stoppedEarly: boolean, idempotencyKey?: string) =>
       request<TestResult>('/assessments/results', {
         method: 'POST',
         body: { test_code: testCode, inputs, stopped_early: stoppedEarly },
+        ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}),
       }),
     activity: (since: string, until: string) =>
       request<ActivityItem[]>(

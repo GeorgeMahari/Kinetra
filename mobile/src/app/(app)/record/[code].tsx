@@ -1,10 +1,11 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { TestCode } from '@/api/assessments';
 import { ApiError } from '@/api/client';
+import { createSubmissionKeys } from '@/api/idempotency';
 import { errorMessage } from '@/api/errorMessage';
 import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/forms/Button';
@@ -33,6 +34,9 @@ export default function RecordResult() {
   const [errors, setErrors] = useState<Record<string, FieldError>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Saving the same values again (after a timeout, say) reuses the key, so the server returns the
+  // result it may already have saved; changed values are a new measurement with a new key.
+  const submissionKey = useRef(createSubmissionKeys()).current;
   const set = (name: string, v: string | boolean) => setValues((prev) => ({ ...prev, [name]: v }));
 
   // Stopwatch tests: copy the elapsed time into the first empty seconds field.
@@ -56,7 +60,8 @@ export default function RecordResult() {
     if (Object.keys(parsed.errors).length) return;
     setSaving(true);
     try {
-      const result = await api.record(testCode, parsed.inputs, stopped);
+      const key = submissionKey({ testCode, inputs: parsed.inputs, stopped });
+      const result = await api.record(testCode, parsed.inputs, stopped, key);
       await invalidate();
       router.replace({ pathname: '/result/[id]', params: { id: result.id, fresh: '1' } });
     } catch (err) {
