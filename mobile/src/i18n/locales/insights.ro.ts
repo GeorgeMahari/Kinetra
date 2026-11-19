@@ -1,7 +1,7 @@
 const insightsRo = {
   dashboard: {
     mapTitle: 'Unde te afli',
-    mapCaption: 'Centrul înseamnă încă fără notă. Lângă centru e cel mai slab nivel al unei norme, marginea e valoarea ideală. Doar testele cu o normă științifică primesc un punct; unele norme sunt aproximative.',
+    mapCaption: 'Marginea este valoarea ideală. Doar rezultatele cu o normă științifică primesc un punct; unele norme sunt aproximative.',
     mapCount: '{{known}} din {{total}} dimensiuni au informații',
     mapA11y: 'Harta profilului: {{known}} din {{total}} dimensiuni au informații.',
     mapScreenTitle: 'Harta profilului',

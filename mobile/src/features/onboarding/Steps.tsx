@@ -30,7 +30,8 @@ import { MAX_GOALS } from './flow';
 type Update = (patch: Partial<OnboardingDraft>) => void;
 
 /** A step's illustrated header: trail-sign pictogram, title, and why we ask (in a sunken note). */
-export function StepHeader({ title, why, picto }: { title: string; why: string; picto?: PictogramName }) {
+/** `why` only where it says what to do or why sensitive data is asked; otherwise the title suffices. */
+export function StepHeader({ title, why, picto }: { title: string; why?: string; picto?: PictogramName }) {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
   return (
@@ -41,14 +42,16 @@ export function StepHeader({ title, why, picto }: { title: string; why: string; 
           {title}
         </AppText>
       </View>
-      <View
-        style={{ flexDirection: 'row', gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surfaceSunken }}
-      >
-        <Icon name="info" size={iconSize.sm + 2} color={colors.dataInk} />
-        <AppText variant="caption" color="textMuted" style={{ flex: 1 }} accessibilityLabel={`${t('onboarding.whyTitle')}: ${why}`}>
-          {why}
-        </AppText>
-      </View>
+      {why ? (
+        <View
+          style={{ flexDirection: 'row', gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surfaceSunken }}
+        >
+          <Icon name="info" size={iconSize.sm + 2} color={colors.dataInk} />
+          <AppText variant="caption" color="textMuted" style={{ flex: 1 }} accessibilityLabel={`${t('onboarding.whyTitle')}: ${why}`}>
+            {why}
+          </AppText>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -188,7 +191,7 @@ export function ActivityStep({ draft, update }: { draft: OnboardingDraft; update
   const set = (patch: Partial<ActivityAnswers>) => update({ activity: { ...a, ...patch } });
   return (
     <View style={{ gap: spacing.xl }}>
-      <StepHeader title={t('onboarding.activityTitle')} why={t('onboarding.activityWhy')} picto="brisk_walk" />
+      <StepHeader title={t('onboarding.activityTitle')} picto="brisk_walk" />
       <View style={{ gap: spacing.sm }}>
         <AppText variant="label">{t('onboarding.activityLevel')}</AppText>
         {ACTIVITY_LEVELS.map((l) => (
@@ -326,7 +329,7 @@ export function FollowUpsStep({
   if (!questions) return <LoadingState label={t('onboarding.followUpsLoading')} />;
   return (
     <View style={{ gap: spacing.lg }}>
-      <StepHeader title={t('onboarding.followUpsTitle')} why={t('onboarding.followUpsWhy')} picto="balance_hold" />
+      <StepHeader title={t('onboarding.followUpsTitle')} picto="balance_hold" />
       {questions.map((q) => {
         const value = fu[q.code];
         const skip = { label: t('onboarding.skip'), onPress: () => set({ [q.code]: null }) };

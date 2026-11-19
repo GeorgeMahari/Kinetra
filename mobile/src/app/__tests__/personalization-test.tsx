@@ -96,6 +96,9 @@ describe('personalised catalogue', () => {
     backend.setBattery(TENNIS_BATTERY, [AGILITY, JUMP]);
     backend.setSportProfile(PROFILE);
     await renderRouter(routes, { initialUrl: '/test/agility_505', wrapper: providers(backend.request) });
+    // The explanation is one tap away: closed by default, open on request.
+    expect(screen.queryByTestId('test-why')).toBeNull();
+    await fireEvent.press(await screen.findByTestId('test-why-toggle'));
     const why = await screen.findByTestId('test-why');
     expect(why).toHaveTextContent(/Tennis relies on agility\./);
     expect(why).toHaveTextContent(/Measures: agility, speed/);

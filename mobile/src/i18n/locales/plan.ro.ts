@@ -83,6 +83,7 @@ const planRo = {
     reasonChosen: 'Planul se construiește în jurul alegerii tale, cu o a doua dimensiune ca echilibru.',
     start: 'Pornește traseul',
     changeFocus: 'Sau alege alt focus',
+    whyFocus: 'De ce acest focus?',
     howItWorks: 'Cum funcționează',
     steps: {
       daily: 'În fiecare zi primești 1–3 sarcini scurte. Le bifezi când le faci.',

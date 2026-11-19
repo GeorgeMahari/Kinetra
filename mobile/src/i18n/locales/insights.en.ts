@@ -1,7 +1,7 @@
 const insightsEn = {
   dashboard: {
     mapTitle: 'Where you stand',
-    mapCaption: "The centre means not rated yet. Next to the centre is a norm's lowest level; the rim is the ideal. Only tests with a scientific norm get a point; some norms are approximate.",
+    mapCaption: 'The rim is the ideal. Only results with a scientific norm get a point; some norms are approximate.',
     mapCount: '{{known}} of {{total}} dimensions have information',
     mapA11y: 'Profile map: {{known}} of {{total}} dimensions have information.',
     mapScreenTitle: 'Profile map',

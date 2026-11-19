@@ -36,6 +36,16 @@ it('starts a plan, ticks the day off and celebrates the finished day', async () 
   expect(screen.getByTestId('plan-streak')).toHaveProp('accessibilityLabel', expect.stringContaining('in a row: 1'));
 });
 
+it('keeps the evidence for the suggested focus one tap away', async () => {
+  const backend = createFakeBackend({ status: 'completed' });
+  await renderRouter(routes, { initialUrl: '/plan', wrapper: providers(backend.request) });
+  expect(await screen.findByTestId('plan-start')).toBeTruthy();
+  // Closed by default: the card leads with the focus and the Start button.
+  expect(screen.queryByTestId('plan-why')).toBeNull();
+  await fireEvent.press(screen.getByTestId('plan-why-toggle'));
+  expect(await screen.findByTestId('plan-why')).toHaveTextContent(/associat/i);
+});
+
 it('opens how to do a task when its text is tapped', async () => {
   const backend = createFakeBackend({ status: 'completed' });
   await renderRouter(routes, { initialUrl: '/plan', wrapper: providers(backend.request) });

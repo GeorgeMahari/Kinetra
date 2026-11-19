@@ -13,6 +13,7 @@ import type { PlanView } from '@/api/plan';
 import { AppText } from '@/design-system/AppText';
 import { Blaze } from '@/components/brand/Blaze';
 import { Button } from '@/components/forms/Button';
+import { Disclosure } from '@/components/layout/Disclosure';
 import { Icon } from '@/design-system/Icon';
 import { PressableScale } from '@/design-system/motion';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
@@ -70,9 +71,6 @@ export function StartPlan({
                 ? t('plan.reasonUnknown')
                 : t('plan.reasonChosen')}
         </AppText>
-        <AppText variant="caption" color="onShellMuted">
-          {tr(`plan.why.${primary}`)}
-        </AppText>
         <Button
           label={t('plan.start')}
           loading={starting}
@@ -80,6 +78,11 @@ export function StartPlan({
           testID="plan-start-button"
           variant="onShell"
         />
+        <Disclosure label={t('plan.whyFocus')} tone="onShell" testID="plan-why">
+          <AppText variant="caption" color="onShellMuted">
+            {tr(`plan.why.${primary}`)}
+          </AppText>
+        </Disclosure>
       </Animated.View>
 
       <View style={{ gap: spacing.sm }}>

@@ -83,7 +83,7 @@ export default function Today() {
         {dashboard.data ? (
           <Rise index={1}>
             <View style={{ gap: spacing.sm }}>
-              <SectionHeader title={t('dashboard.mapTitle')} caption={t('dashboard.mapCaption')} />
+              <SectionHeader title={t('dashboard.mapTitle')} />
               <PressableScale
                 testID="open-profile-map"
                 motionless

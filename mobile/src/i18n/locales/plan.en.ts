@@ -83,6 +83,7 @@ const planEn = {
     reasonChosen: 'The plan is built around your choice, with a second dimension for balance.',
     start: 'Start the trail',
     changeFocus: 'Or pick another focus',
+    whyFocus: 'Why this focus?',
     howItWorks: 'How it works',
     steps: {
       daily: 'Each day you get 1–3 short tasks. Tick them off as you do them.',

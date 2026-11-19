@@ -4,9 +4,9 @@
  * (real results only); history; limits on demand. The action to record stays pinned at the bottom.
  */
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, ReduceMotion } from 'react-native-reanimated';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { headlineIndicator, type TestCode } from '@/api/assessments';
@@ -17,6 +17,7 @@ import { IntensityMeter } from '@/components/data/IntensityMeter';
 import { Icon } from '@/design-system/Icon';
 import { Notice } from '@/components/feedback/Notice';
 import { Pictogram } from '@/components/brand/Pictogram';
+import { Disclosure } from '@/components/layout/Disclosure';
 import { Screen } from '@/components/layout/Screen';
 import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { FORMS } from '@/features/assessments/forms';
@@ -86,7 +87,6 @@ export default function TestDetail() {
   const tests = useTests();
   const testCode = code as TestCode;
   const results = useResults(testCode);
-  const [limitsOpen, setLimitsOpen] = useState(false);
   const locale = i18n.resolvedLanguage;
   const battery = useBattery();
   const profile = useSportProfile();
@@ -159,7 +159,7 @@ export default function TestDetail() {
           </Animated.View>
 
           {personal ? (
-            <Section title={t('personal.why.title')} testID="test-why">
+            <Disclosure label={t('personal.why.title')} testID="test-why">
               <View style={{ padding: spacing.lg, gap: spacing.sm, borderRadius: radius.lg, backgroundColor: colors.surfaceSunken }}>
                 {whyLines(t, personal, primaryGoal, locale).map((line) => (
                   <View key={line} style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -180,7 +180,7 @@ export default function TestDetail() {
                   </AppText>
                 </View>
               </View>
-            </Section>
+            </Disclosure>
           ) : null}
 
           <Section title={t('assess.sections.howTo')}>
@@ -263,25 +263,9 @@ export default function TestDetail() {
             )}
           </Section>
 
-          <View style={{ gap: spacing.sm }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: limitsOpen }}
-              onPress={() => setLimitsOpen((o) => !o)}
-              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}
-              testID="test-limits-toggle"
-            >
-              <AppText variant="label">{t('assessView.moreAbout')}</AppText>
-              <View style={{ transform: [{ rotate: limitsOpen ? '90deg' : '0deg' }] }}>
-                <Icon name="chevronRight" size={18} color={colors.brandText} />
-              </View>
-            </Pressable>
-            {limitsOpen ? (
-              <Animated.View entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}>
-                <AppText color="textMuted">{t(`assess.tests.${testCode}.limitations`)}</AppText>
-              </Animated.View>
-            ) : null}
-          </View>
+          <Disclosure label={t('assessView.moreAbout')} testID="test-limits">
+            <AppText color="textMuted">{t(`assess.tests.${testCode}.limitations`)}</AppText>
+          </Disclosure>
         </View>
       </Screen>
     </>
