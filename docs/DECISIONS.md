@@ -399,3 +399,26 @@ reaction time, back-scratch, single-leg forward reach, single-leg hop, ISAK circ
 - **plan-2.** If any dimension is in the attention zone, the focus is the lowest one (the plan-1 rule).
   Otherwise it is the dimension that matters most to the person among those not yet a strength. Running
   plan-1 plans keep their stored focus.
+
+### D46 — A retried save returns the saved result: idempotency keys for test results (2026-11-19)
+
+A test result could be saved twice: the app gives up after 10 s, but the server may already have
+saved the result; the person taps Save again and a second, identical row appears. Nothing on the
+server could tell a retry from a new measurement, and the same values twice can be a real repeat
+(a resting pulse is often measured twice).
+
+- **The app marks each measurement.** On the first Save it creates a random UUID and sends it as the
+  `Idempotency-Key` header. It sends the same key again only while the values are unchanged (a
+  retry); any change, or a new visit to the form, gets a new key.
+- **The server remembers the key** in `result_requests` (user, key, result; migration 0012). A request
+  with a key this user already used returns that result unchanged (201, same body), whatever the
+  conditions now. The same key for another test is refused (409 `idempotency_key_reused`): a client
+  bug, not a retry. An invalid key is a validation error (422). Keys are private to each user.
+- **Concurrency:** requests with the same key are serialised by a transaction-level advisory lock,
+  so a retry that arrives while the first request is still running waits and then finds its result.
+- **Nothing existing changes.** `test_results` and its history are untouched; a request without the
+  header behaves exactly as before, so older app builds and older servers work in any combination.
+  Deleting a result deletes its key (cascade). Keys older than 30 days are deleted daily (pg_cron).
+- **Rejected:** fixing `performed_at` on the client (the server allows only 5 minutes in the future,
+  so a phone with a fast clock would start failing), and merging identical values saved close
+  together (it would silently merge real repeated measurements).
