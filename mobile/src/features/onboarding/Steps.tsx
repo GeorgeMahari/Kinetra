@@ -23,6 +23,7 @@ import { Pictogram, type PictogramName } from '@/components/brand/Pictogram';
 import { SegmentedControl } from '@/components/forms/SegmentedControl';
 import { LoadingState } from '@/components/feedback/States';
 import { useTheme } from '@/design-system/ThemeProvider';
+import { ActivityPicker } from '@/features/activities/ActivityPicker';
 import { iconSize } from '@/design-system/tokens';
 
 import { MAX_GOALS } from './flow';
@@ -279,11 +280,13 @@ export function SportsStep({
           />
         </Card>
       ))}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-        {sports.map((s) => {
+      <ActivityPicker
+        items={sports}
+        testID="sports-picker"
+        renderItem={(s) => {
           const selected = chosen.some((c) => c.code === s.code);
           return (
-            <View key={s.code} style={{ minWidth: '47%', flexGrow: 1 }}>
+            <View style={{ minWidth: '47%', flexGrow: 1 }}>
               <OptionCard
                 testID={`sport-${s.code}`}
                 multi
@@ -301,8 +304,8 @@ export function SportsStep({
               />
             </View>
           );
-        })}
-      </View>
+        }}
+      />
       {chosen.length === 0 ? (
         <AppText variant="caption" color="textMuted">
           {t('onboarding.sportsNone')}

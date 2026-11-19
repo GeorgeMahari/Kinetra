@@ -246,6 +246,21 @@ const en = {
     alpine_skiing: 'Skiing / snowboarding', other: 'Other',
     athletics_sprints: 'Athletics: sprints', athletics_jumps: 'Athletics: jumps', athletics_throws: 'Athletics: throws',
   },
+  activities: {
+    searchLabel: 'Search activities',
+    searchPlaceholder: 'For example running or tennis',
+    noMatch: 'No activity matches “{{query}}”.',
+    noMatchOther: 'No activity matches “{{query}}”. You can choose Other.',
+    categories: {
+      endurance: 'Endurance',
+      strength: 'Strength',
+      team: 'Team sports',
+      racket: 'Racket sports',
+      combat: 'Combat sports',
+      mind_body: 'Mind and body',
+      mixed: 'Mixed',
+    },
+  },
   followUps: {
     strength_sessions_per_week: 'How many times a week do you do strength training (weights, bands or bodyweight)?',
     cardio_sessions_per_week: 'How many times a week do you do continuous cardio for 20+ minutes (brisk walking, cycling, running…)?',

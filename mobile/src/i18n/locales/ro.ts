@@ -247,6 +247,21 @@ const ro: TranslationResources = {
     alpine_skiing: 'Schi / snowboard', other: 'Altele',
     athletics_sprints: 'Atletism: sprint', athletics_jumps: 'Atletism: sărituri', athletics_throws: 'Atletism: aruncări',
   },
+  activities: {
+    searchLabel: 'Caută o activitate',
+    searchPlaceholder: 'De exemplu alergare sau tenis',
+    noMatch: 'Nicio activitate nu se potrivește cu „{{query}}”.',
+    noMatchOther: 'Nicio activitate nu se potrivește cu „{{query}}”. Poți alege Altele.',
+    categories: {
+      endurance: 'Anduranță',
+      strength: 'Forță',
+      team: 'Sporturi de echipă',
+      racket: 'Sporturi cu rachetă',
+      combat: 'Sporturi de luptă',
+      mind_body: 'Minte și corp',
+      mixed: 'Mixte',
+    },
+  },
   followUps: {
     strength_sessions_per_week: 'De câte ori pe săptămână faci antrenament de forță (greutăți, benzi sau greutatea corpului)?',
     cardio_sessions_per_week: 'De câte ori pe săptămână faci cardio continuu de peste 20 de minute (mers alert, ciclism, alergare…)?',

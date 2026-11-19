@@ -108,6 +108,25 @@ describe('personalised catalogue', () => {
 });
 
 describe('sport profile editor', () => {
+  it('searches the catalogue without losing the sports already chosen', async () => {
+    const backend = createFakeBackend({ status: 'completed' });
+    backend.setSportProfile({ sports: [], goals: ['improve_endurance'], goals_ranked: true, priorities: [] });
+    backend.setBattery(TENNIS_BATTERY);
+    await renderRouter(routes, { initialUrl: '/sport-profile', wrapper: providers(backend.request) });
+    await fireEvent.press(await screen.findByTestId('sp-sport-cycling'));
+    expect(screen.getByTestId('sp-sport-cycling-card')).toBeTruthy();
+
+    await fireEvent.changeText(screen.getByTestId('sp-picker-search'), 'YOGA');
+    expect(screen.getByTestId('sp-sport-yoga')).toBeTruthy();
+    expect(screen.queryByTestId('sp-sport-running')).toBeNull();
+    // The chosen sport stays chosen while the list is filtered.
+    expect(screen.getByTestId('sp-sport-cycling-card')).toBeTruthy();
+
+    await fireEvent.changeText(screen.getByTestId('sp-picker-search'), 'zzz');
+    expect(screen.getByTestId('sp-picker-empty')).toHaveTextContent(/No activity matches “zzz”/);
+    expect(screen.getByTestId('sp-sport-cycling-card')).toBeTruthy();
+  });
+
   it('saves sports, ordered goals and priorities', async () => {
     const backend = createFakeBackend({ status: 'completed' });
     backend.setSportProfile({ sports: [], goals: ['improve_endurance'], goals_ranked: true, priorities: [] });

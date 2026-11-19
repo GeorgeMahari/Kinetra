@@ -247,6 +247,21 @@ const ru: TranslationResources = {
     alpine_skiing: 'Горные лыжи / сноуборд', other: 'Другое',
     athletics_sprints: 'Лёгкая атлетика: спринт', athletics_jumps: 'Лёгкая атлетика: прыжки', athletics_throws: 'Лёгкая атлетика: метания',
   },
+  activities: {
+    searchLabel: 'Поиск занятия',
+    searchPlaceholder: 'Например, бег или теннис',
+    noMatch: 'Ничего не найдено по запросу «{{query}}».',
+    noMatchOther: 'Ничего не найдено по запросу «{{query}}». Можно выбрать «Другое».',
+    categories: {
+      endurance: 'Выносливость',
+      strength: 'Сила',
+      team: 'Командные виды',
+      racket: 'Виды с ракеткой',
+      combat: 'Единоборства',
+      mind_body: 'Тело и разум',
+      mixed: 'Смешанные',
+    },
+  },
   followUps: {
     strength_sessions_per_week: 'Сколько раз в неделю вы делаете силовые тренировки (веса, резинки или вес тела)?',
     cardio_sessions_per_week: 'Сколько раз в неделю вы занимаетесь непрерывным кардио от 20 минут (быстрая ходьба, велосипед, бег…)?',

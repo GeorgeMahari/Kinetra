@@ -9,7 +9,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessage } from '@/api/errorMessage';
-import { GOALS, type Goal } from '@/api/onboarding';
+import { GOALS, type Goal, type Sport } from '@/api/onboarding';
 import { CAPACITIES, SPORT_LEVELS, type Capacity, type SportLevel, type SportProfile } from '@/api/personalization';
 import { AppText } from '@/design-system/AppText';
 import { Button } from '@/components/forms/Button';
@@ -20,6 +20,7 @@ import { Notice } from '@/components/feedback/Notice';
 import { Screen } from '@/components/layout/Screen';
 import { SegmentedControl } from '@/components/forms/SegmentedControl';
 import { ErrorState, LoadingState } from '@/components/feedback/States';
+import { ActivityPicker } from '@/features/activities/ActivityPicker';
 import { useSports } from '@/features/onboarding/useOnboarding';
 import { useBattery, useSaveSportProfile, useSportProfile } from '@/features/personalization/usePersonalization';
 import { useTheme } from '@/design-system/ThemeProvider';
@@ -34,10 +35,10 @@ export default function SportProfileScreen() {
   if (profile.isPending || sports.isPending) return <LoadingState />;
   if (profile.isError) return <ErrorState error={profile.error} onRetry={() => void profile.refetch()} />;
   if (sports.isError) return <ErrorState error={sports.error} onRetry={() => void sports.refetch()} />;
-  return <Editor initial={profile.data} catalogue={sports.data.map((s) => s.code)} />;
+  return <Editor initial={profile.data} catalogue={sports.data} />;
 }
 
-function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: string[] }) {
+function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: Sport[] }) {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
   const save = useSaveSportProfile();
@@ -184,28 +185,27 @@ function Editor({ initial, catalogue }: { initial: SportProfile; catalogue: stri
               </View>
             </Card>
           ))}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            {catalogue
-              .filter((code) => !chosen.some((s) => s.code === code))
-              .map((code) => (
-                <PressableScale
-                  key={code}
-                  testID={`sp-sport-${code}`}
-                  accessibilityRole="button"
-                  hapticKind="select"
-                  onPress={() => toggleSport(code)}
-                  style={{
-                    paddingVertical: spacing.sm,
-                    paddingHorizontal: spacing.md,
-                    borderRadius: radius.pill,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <AppText variant="label">+ {t(`sports.${code}` as 'sports.other')}</AppText>
-                </PressableScale>
-              ))}
-          </View>
+          <ActivityPicker
+            items={catalogue.filter((sp) => !chosen.some((s) => s.code === sp.code))}
+            testID="sp-picker"
+            renderItem={({ code }) => (
+              <PressableScale
+                testID={`sp-sport-${code}`}
+                accessibilityRole="button"
+                hapticKind="select"
+                onPress={() => toggleSport(code)}
+                style={{
+                  paddingVertical: spacing.sm,
+                  paddingHorizontal: spacing.md,
+                  borderRadius: radius.pill,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <AppText variant="label">+ {t(`sports.${code}` as 'sports.other')}</AppText>
+              </PressableScale>
+            )}
+          />
         </View>
 
         {/* Optional explicit priorities: tap to cycle 0 → 1 → 2 → 3 → 0. */}
