@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi import APIRouter, Depends, Header, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.db import DB
@@ -23,9 +23,16 @@ def tests(user: User = Depends(get_current_user), db: Session = DB) -> list[Test
 
 @router.post("/results", response_model=ResultOut, status_code=status.HTTP_201_CREATED)
 def record(
-    body: ResultCreate, user: User = Depends(get_current_user), db: Session = DB
+    body: ResultCreate,
+    user: User = Depends(get_current_user),
+    db: Session = DB,
+    idempotency_key: uuid.UUID | None = Header(
+        default=None,
+        alias="Idempotency-Key",
+        description="A UUID the app picks per save; a retry with the same one returns the saved result.",
+    ),
 ) -> ResultOut:
-    return service.record_result(db, user, body)
+    return service.record_result(db, user, body, idempotency_key)
 
 
 @router.get("/results", response_model=list[ResultOut])

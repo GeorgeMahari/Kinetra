@@ -6,6 +6,8 @@
 - `measurements` is a generic, source-tagged time series (weight, waist, resting HR…). Today the
   only source is `manual`; wearable or health-platform imports add new sources (with an
   `external_id` for de-duplication) without a schema redesign.
+- `result_requests` maps an app-generated idempotency key to the result it created, so a retried
+  save after a timeout returns the same result (D46).
 """
 
 import uuid
@@ -85,4 +87,27 @@ class Measurement(Base):
         CheckConstraint(
             f"source IN ({', '.join(repr(s) for s in MEASUREMENT_SOURCES)})", name="source_valid"
         ),
+    )
+
+
+class ResultRequest(Base):
+    """An `Idempotency-Key` the app sent when saving a result (migration 0012). A retry with the same
+    key returns that result instead of saving a duplicate. Not part of the result history itself."""
+
+    __tablename__ = "result_requests"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    key: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    result_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("test_results.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_result_requests_result_id", "result_id"),
+        Index("ix_result_requests_created_at", "created_at"),
     )

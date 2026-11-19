@@ -57,7 +57,7 @@ def create_app(background_jobs: bool = True) -> FastAPI:
         allow_origins=settings.cors_origins,
         allow_credentials=False,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type", "Accept-Language"],
+        allow_headers=["Authorization", "Content-Type", "Accept-Language", "Idempotency-Key"],
     )
     # Outermost: size limit and security headers apply to every response, errors and CORS included.
     app.add_middleware(SecurityMiddleware, hsts=production)

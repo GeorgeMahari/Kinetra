@@ -198,3 +198,91 @@ class TestActivity:
             params={"since": (now - timedelta(days=500)).isoformat(), "until": now.isoformat()},
         )
         assert resp.status_code == 422
+
+
+class TestRetriedSaves:
+    """D46: a save retried after a timeout must not create a second result; a new measurement must."""
+
+    KEY = "3f6c2a1e-8b4d-4c7a-9e2f-1a2b3c4d5e6f"
+
+    def results(self, api: TestClient, h: dict[str, str]) -> list[dict[str, Any]]:
+        resp = api.get("/api/v1/assessments/results", headers=h)
+        assert resp.status_code == 200
+        return resp.json()
+
+    def test_a_retry_with_the_same_key_returns_the_saved_result(
+        self, api: TestClient, user: dict[str, str], migrated_engine: Engine
+    ) -> None:
+        h = {**user, "Idempotency-Key": self.KEY}
+        first = post(api, h, "plank", {"seconds": 60})
+        again = post(api, h, "plank", {"seconds": 60})
+        assert first.status_code == again.status_code == 201
+        assert again.json() == first.json()
+        assert [r["id"] for r in self.results(api, user)] == [first.json()["id"]]
+        # Measurement side effects are not repeated either.
+        post(
+            api,
+            {**user, "Idempotency-Key": "9d8c7b6a-5f4e-4d3c-8b2a-1f0e9d8c7b6a"},
+            "body_measurements",
+            {"weight_kg": 70},
+        )
+        post(
+            api,
+            {**user, "Idempotency-Key": "9d8c7b6a-5f4e-4d3c-8b2a-1f0e9d8c7b6a"},
+            "body_measurements",
+            {"weight_kg": 70},
+        )
+        with migrated_engine.connect() as conn:
+            assert conn.execute(text("SELECT count(*) FROM measurements")).scalar_one() == 1
+
+    def test_repeated_assessments_with_new_keys_or_no_key_are_all_kept(
+        self, api: TestClient, user: dict[str, str]
+    ) -> None:
+        # The same values twice is a legitimate repeat (resting pulse is often measured twice).
+        a = post(
+            api, {**user, "Idempotency-Key": self.KEY}, "resting_hr", {"bpm": 62, "method": "manual_pulse"}
+        )
+        b = post(
+            api,
+            {**user, "Idempotency-Key": "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"},
+            "resting_hr",
+            {"bpm": 62, "method": "manual_pulse"},
+        )
+        c = post(api, user, "resting_hr", {"bpm": 62, "method": "manual_pulse"})
+        d = post(api, user, "resting_hr", {"bpm": 62, "method": "manual_pulse"})
+        assert {r.status_code for r in (a, b, c, d)} == {201}
+        assert len({r.json()["id"] for r in (a, b, c, d)}) == 4
+        assert len(self.results(api, user)) == 4
+
+    def test_a_key_is_private_to_its_user(self, api: TestClient, user: dict[str, str]) -> None:
+        other = auth(register_ok(api, "ion@example.com")["access_token"])
+        onboard(api, other)
+        mine = post(api, {**user, "Idempotency-Key": self.KEY}, "plank", {"seconds": 60}).json()
+        theirs = post(api, {**other, "Idempotency-Key": self.KEY}, "plank", {"seconds": 30})
+        assert theirs.status_code == 201 and theirs.json()["id"] != mine["id"]
+        assert [r["id"] for r in self.results(api, other)] == [theirs.json()["id"]]
+
+    def test_a_key_reused_for_another_test_is_refused(self, api: TestClient, user: dict[str, str]) -> None:
+        h = {**user, "Idempotency-Key": self.KEY}
+        assert post(api, h, "plank", {"seconds": 60}).status_code == 201
+        resp = post(api, h, "pushups", {"variant": "toes", "reps": 20})
+        assert resp.status_code == 409
+        assert resp.json()["error"]["code"] == "idempotency_key_reused"
+        assert len(self.results(api, user)) == 1
+
+    def test_an_invalid_key_is_a_validation_error(self, api: TestClient, user: dict[str, str]) -> None:
+        resp = post(api, {**user, "Idempotency-Key": "not-a-uuid"}, "plank", {"seconds": 60})
+        assert resp.status_code == 422
+        assert resp.json()["error"]["code"] == "validation_error"
+        assert self.results(api, user) == []
+
+    def test_after_the_result_is_deleted_the_key_saves_again(
+        self, api: TestClient, user: dict[str, str], migrated_engine: Engine
+    ) -> None:
+        h = {**user, "Idempotency-Key": self.KEY}
+        first = post(api, h, "plank", {"seconds": 60}).json()
+        assert api.delete(f"/api/v1/assessments/results/{first['id']}", headers=user).status_code == 204
+        with migrated_engine.connect() as conn:
+            assert conn.execute(text("SELECT count(*) FROM result_requests")).scalar_one() == 0
+        again = post(api, h, "plank", {"seconds": 60}).json()
+        assert again["id"] != first["id"]

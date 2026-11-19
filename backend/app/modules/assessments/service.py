@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import status
 from pydantic import ValidationError
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
@@ -22,7 +22,7 @@ from app.modules.assessments.engine.catalog import (
     protocol_key,
     run,
 )
-from app.modules.assessments.models import Measurement, TestResult
+from app.modules.assessments.models import Measurement, ResultRequest, TestResult
 from app.modules.assessments.schemas import (
     ActivityOut,
     DimensionOverview,
@@ -119,10 +119,40 @@ def _to_out(r: TestResult) -> ResultOut:
     )
 
 
-def record_result(db: Session, user: User, body: ResultCreate) -> ResultOut:
+def _replayed(db: Session, user: User, key: uuid.UUID, test_code: str) -> ResultOut | None:
+    """The result an earlier request with this idempotency key saved, if any (D46).
+
+    The lock serialises requests with the same key, so a retry that arrives while the first request
+    is still running waits for it and then finds its result, instead of saving a second one."""
+    db.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(f"result:{user.id}:{key}", 0))))
+    earlier = db.scalar(
+        select(ResultRequest).where(ResultRequest.user_id == user.id, ResultRequest.key == key)
+    )
+    if earlier is None:
+        return None
+    row = db.get(TestResult, earlier.result_id)
+    if row is None:  # the result was deleted; its key row normally goes with it (ON DELETE CASCADE)
+        return None
+    if row.test_code != test_code:
+        raise AppError(
+            "idempotency_key_reused",
+            "This Idempotency-Key was already used to save another test.",
+            status.HTTP_409_CONFLICT,
+        )
+    logger.info("Result request replayed user=%s test=%s", user.id, row.test_code)
+    return _to_out(row)
+
+
+def record_result(
+    db: Session, user: User, body: ResultCreate, idempotency_key: uuid.UUID | None = None
+) -> ResultOut:
+    """Saves a result. With an idempotency key already used by this user, returns that earlier result
+    unchanged (a retried save), whatever the conditions now."""
     test = TESTS.get(body.test_code)
     if test is None:
         raise AppError("unknown_test", "Unknown test.", status.HTTP_404_NOT_FOUND)
+    if idempotency_key is not None and (earlier := _replayed(db, user, idempotency_key, test.code)):
+        return earlier
     if not allowed(test, _ceiling(db, user)):
         # The server enforces the safety ceiling too, not only the app.
         raise AppError("test_not_allowed", "This test is not suggested for you.", status.HTTP_403_FORBIDDEN)
@@ -187,6 +217,8 @@ def record_result(db: Session, user: User, body: ResultCreate) -> ResultOut:
                     test_result_id=row.id,
                 )
             )
+    if idempotency_key is not None:
+        db.add(ResultRequest(user_id=user.id, key=idempotency_key, result_id=row.id))
     db.flush()
     logger.info("Result recorded user=%s test=%s", user.id, test.code)
     return _to_out(row)

@@ -30,6 +30,14 @@ select cron.schedule(
   $$delete from public.rate_limit_events where at < now() - interval '1 day'$$
 );
 
+-- Daily: idempotency keys of saved results (migration 0012) older than 30 days. A key only matters
+-- for the minutes in which the app may retry a save; the results themselves are never touched.
+select cron.schedule(
+  'kinetra-clean-result-requests',
+  '47 3 * * *',
+  $$delete from public.result_requests where created_at < now() - interval '30 days'$$
+);
+
 -- Keep the job log short (it lives in the cron schema and grows with every run).
 select cron.schedule(
   'kinetra-clean-cron-history',
