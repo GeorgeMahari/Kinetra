@@ -67,3 +67,20 @@ Deno.test("validation matches Pydantic on every exported case", () => {
   if (failures.length) console.log(failures.slice(0, 60).join("\n"));
   assertEquals(failures.length, 0, `${failures.length} of ${fixture.cases.length} cases differ`);
 });
+
+Deno.test("UUIDs parse and fail exactly like pydantic-core (braces, urn:uuid:, golden cases)", () => {
+  const golden: [string, string | null, string | null][] = JSON.parse(
+    Deno.readTextFileSync(new URL("../../../../tools/differential/fixtures/uuid_cases.json", import.meta.url)),
+  );
+  const bad: string[] = [];
+  for (const [input, valid, error] of golden) {
+    const got = v.uuidParseError(input);
+    if (valid !== null) {
+      if (got !== null || v.canonicalUuid(input) !== valid) bad.push(`${JSON.stringify(input)}: want ${valid}, got ${got ?? v.canonicalUuid(input)}`);
+    } else if (got !== error) {
+      bad.push(`${JSON.stringify(input)}: want ${error}, got ${got}`);
+    }
+  }
+  if (bad.length) console.log(bad.slice(0, 8).join("\n"));
+  assertEquals(bad.length, 0, `${bad.length} of ${golden.length} UUID cases differ`);
+});

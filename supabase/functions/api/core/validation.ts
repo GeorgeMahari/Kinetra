@@ -432,27 +432,68 @@ export function date(): Schema<PyDate> {
 const HEX = /^[0-9a-fA-F]$/;
 const GROUPS = [8, 4, 4, 4, 12];
 
+/** The hyphenated form: 8-4-4-4-12 hex digits. */
+function isHyphenated(s: string): boolean {
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
+}
+
+/**
+ * The UUID a string denotes, as pydantic-core's `uuid` crate reads it: 32 hex digits, the hyphenated
+ * form, `{hyphenated}` or `urn:uuid:hyphenated` (lower-case prefix). Null if none of these.
+ */
+function uuidBody(s: string): string | null {
+  if (s.length === 32) return /^[0-9a-fA-F]{32}$/.test(s) ? s : null;
+  if (s.length === 36) return isHyphenated(s) ? s : null;
+  if (s.length === 38 && s[0] === "{" && s[37] === "}") return isHyphenated(s.slice(1, -1)) ? s.slice(1, -1) : null;
+  if (s.length === 45 && s.startsWith("urn:uuid:")) return isHyphenated(s.slice(9)) ? s.slice(9) : null;
+  return null;
+}
+
+/**
+ * Why `t` is not a UUID, scanning it as given (no prefix stripped): the first character that is not
+ * a hex digit or hyphen, then the hyphen count, then each group's length. `bare` allows the 32-digit
+ * form, so a string without hyphens is a length error rather than a group-count error.
+ */
+function scanError(t: string, bare: boolean, offset = 0, total = t.length): string {
+  const bounds: number[] = [];
+  let hyphens = 0;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (ch === "-") {
+      if (hyphens < 4) bounds[hyphens] = i;
+      hyphens++;
+    } else if (!HEX.test(ch)) {
+      return `invalid character: found \`${ch}\` at ${i + offset}`;
+    }
+  }
+  if (hyphens === 0 && bare) return `invalid length: found ${total}`;
+  if (hyphens !== 4) return `invalid group count: expected 5, found ${hyphens + 1}`;
+  let start = 0;
+  for (let g = 0; g < 4; g++) {
+    const len = bounds[g] - start;
+    if (len !== GROUPS[g]) return `invalid group length in group ${g}: expected ${GROUPS[g]}, found ${len}`;
+    start = bounds[g] + 1;
+  }
+  return `invalid group length in group 4: expected 12, found ${total - start}`;
+}
+
 export function uuidParseError(s: string): string | null {
   // Longer than any UUID form (urn:uuid:..., 45 characters): reported as a length error first.
   if (s.length > 45) return `invalid length: found ${s.length}`;
-  for (let i = 0; i < s.length; i++) {
-    if (!HEX.test(s[i]) && s[i] !== "-") return `invalid character: found \`${s[i]}\` at ${i}`;
-  }
-  if (s.includes("-")) {
-    const parts = s.split("-");
-    if (parts.length !== 5) return `invalid group count: expected 5, found ${parts.length}`;
-    for (let g = 0; g < 5; g++) {
-      if (parts[g].length !== GROUPS[g]) {
-        return `invalid group length in group ${g}: expected ${GROUPS[g]}, found ${parts[g].length}`;
-      }
-    }
-    return null;
-  }
-  return s.length === 32 ? null : `invalid length: found ${s.length}`;
+  if (uuidBody(s) !== null) return null;
+  // The hyphenated lengths are diagnosed by the hyphenated parser, on the digits part as given.
+  if (s.length === 36) return scanError(s, true);
+  if (s.length === 38 && s[0] === "{" && s[37] === "}") return scanError(s.slice(1, -1), false);
+  if (s.length === 45 && s.startsWith("urn:uuid:")) return scanError(s.slice(9), false);
+  // Any other length: a {...} or urn:uuid: prefix is set aside, positions still count it, and the
+  // last group is measured against the whole input (the crate's own arithmetic).
+  if (s.length >= 2 && s[0] === "{" && s[s.length - 1] === "}") return scanError(s.slice(1, -1), false, 1, s.length);
+  if (s.startsWith("urn:uuid:")) return scanError(s.slice(9), false, 9, s.length);
+  return scanError(s, true);
 }
 
 export function canonicalUuid(s: string): string {
-  const h = s.replaceAll("-", "").toLowerCase();
+  const h = (uuidBody(s) ?? s).replaceAll("-", "").toLowerCase();
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
