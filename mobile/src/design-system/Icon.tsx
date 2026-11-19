@@ -104,11 +104,12 @@ const PATHS: Record<IconName, (c: ColorValue) => React.ReactNode> = {
       <Path d="M5 9.5l7 1.5 7-1.5M12 11v4l-4 5M12 15l4 5" stroke={c} />
     </>
   ),
+  // Standing balance: a figure on one leg, arms out (the single-leg stance test), not a weighing scale.
   balance: (c) => (
     <>
-      <Path d="M12 4v15M7 19h10" stroke={c} />
-      <Path d="M4 9h16" stroke={c} />
-      <Path d="M4 9l-1.5 4h3zM20 9l-1.5 4h3z" stroke={c} />
+      <Circle cx={12} cy={4.5} r={1.8} stroke={c} />
+      <Path d="M4.5 10h15M12 7.5v7.5M12 15v5.5M12 15l4.5 2.5" stroke={c} />
+      <Path d="M9 20.5h6" stroke={c} />
     </>
   ),
   body: (c) => (

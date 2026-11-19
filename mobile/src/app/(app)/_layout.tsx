@@ -43,7 +43,7 @@ export default function SignedInLayout() {
         <Stack.Screen name="sport-profile" options={{ title: '' }} />
         <Stack.Screen
           name="profile-map"
-          options={{ title: t('dashboard.mapScreenTitle'), animation: 'fade_from_bottom' }}
+          options={{ title: t('dashboard.mapScreenTitle'), animation: 'fade' }}
         />
       </Stack>
     </View>

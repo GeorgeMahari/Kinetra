@@ -5,7 +5,8 @@
  * Radius: the centre means "not rated"; next to the centre is a norm's lowest band; the rim is its
  * best band. Each rated dimension is a point on its spoke, and the points joined together form the
  * pale green area. A dimension that was measured but has no verified norm yet stays at the centre as
- * a small solid ring; one never assessed is a dashed ring. Each spoke ends in its trail blaze.
+ * a small solid ring; one never assessed is a dashed ring. Each spoke ends in the dimension's mark
+ * (its pictogram on its trail colour), looked up by the same key as the spoke, never by position.
  */
 import { useEffect, type ReactNode } from 'react';
 import { View } from 'react-native';
@@ -22,8 +23,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { Coverage } from '@/api/insights';
 import { AppText } from '@/design-system/AppText';
-import { Blaze } from '@/components/brand/Blaze';
-import { DIMENSIONS } from '@/features/dimensions/dimensions';
+import { DimensionMark } from '@/components/brand/DimensionMark';
+import { DIMENSIONS, type DimensionKey } from '@/features/dimensions/dimensions';
 import { useTheme } from '@/design-system/ThemeProvider';
 
 /** Where unrated dimensions sit: a hair off the centre, so the rings stay visible. */
@@ -51,11 +52,14 @@ export function ProfileMap({
   items,
   size = 180,
   badgeSize = 22,
+  grow = true,
 }: {
   items: ProfileMapItem[];
   size?: number;
-  /** Size of the blaze at each spoke's end; 0 hides the badges. */
+  /** Size of the mark at each spoke's end; 0 hides the badges. */
   badgeSize?: number;
+  /** Grow the area from the centre on first paint. Off where the map was just opened by a tap. */
+  grow?: boolean;
 }) {
   const { t } = useTranslation();
   const { colors, spacing } = useTheme();
@@ -71,16 +75,17 @@ export function ProfileMap({
   const rated = items.filter((i) => i.level != null).length;
   const reach = items.map((it) => it.level ?? 0);
 
-  // The area grows out from the centre when the map appears.
-  const grow = useSharedValue(reduced ? 1 : 0);
+  // The area grows out from the centre when the map first appears (not under Reduce Motion).
+  const still = reduced || !grow;
+  const growth = useSharedValue(still ? 1 : 0);
   useEffect(() => {
-    if (reduced) return;
-    grow.set(withTiming(1, { duration: 650, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
-  }, [reduced, grow]);
+    if (still) return;
+    growth.set(withTiming(1, { duration: 650, easing: Easing.bezier(0.16, 1, 0.3, 1) }));
+  }, [still, growth]);
   const areaProps = useAnimatedProps(() => ({
     points: reach
       .map((f, i) => {
-        const p = axisPoint(i, n, R * f * grow.value, c);
+        const p = axisPoint(i, n, R * f * growth.value, c);
         return `${p.x},${p.y}`;
       })
       .join(' '),
@@ -149,8 +154,7 @@ export function ProfileMap({
         </Svg>
         {badgeSize
           ? items.map((it, i) => {
-              const dim = DIMENSIONS.find((d) => d.key === it.key);
-              if (!dim) return null;
+              if (!DIMENSIONS.some((d) => d.key === it.key)) return null;
               const p = axisPoint(i, n, R + badgeSize / 2 + 4, c);
               return (
                 <View
@@ -158,7 +162,7 @@ export function ProfileMap({
                   testID={`map-badge-${it.key}`}
                   style={{ position: 'absolute', left: p.x - badgeSize / 2, top: p.y - badgeSize / 2 }}
                 >
-                  <Blaze {...dim.blaze} size={badgeSize} />
+                  <DimensionMark dimension={it.key as DimensionKey} size={badgeSize} />
                 </View>
               );
             })

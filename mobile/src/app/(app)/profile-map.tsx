@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
 import { useWindowDimensions, View } from 'react-native';
-import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/design-system/AppText';
-import { Blaze } from '@/components/brand/Blaze';
+import { DimensionMark } from '@/components/brand/DimensionMark';
 import { ProfileMap, ProfileMapLegend, standingBand } from '@/components/charts/ProfileMap';
-import { FadeInItem, PressableScale } from '@/design-system/motion';
+import { PressableScale } from '@/design-system/motion';
 import { Screen } from '@/components/layout/Screen';
 import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { DIMENSIONS } from '@/features/dimensions/dimensions';
@@ -35,8 +34,7 @@ export default function ProfileMapScreen() {
           <AppText color="textMuted">{t('dashboard.mapCaption')}</AppText>
         </View>
 
-        <Animated.View
-          entering={ZoomIn.springify().damping(18).reduceMotion(ReduceMotion.System)}
+        <View
           style={{
             alignItems: 'center',
             paddingVertical: spacing.lg,
@@ -50,6 +48,7 @@ export default function ProfileMapScreen() {
           <ProfileMap
             size={size}
             badgeSize={badge}
+            grow={false}
             items={map.map((m) => ({
               key: m.dimension,
               label: t(`dimensions.${m.dimension}.name`),
@@ -57,7 +56,7 @@ export default function ProfileMapScreen() {
               level: m.standing?.level ?? null,
             }))}
           />
-        </Animated.View>
+        </View>
 
         <ProfileMapLegend />
 
@@ -86,7 +85,7 @@ export default function ProfileMapScreen() {
                   : t(`dashboard.coverage.${coverage}`);
               const line = when ? `${status} · ${when}` : status;
               return (
-                <FadeInItem key={d.key} index={i}>
+                <View key={d.key}>
                   {i > 0 ? <View style={{ height: 1, backgroundColor: colors.border, marginLeft: 64 }} /> : null}
                   <PressableScale
                     testID={`map-key-${d.key}`}
@@ -104,7 +103,7 @@ export default function ProfileMapScreen() {
                       minHeight: 56,
                     }}
                   >
-                    <Blaze {...d.blaze} />
+                    <DimensionMark dimension={d.key} size={32} />
                     <View style={{ flex: 1, gap: 2 }}>
                       <AppText variant="label">{t(`dimensions.${d.key}.name`)}</AppText>
                       <AppText variant="caption" color={coverage === 'unknown' ? 'unknown' : 'textMuted'}>
@@ -113,7 +112,7 @@ export default function ProfileMapScreen() {
                     </View>
                     {st ? <LevelMeter level={st.level} testID={`map-level-${d.key}`} /> : null}
                   </PressableScale>
-                </FadeInItem>
+                </View>
               );
             })}
           </View>

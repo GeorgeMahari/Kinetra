@@ -86,6 +86,7 @@ export default function Today() {
               <SectionHeader title={t('dashboard.mapTitle')} caption={t('dashboard.mapCaption')} />
               <PressableScale
                 testID="open-profile-map"
+                motionless
                 accessibilityRole="button"
                 accessibilityLabel={`${t('dashboard.mapTitle')}. ${t('dashboard.mapOpen')}`}
                 onPress={() => router.push('/profile-map')}

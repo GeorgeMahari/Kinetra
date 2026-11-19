@@ -1,6 +1,6 @@
 import '@/i18n';
 
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
 import type { Me } from '@/api/auth';
@@ -16,9 +16,13 @@ import TabsLayout from '../(app)/(tabs)/_layout';
 import ProfileTab from '../(app)/(tabs)/profile';
 import Today from '../(app)/(tabs)/today';
 
+// The Assess tab only needs to exist as a target here: the test checks where the map key leads.
+const AssessStub = () => null;
+
 const routes = {
   '(tabs)/_layout': TabsLayout,
   '(tabs)/today': Today,
+  '(tabs)/assess': AssessStub,
   '(tabs)/profile': ProfileTab,
   'edit-profile': EditProfile,
   onboarding: Onboarding,
@@ -93,6 +97,13 @@ describe('signed-in navigation', () => {
     expect(screen.getByTestId('map-key-lifestyle')).toHaveTextContent(/Close to ideal · by AASM \(sleep ≥ 7 h\)/);
     expect(screen.getByTestId('map-level-lifestyle', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.getByTestId('map-badge-lifestyle')).toBeTruthy();
+    // The spoke ends in that dimension's own mark, and the key row shows the same one.
+    expect(within(screen.getByTestId('map-badge-lifestyle')).getByTestId('dimension-mark-lifestyle', { includeHiddenElements: true })).toBeTruthy();
+    expect(within(screen.getByTestId('map-key-lifestyle')).getByTestId('dimension-mark-lifestyle', { includeHiddenElements: true })).toBeTruthy();
+    // Tapping a dimension in the key still opens its tests.
+    await fireEvent.press(screen.getByTestId('map-key-balance'));
+    await waitFor(() => expect(screen).toHavePathname('/assess'));
+    expect(screen).toHaveSearchParams({ dimension: 'balance' });
   });
 
   it('shows the profile-completion card only while details are missing', async () => {

@@ -54,6 +54,11 @@ export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
    * Kept under Reduce Motion: a colour change is state feedback, not movement.
    */
   highlight?: { base: string; active: string };
+  /**
+   * No scale or lift on press or hover, as under Reduce Motion: for large surfaces such as a chart
+   * card, where a springing card reads as the content moving. The press still dims and ticks.
+   */
+  motionless?: boolean;
   children: ReactNode;
 }
 
@@ -71,6 +76,7 @@ export function PressableScale({
   style,
   hapticKind = 'tap',
   highlight,
+  motionless = false,
   onPressIn,
   onPressOut,
   onHoverIn,
@@ -80,7 +86,7 @@ export function PressableScale({
   children,
   ...rest
 }: PressableScaleProps) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() || motionless;
   const pressed = useSharedValue(0);
   const hovered = useSharedValue(0);
   const animated = useAnimatedStyle(() => {
