@@ -77,6 +77,16 @@ export class Validated {
     }
     return this.parse(schema, all[all.length - 1], ["query", name]);
   }
+  /** A request header (FastAPI `Header(alias=name)`); validated before the body, as FastAPI does. */
+  header<T>(ctx: Ctx, name: string, schema: Schema<T>): T {
+    const value = ctx.req.headers.get(name);
+    if (value === null) {
+      if (schema.default) return schema.default();
+      this.issues.push({ type: "missing", msg: "Field required", loc: ["header", name] });
+      return undefined as T;
+    }
+    return this.parse(schema, value, ["header", name]);
+  }
   body<T>(ctx: Ctx, schema: Schema<T>): T {
     if (!ctx.hasBody) {
       this.issues.push({ type: "missing", msg: "Field required", loc: ["body"] });
@@ -136,7 +146,7 @@ function securityHeaders(h: Headers): void {
 }
 
 const CORS_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
-const CORS_HEADERS = ["Accept", "Accept-Language", "Authorization", "Content-Language", "Content-Type"];
+const CORS_HEADERS = ["Accept", "Accept-Language", "Authorization", "Content-Language", "Content-Type", "Idempotency-Key"];
 
 function preflight(req: Request): Response {
   const origin = req.headers.get("origin") ?? "";

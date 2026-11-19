@@ -26,7 +26,16 @@ V = "/api/v1"
 PASSWORD = "blue tram over the river"  # noqa: S105 (throwaway test accounts)
 UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 TS_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?")
-HEADERS = ("content-type", "cache-control", "x-content-type-options", "content-security-policy", "allow")
+HEADERS = (
+    "content-type",
+    "cache-control",
+    "x-content-type-options",
+    "content-security-policy",
+    "allow",
+    "access-control-allow-origin",
+    "access-control-allow-methods",
+    "access-control-allow-headers",
+)
 
 
 class Recorder:
@@ -828,7 +837,67 @@ def scenario_consent_export(r: Recorder) -> None:
     r.call("GET", "/me/export")
 
 
+def scenario_retries(r: Recorder) -> None:
+    """D46: a save retried with the same Idempotency-Key returns the saved result."""
+    h = signed_up(r, "retry", sex="female")
+    r.call("POST", "/onboarding/complete", headers=h, json=answers())
+    key = "3f6c2a1e-8b4d-4c7a-9e2f-1a2b3c4d5e6f"
+    body = {"test_code": "plank", "inputs": {"seconds": 75}}
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": key}, json=body)
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": key.upper()}, json=body)
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers={**h, "Idempotency-Key": key},
+        json={**body, "inputs": {"seconds": 80}},
+    )
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers={**h, "Idempotency-Key": key},
+        json={"test_code": "pushups", "inputs": {"variant": "knees", "reps": 12}},
+    )
+    other = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": other}, json=body)
+    r.call("POST", "/assessments/results", headers=h, json=body)
+    for bad in (
+        "not-a-uuid",
+        "",
+        "3f6c2a1e8b4d4c7a9e2f1a2b3c4d5e6f",
+        "{3f6c2a1e-8b4d-4c7a-9e2f-1a2b3c4d5e6f}",
+    ):
+        r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": bad}, json=body)
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": "x"}, json={"test_code": "plank"})
+    r.call(
+        "POST",
+        "/assessments/results",
+        headers={**h, "Idempotency-Key": key},
+        json={"test_code": "nope", "inputs": {}},
+    )
+    body_hm = {"test_code": "body_measurements", "inputs": {"weight_kg": 70, "waist_cm": 80}}
+    k2 = "9d8c7b6a-5f4e-4d3c-8b2a-1f0e9d8c7b6a"
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": k2}, json=body_hm)
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": k2}, json=body_hm)
+    results = r.call("GET", "/assessments/results", headers=h).json()
+    first = next((x for x in results if x["test_code"] == "plank"), None)
+    if first:
+        r.call("DELETE", f"/assessments/results/{first['id']}", headers=h)
+    r.call("POST", "/assessments/results", headers={**h, "Idempotency-Key": key}, json=body)
+    r.call("GET", "/assessments/results", headers=h)
+    r.call("GET", "/measurements", headers=h)
+    r.call(
+        "OPTIONS",
+        "/assessments/results",
+        headers={
+            "Origin": "http://localhost:8081",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "idempotency-key,content-type,authorization",
+        },
+    )
+
+
 SCENARIOS = {
+    "retries": scenario_retries,
     "consent_export": scenario_consent_export,
     "plans": scenario_plans,
     "insights": scenario_insights,

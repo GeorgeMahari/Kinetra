@@ -22,8 +22,12 @@ route({
 route({
   method: "POST", path: "/api/v1/assessments/results", status: 201, deps: [currentUser],
   handler: async (ctx) => {
-    const body = validate((p) => p.body(ctx, ResultCreate));
-    return await service.recordResult(ctx.db, userOf(ctx), body as never);
+    // A UUID the app picks per save: a retry with the same one returns the saved result (D46).
+    const [key, body] = validate((p) => [
+      p.header(ctx, "Idempotency-Key", v.optional(v.nullable(v.uuid()), () => null)),
+      p.body(ctx, ResultCreate),
+    ] as const);
+    return await service.recordResult(ctx.db, userOf(ctx), body as never, key);
   },
 });
 

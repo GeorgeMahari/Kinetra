@@ -85,11 +85,36 @@ function dumpInputs(inputs: Record<string, unknown>): Record<string, unknown> {
   return JSON.parse(JSON.stringify(inputs));
 }
 
+/**
+ * The result an earlier request with this idempotency key saved, if any (D46). The lock serialises
+ * requests with the same key, so a retry that arrives while the first one is still running waits for
+ * it and then finds its result instead of saving a second one.
+ */
+async function replayed(db: Db, user: User, key: string, testCode: string) {
+  await db.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`result:${user.id}:${key}`}, 0))`;
+  const [earlier] = await db.sql`SELECT result_id::text AS result_id FROM result_requests
+    WHERE user_id = ${user.id} AND key = ${key}`;
+  if (!earlier) return null;
+  const rows = await db.sql.unsafe(`SELECT ${COLS} FROM test_results WHERE id = $1`, [earlier.result_id]);
+  if (!rows.length) return null; // deleted; its key row normally goes with it (ON DELETE CASCADE)
+  if (rows[0].test_code !== testCode) {
+    throw new AppError("idempotency_key_reused", "This Idempotency-Key was already used to save another test.", 409);
+  }
+  console.info(`Result request replayed user=${user.id} test=${rows[0].test_code}`);
+  return toOut(rows[0]);
+}
+
+/** Saves a result; with an idempotency key this user already used, returns that result unchanged. */
 export async function recordResult(
   db: Db, user: User, body: { test_code: string; performed_at: PyDateTime | null; stopped_early: boolean; inputs: Record<string, unknown> },
+  idempotencyKey: string | null = null,
 ) {
   const test = TESTS[body.test_code];
   if (!test) throw new AppError("unknown_test", "Unknown test.", 404);
+  if (idempotencyKey !== null) {
+    const earlier = await replayed(db, user, idempotencyKey, test.code);
+    if (earlier) return earlier;
+  }
   if (!allowed(test, await latestIntensityCeiling(db, user))) {
     // The server enforces the safety ceiling too, not only the app.
     throw new AppError("test_not_allowed", "This test is not suggested for you.", 403);
@@ -130,6 +155,9 @@ export async function recordResult(
       await db.sql`INSERT INTO measurements (id, user_id, kind, value, measured_at, source, test_result_id)
         VALUES (${crypto.randomUUID()}, ${user.id}, ${kind}, ${String(value)}, ${toDb(performedAt)}, 'manual', ${row.id})`;
     }
+  }
+  if (idempotencyKey !== null) {
+    await db.sql`INSERT INTO result_requests (user_id, key, result_id) VALUES (${user.id}, ${idempotencyKey}, ${row.id})`;
   }
   console.info(`Result recorded user=${user.id} test=${test.code}`);
   return toOut(row, performedAt);
