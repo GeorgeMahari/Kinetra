@@ -64,6 +64,7 @@
       "<rootDir>/jest.setup.ts"
     ],
     "testTimeout": 15000,
+    "maxWorkers": "50%",
     "moduleNameMapper": {
       "^react-native-reanimated$": "<rootDir>/src/test-utils/reanimatedEntry.ts",
       "^react-native-reanimated/mock$": "<rootDir>/src/test-utils/reanimatedMock.ts"
