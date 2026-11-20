@@ -1,4 +1,5 @@
 /** Authentication dependencies (backend/app/modules/auth/deps.py). */
+import type { Db } from "../../core/db.ts";
 import { AppError } from "../../core/errors.ts";
 import type { Ctx } from "../../core/http.ts";
 import { hit } from "../../core/rateLimit.ts";
@@ -41,8 +42,8 @@ export function userOf(ctx: Ctx): User {
   return ctx.state.user as User;
 }
 
-export async function enforceLimit(key: string): Promise<void> {
-  if (!(await hit(key))) {
+export async function enforceLimit(db: Db, key: string): Promise<void> {
+  if (!(await hit(db, key))) {
     throw new AppError("rate_limited", "Too many attempts. Please wait a few minutes and try again.", 429);
   }
 }
