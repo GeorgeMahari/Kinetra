@@ -6,7 +6,8 @@ tables and the same Argon2id + JWT authentication. Users keep their passwords an
 The Python backend stays as the reference until the migration is complete. The mobile app changes
 only its `EXPO_PUBLIC_API_URL`, and only after the new backend passes every test.
 
-Decided with the owner on 2026-11-17: option 1 (all on Supabase), Brevo for email (free plan),
+Decided with the owner on 2026-11-17: option 1 (all on Supabase), Brevo for email (free plan;
+replaced by Resend on 2026-11-21, because Brevo's phone verification could not be completed),
 GitHub Pages for the parental-consent page, free plans only.
 
 ## Target
@@ -18,7 +19,7 @@ APK ──HTTPS──▶ https://<ref>.supabase.co/functions/v1/api/api/v1/...
                  ├─ Argon2id (hash-wasm), HS256 JWT (jose), same secrets as the Python backend
                  └─ Postgres as kinetra_app (Session/Transaction pooler, RLS policy kinetra_api)
 pg_cron ──▶ hourly purge of expired parental consents
-Brevo HTTPS API ──▶ code emails (Edge Functions block SMTP ports 25 and 587)
+Resend HTTPS API ──▶ code emails (Edge Functions block SMTP ports 25 and 587)
 GitHub Pages ──▶ static parental-consent page that calls the function (HTML from Edge Functions on
                  supabase.co is served as text/plain)
 ```
@@ -33,7 +34,7 @@ GitHub Pages ──▶ static parental-consent page that calls the function (HTM
 | Runtime | Deno, TypeScript or WASM; no Python | the backend is rewritten |
 | CPU time per request | 2 s (async I/O excluded) | Argon2 must fit (measured below) |
 | Memory | 256 MB | Argon2 uses 64 MiB |
-| Outgoing ports 25 and 587 | blocked | email goes through Brevo's HTTPS API |
+| Outgoing ports 25 and 587 | blocked | email goes through Resend's HTTPS API |
 | HTML responses on supabase.co | rewritten to text/plain | the consent page moves to GitHub Pages |
 | Free invocations | 500,000 per month | ample |
 | Free project pausing | after 1 week of inactivity | a weekly keep-alive request (GitHub Actions) |
@@ -51,7 +52,7 @@ GitHub Pages ──▶ static parental-consent page that calls the function (HTM
 
 Verdict: the migration is feasible. Still to measure on Supabase itself, which needs a scoped access
 token: CPU time on the platform, a cold start, the pooler from the Edge runtime, the client-IP header,
-and a Brevo send.
+and a Resend send.
 
 ## Comparing Python and TypeScript
 
@@ -77,7 +78,7 @@ and a Brevo send.
 1. Foundation: router, error envelope, Pydantic-compatible validation, security headers, body
    limit, DB pool, auth dependency, client IP, health. Optional fallback proxy to Python.
 2. Comparison tooling: fixtures exporter, HTTP mode for the API tests, differential runner.
-3. Auth and account: 8 `/auth` routes, `/me` GET/PATCH, `/me/profile`, Brevo email, rate-limit table
+3. Auth and account: 8 `/auth` routes, `/me` GET/PATCH, `/me/profile`, email over HTTPS, rate-limit table
    (additive migration 0011).
 4. Catalog and onboarding (6 routes).
 5. Assessments engine (7 routes).
@@ -127,7 +128,7 @@ What changes on Supabase compared with Python:
 | In-memory login rate limiter | `rate_limit_events` table (migration 0011), one short transaction per attempt |
 | Hourly purge loop in the API process | pg_cron job `kinetra-purge-expired-consents` (`db/sql/supabase/03_jobs.sql`), plus daily cleanups |
 | HTML consent page served by the API | the same routes answer JSON to `site/consent` on GitHub Pages; the HTML stays for direct calls |
-| Gmail SMTP | Brevo HTTPS API |
+| Gmail SMTP | Resend HTTPS API |
 
 Applied on Supabase on 2026-11-17, after a backup (`db/backups/supabase_20261117_230514.dump`):
 migration 0011, privileges and RLS for the new table, and the three pg_cron jobs. The Python API keeps
@@ -140,9 +141,11 @@ Steps 1–3 need accounts only you can create; everything else is scripted.
 1. **Supabase access token.** supabase.com → Account → Access Tokens → a scoped token for project
    `vrdwcgzcgukzmyzyuedm` with Edge Functions and Secrets write. Save it in your own terminal:
    `[Environment]::SetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', '<token>', 'User')`.
-2. **Brevo.** Create a free account, verify the sender address you use in `KINETRA_EMAIL_FROM`
-   (Senders & IP → Senders), create an API key (SMTP & API → API keys) and save it the same way as
-   `KINETRA_BREVO_API_KEY`.
+2. **Resend.** Create a free account. Under Domains, add a domain you own and add the DNS records
+   it shows (SPF and DKIM) until it says Verified; a Gmail address cannot be a sender. Create an
+   API key with "Sending access" and save it the same way as `RESEND_API_KEY`. Pass the sender
+   to the deploy as `-EmailFrom 'Kinetra <no-reply@your-domain>'`, or set `KINETRA_EMAIL_FROM` in
+   `infra/public/.env.public`.
 3. **GitHub Pages.** Repository → Settings → Pages → Source: **GitHub Actions**. The `Pages`
    workflow publishes `site/` on the next push to `main` that touches it (or run it by hand).
 4. **Deploy:** `powershell -ExecutionPolicy Bypass -File infra\supabase\deploy-function.ps1`.

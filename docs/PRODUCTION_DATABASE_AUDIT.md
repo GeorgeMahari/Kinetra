@@ -68,7 +68,7 @@ created after the move. No migration has to be repeated.
 | Startup check: `SELECT 1` with 5 attempts and backoff (1, 2, 4, 8 s). It logs `user@host:port/db (sslmode)` and never the password. In production, the API refuses to start without its database. | `backend/app/core/db.py`, `backend/app/main.py` |
 | Temporary outages: pooled connections are recycled after 300 s, and TCP keepalives detect a dead server connection. `pool_pre_ping` was already on. | `backend/app/core/db.py` |
 | Refused settings no longer print their input (`hide_input_in_errors`). | `backend/app/core/config.py` |
-| New email backend `brevo`, over HTTPS. It sends the same request as the Edge Function; the key is read from `KINETRA_BREVO_API_KEY` only. | `backend/app/core/email.py` |
+| New email backend over HTTPS (`brevo`, replaced by `resend` on 2026-11-21). It sends the same request as the Edge Function; the key is read from `RESEND_API_KEY` only. | `backend/app/core/email.py` |
 | Render Blueprint, prepared but not active, plus Supabase's public root CA in the API image. | `render.yaml`, `backend/Dockerfile`, `backend/certs/` |
 | End-to-end test of the public API with Docker stopped and the API restarted. | `infra/supabase/cloud-only-test.ps1`, `infra/supabase/restart_test.py` |
 
@@ -105,8 +105,8 @@ with no PC, no sleeping and no extra account. It is blocked only on two things y
 1. **A Supabase access token** (Dashboard, Account, Access Tokens), scoped to project
    `vrdwcgzcgukzmyzyuedm` with Edge Functions and Secrets write. Save it as the user environment
    variable `SUPABASE_ACCESS_TOKEN` in your own terminal.
-2. **A Brevo API key** (free plan: 300 emails a day), with a verified sender. Save it as
-   `KINETRA_BREVO_API_KEY`.
+2. **A Resend API key** (free plan: 100 emails a day, 3,000 a month), with a domain you own
+   verified in Resend. Save it as `RESEND_API_KEY`.
 
 Then follow the runbook in `docs/SUPABASE_EDGE_MIGRATION.md`, "Go-live runbook":
 `deploy-function.ps1`, the client-IP probe, the smoke test, and a new APK with the function's URL.
@@ -117,7 +117,7 @@ Then follow the runbook in `docs/SUPABASE_EDGE_MIGRATION.md`, "Go-live runbook":
 
 - **The free plan sleeps after 15 minutes without traffic.** The first request then waits about a
   minute, and the app gives up after 10 s. The $7 a month Starter plan does not sleep.
-- SMTP is blocked on the free plan, so email must use Brevo, as in A.
+- SMTP is blocked on the free plan, so email must use Resend, as in A.
 - The login rate limit sees Render's proxy, not the person. It still limits per email address.
 
 Steps, if you choose B:
@@ -128,7 +128,7 @@ Steps, if you choose B:
    - `KINETRA_DB_PASSWORD`: the value of your `KINETRA_APP_DB_PASSWORD`.
    - `KINETRA_JWT_SECRET`: the value of your `KINETRA_JWT_SECRET`. Use the same one, so signed-in
      people stay signed in.
-   - `KINETRA_BREVO_API_KEY` and `KINETRA_EMAIL_FROM`.
+   - `RESEND_API_KEY`, and `KINETRA_EMAIL_FROM` on the domain verified in Resend.
    - `KINETRA_PUBLIC_BASE_URL`: `https://<service>.onrender.com`.
 4. After the first deploy, open `https://<service>.onrender.com/api/v1/health/ready`. It should
    return `"database": "ok"`.

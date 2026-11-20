@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-21: Email through Resend instead of Brevo
+
+Brevo's phone verification could not be completed, so Resend replaces it. Nothing was deployed.
+
+- **Edge Function.** The verification code, password reset and parental consent emails go to
+  Resend's API. The only email secret is `RESEND_API_KEY`. Production refuses to start without it.
+  A refused email is logged with Resend's reason, never with the key, the address or the code.
+- **Python API.** The HTTPS backend for Render is now `resend`, with the same request. Gmail SMTP on
+  the PC is unchanged. `python -m app.tools.send_test_email` prints Resend's answer.
+- **Deploy.** `deploy-function.ps1` sets `RESEND_API_KEY` and refuses a sender on a free mailbox
+  domain such as gmail.com, which Resend cannot send from. A domain you own, verified in Resend, is
+  needed before the deploy.
+- **Tests.** 2 new Deno tests and 3 new Python tests for the request, the refusal log and the
+  production settings.
+
 ## 2026-11-20: Production database audit (Supabase only)
 
 Full report: `docs/PRODUCTION_DATABASE_AUDIT.md`.

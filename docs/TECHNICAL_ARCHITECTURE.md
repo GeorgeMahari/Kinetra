@@ -38,8 +38,8 @@ computer. When the PC sleeps, shuts down or loses network, every request fails (
 
 **Prepared, not live:** the Edge Function (`docs/SUPABASE_EDGE_MIGRATION.md`) removes the PC from
 the path. Python API suite over HTTP against it: 464 of 468 pass, the 4 others need the Python
-process; 8 replay scenarios identical (run 2026-11-17). Deploy waits on a Supabase access token
-and a Brevo key.
+process; 8 replay scenarios identical (run 2026-11-17). Deploy waits on a Supabase access token,
+a Resend key and a sender domain verified in Resend.
 
 ## 3. Mobile app (`mobile/src`)
 
@@ -147,7 +147,7 @@ methodology.
 |---|---|---|
 | Supabase Postgres | the database | `KINETRA_DB_*` (`infra/public/.env.public`, not committed); passwords in user environment variables |
 | Tailscale Funnel | public HTTPS for the PC | `KINETRA_PUBLIC_HOSTNAME`, `KINETRA_TUNNEL_PROVIDER` |
-| Gmail SMTP (Python) / Brevo (Edge) | verification, reset and consent emails | `KINETRA_SMTP_*` / `KINETRA_BREVO_API_KEY` (not yet created) |
+| Gmail SMTP (Python on the PC) / Resend (Edge, Render) | verification, reset and consent emails | `KINETRA_SMTP_*` / `RESEND_API_KEY` (not yet created) |
 | Expo EAS | builds; `EXPO_PUBLIC_API_URL` per EAS environment | `mobile/eas.json`, `mobile/app.config.ts:6-20` refuses a release build without the URL |
 | GitHub | code, CI, Releases (APK), Pages (consent site, not enabled yet) | `.github/workflows/` |
 | Health Connect | steps, resting HR, weight (opt-in) | `mobile/src/features/devices/` |
