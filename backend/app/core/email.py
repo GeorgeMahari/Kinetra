@@ -21,7 +21,10 @@ from email.message import EmailMessage
 from functools import lru_cache
 from typing import Protocol
 
+from fastapi import status
+
 from app.core.config import get_settings
+from app.core.errors import AppError
 
 logger = logging.getLogger(__name__)
 
@@ -128,9 +131,33 @@ def _resend_reason(err: urllib.error.HTTPError) -> str:
         return "no details"
 
 
+class DisabledEmailSender:
+    """No provider configured. Callers check `email_available()` first; reaching this is a bug,
+    and it must never look like a success."""
+
+    def send(self, message: OutgoingEmail) -> None:
+        raise RuntimeError("Email is disabled (KINETRA_EMAIL_BACKEND=disabled)")
+
+
+def email_available() -> bool:
+    return get_settings().email_backend != "disabled"
+
+
+def require_email() -> None:
+    """For flows that only work through an email: say so, instead of confirming what can't happen."""
+    if not email_available():
+        raise AppError(
+            "email_unavailable",
+            "Email is not available right now, so this can't be done.",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+
 @lru_cache
 def get_email_sender() -> EmailSender:
     s = get_settings()
+    if s.email_backend == "disabled":
+        return DisabledEmailSender()
     if s.email_backend == "smtp":
         return SmtpEmailSender(
             s.smtp_host, s.smtp_port, s.smtp_user, s.smtp_password.get_secret_value(), s.email_from

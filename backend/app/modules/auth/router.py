@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.db import DB
+from app.core.email import email_available, require_email
 from app.core.errors import AppError
 from app.core.rate_limit import SlidingWindowLimiter
 from app.modules.auth import recovery, service
@@ -38,7 +39,8 @@ def register(
 ) -> TokenPair:
     _enforce_limit(limiter, f"register:{client_ip(request)}")
     user = service.register(db, body)
-    recovery.request_email_verification(db, user)
+    if email_available():  # without a provider the account simply stays unverified
+        recovery.request_email_verification(db, user)
     return service.issue_tokens(db, user.id)
 
 
@@ -73,6 +75,7 @@ def request_verification(
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     """(Re)sends a 6-digit code to the account's email. No-op once verified."""
+    require_email()
     _enforce_limit(limiter, f"verify-send:{user.id}")
     recovery.request_email_verification(db, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -85,6 +88,7 @@ def confirm_verification(
     db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
+    require_email()
     _enforce_limit(limiter, f"verify-confirm:{user.id}")
     recovery.confirm_email(db, user, body.code)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -97,7 +101,8 @@ def forgot_password(
     db: Session = DB,
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
-    """Always 202, whether or not the email has an account."""
+    """Always 202, whether or not the email has an account (503 for both without email)."""
+    require_email()
     _enforce_limit(limiter, f"forgot:{body.email}:{client_ip(request)}")
     recovery.forgot_password(db, body.email)
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -111,6 +116,7 @@ def reset_password(
     limiter: SlidingWindowLimiter = Depends(get_login_limiter),
 ) -> Response:
     """Sets a new password with the emailed code and signs the account out everywhere."""
+    require_email()
     _enforce_limit(limiter, f"reset:{body.email}:{client_ip(request)}")
     recovery.reset_password(db, body.email, body.code, body.new_password)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

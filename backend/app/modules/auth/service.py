@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.email import require_email
 from app.core.errors import AppError
 from app.core.security import (
     create_access_token,
@@ -85,6 +86,10 @@ def register(db: Session, data: RegisterRequest, today: date | None = None) -> U
     exists = db.scalar(select(User.id).where(func.lower(User.email) == data.email))
     if exists:
         raise AppError("email_taken", "An account with this email already exists.", status.HTTP_409_CONFLICT)
+    if needs_consent:
+        # The parent can only answer through the emailed link: without email the account would stay
+        # locked until deleted, so it is not created at all.
+        require_email()
 
     user = User(
         email=data.email,

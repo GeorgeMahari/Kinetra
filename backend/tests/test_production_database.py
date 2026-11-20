@@ -113,6 +113,18 @@ def test_resend_is_accepted_for_production_email(cloud_env: pytest.MonkeyPatch) 
     assert Settings().email_backend == "resend"
 
 
+def test_production_can_run_with_email_explicitly_disabled(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "disabled")
+    cloud_env.delenv("KINETRA_SMTP_HOST")
+    assert Settings().email_backend == "disabled"
+
+
+def test_production_never_falls_back_to_the_console_email(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "console")
+    with pytest.raises(ValueError, match="KINETRA_EMAIL_BACKEND"):
+        Settings()
+
+
 def test_brevo_is_no_longer_an_email_backend(cloud_env: pytest.MonkeyPatch) -> None:
     cloud_env.setenv("KINETRA_EMAIL_BACKEND", "brevo")
     with pytest.raises(ValueError, match="email_backend"):

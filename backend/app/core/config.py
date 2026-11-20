@@ -90,7 +90,8 @@ class Settings(BaseSettings):
     login_rate_limit_window_seconds: int = 300
 
     # --- Email (verification and password reset codes)
-    email_backend: Literal["console", "smtp", "resend"] = "console"
+    # disabled: no provider. Flows that need an email answer 503 email_unavailable; nothing is sent.
+    email_backend: Literal["console", "smtp", "resend", "disabled"] = "console"
     email_from: str = "Kinetra <no-reply@kinetra.app>"
     smtp_host: str = ""
     smtp_port: int = 587
@@ -112,13 +113,16 @@ class Settings(BaseSettings):
                 raise ValueError("KINETRA_JWT_SECRET must be set in production")
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
         if self.environment == "production":
-            email_ready = (self.email_backend == "smtp" and self.smtp_host) or (
-                self.email_backend == "resend" and self.resend_api_key.get_secret_value()
+            email_ready = (
+                (self.email_backend == "smtp" and self.smtp_host)
+                or (self.email_backend == "resend" and self.resend_api_key.get_secret_value())
+                or self.email_backend == "disabled"
             )
             if not email_ready:
                 raise ValueError(
                     "Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST, "
-                    "or KINETRA_EMAIL_BACKEND=resend and RESEND_API_KEY"
+                    "KINETRA_EMAIL_BACKEND=resend and RESEND_API_KEY, "
+                    "or KINETRA_EMAIL_BACKEND=disabled"
                 )
             if not self.db_allow_local:
                 self._check_production_database()

@@ -21,7 +21,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.email import OutgoingEmail, get_email_sender
+from app.core.email import OutgoingEmail, get_email_sender, require_email
 from app.core.errors import AppError
 from app.modules.consent.models import ParentalConsent
 from app.modules.users.models import User
@@ -147,6 +147,7 @@ def get_status(db: Session, user: User) -> ConsentStatus:
 
 def resend(db: Session, user: User, now: datetime | None = None) -> ConsentStatus:
     """A new link replaces the old one. The deadline doesn't move: it counts from registration."""
+    require_email()
     now = now or datetime.now(UTC)
     c = _pending(db, user) if user.parental_consent_status == PENDING else None
     if c is None:
