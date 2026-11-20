@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-20: Production database audit (Supabase only)
+
+Full report: `docs/PRODUCTION_DATABASE_AUDIT.md`.
+
+- **Finding.** The production data already lives only on Supabase: the schema matches the code at
+  0012, and nothing exists only in the local database. What still depends on this PC is the API
+  process and its tunnel.
+- **API.** Production now refuses a local database host, a connection without TLS and the Docker
+  password, instead of falling back to them silently. It checks the database at startup, with
+  retries, and refuses to start without it. Connections are recycled and use keepalives. Refused
+  settings no longer print secrets. A new `brevo` email backend works over HTTPS.
+- **Deploy.** `render.yaml` is prepared but not active. The recommended route remains the Edge
+  Function, which waits on two keys only you can create.
+- **Tests.** `infra/supabase/cloud-only-test.ps1` passed 29/29 with the Docker database stopped and
+  the API restarted midway. The backend suite passes 496 of 496.
+- **Supabase.** 0012 was applied after a backup on 2026-11-19, so the "Before deploying this" steps
+  below are done.
+
 ## 2026-11-19: Phase 1, independent improvements
 
 Scope: the work in `docs/IMPLEMENTATION_PLAN.md` that needs no company decision (spider diagram,
