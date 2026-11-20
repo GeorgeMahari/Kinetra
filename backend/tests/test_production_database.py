@@ -2,9 +2,12 @@
 outages. None of these tests needs a database: an unreachable one is simulated with a closed port."""
 
 import asyncio
+import io
 import json
 import socket
+import urllib.error
 from collections.abc import Iterator
+from email.message import Message
 from typing import Any
 
 import pytest
@@ -12,8 +15,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
 
 from app.core import db as db_module
+from app.core import email as email_module
 from app.core.config import Settings, get_settings
-from app.core.email import BrevoEmailSender, OutgoingEmail, get_email_sender
+from app.core.email import OutgoingEmail, ResendEmailSender, get_email_sender
 from app.main import create_app
 
 CLOUD = {
@@ -73,7 +77,7 @@ def test_production_never_uses_the_docker_password(cloud_env: pytest.MonkeyPatch
 
 
 def test_a_refused_setting_never_prints_secrets(cloud_env: pytest.MonkeyPatch) -> None:
-    cloud_env.setenv("KINETRA_BREVO_API_KEY", "xkeysib-must-not-appear")
+    cloud_env.setenv("RESEND_API_KEY", "re_must_not_appear")
     cloud_env.setenv("KINETRA_DB_HOST", "127.0.0.1")
     with pytest.raises(ValueError) as err:
         Settings()
@@ -99,14 +103,20 @@ def test_development_keeps_the_docker_defaults(monkeypatch: pytest.MonkeyPatch) 
     assert (s.db_host, s.db_port) == ("127.0.0.1", 5433)
 
 
-def test_brevo_is_accepted_for_production_email(cloud_env: pytest.MonkeyPatch) -> None:
-    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "brevo")
+def test_resend_is_accepted_for_production_email(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "resend")
     cloud_env.delenv("KINETRA_SMTP_HOST")
-    cloud_env.delenv("KINETRA_BREVO_API_KEY", raising=False)
-    with pytest.raises(ValueError, match="KINETRA_BREVO_API_KEY"):
+    cloud_env.delenv("RESEND_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="RESEND_API_KEY"):
         Settings()
-    cloud_env.setenv("KINETRA_BREVO_API_KEY", "xkeysib-test")
-    assert Settings().email_backend == "brevo"
+    cloud_env.setenv("RESEND_API_KEY", "re_test_key")
+    assert Settings().email_backend == "resend"
+
+
+def test_brevo_is_no_longer_an_email_backend(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "brevo")
+    with pytest.raises(ValueError, match="email_backend"):
+        Settings()
 
 
 def test_the_database_description_hides_the_password(cloud_env: pytest.MonkeyPatch) -> None:
@@ -210,7 +220,7 @@ class _Resp:
         return b"{}"
 
 
-def test_brevo_sends_the_same_request_as_the_edge_function(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_resend_sends_the_same_request_as_the_edge_function(monkeypatch: pytest.MonkeyPatch) -> None:
     sent: dict[str, Any] = {}
 
     def fake_urlopen(req: Any, timeout: float) -> _Resp:
@@ -218,26 +228,47 @@ def test_brevo_sends_the_same_request_as_the_edge_function(monkeypatch: pytest.M
         return _Resp()
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    sender = BrevoEmailSender("xkeysib-test", "Kinetra <no-reply@example.com>")
+    sender = ResendEmailSender("re_test_key", "Kinetra <no-reply@example.com>")
     sender.send(OutgoingEmail(to="a@example.com", subject="Code", body="123456"))
     sender.wait_idle(5)
-    assert sent["url"] == "https://api.brevo.com/v3/smtp/email"
-    assert sent["headers"]["Api-key"] == "xkeysib-test"
+    assert sent["url"] == "https://api.resend.com/emails"
+    assert sent["headers"]["Authorization"] == "Bearer re_test_key"
+    assert sent["headers"]["Content-type"] == "application/json"
+    # Resend refuses requests without a User-Agent (403).
+    assert sent["headers"]["User-agent"].startswith("kinetra-api/")
     assert sent["body"] == {
-        "sender": {"name": "Kinetra", "email": "no-reply@example.com"},
-        "to": [{"email": "a@example.com"}],
+        "from": "Kinetra <no-reply@example.com>",
+        "to": ["a@example.com"],
         "subject": "Code",
-        "textContent": "123456",
+        "text": "123456",
     }
 
 
-def test_the_brevo_backend_is_selected_from_settings(cloud_env: pytest.MonkeyPatch) -> None:
-    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "brevo")
-    cloud_env.setenv("KINETRA_BREVO_API_KEY", "xkeysib-test")
+def test_a_refused_resend_email_is_logged_without_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    answer = b'{"name":"validation_error","message":"The example.com domain is not verified."}'
+
+    def refuse(req: Any, timeout: float) -> _Resp:
+        raise urllib.error.HTTPError(req.full_url, 403, "Forbidden", Message(), io.BytesIO(answer))
+
+    logged: list[str] = []
+    monkeypatch.setattr("urllib.request.urlopen", refuse)
+    monkeypatch.setattr(email_module.logger, "error", lambda msg, *a: logged.append(msg % a))
+    sender = ResendEmailSender("re_test_key", "Kinetra <no-reply@example.com>")
+    sender.send(OutgoingEmail(to="person@example.com", subject="Reset", body="654321"))
+    sender.wait_idle(5)
+    assert len(logged) == 1
+    line = logged[0]
+    assert "403" in line and "validation_error" in line and "domain is not verified" in line
+    assert "re_test_key" not in line and "person@example.com" not in line and "654321" not in line
+
+
+def test_the_resend_backend_is_selected_from_settings(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_EMAIL_BACKEND", "resend")
+    cloud_env.setenv("RESEND_API_KEY", "re_test_key")
     get_settings.cache_clear()
     get_email_sender.cache_clear()
     try:
-        assert isinstance(get_email_sender(), BrevoEmailSender)
+        assert isinstance(get_email_sender(), ResendEmailSender)
     finally:
         get_settings.cache_clear()
         get_email_sender.cache_clear()

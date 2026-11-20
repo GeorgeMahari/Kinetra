@@ -90,16 +90,18 @@ class Settings(BaseSettings):
     login_rate_limit_window_seconds: int = 300
 
     # --- Email (verification and password reset codes)
-    email_backend: Literal["console", "smtp", "brevo"] = "console"
+    email_backend: Literal["console", "smtp", "resend"] = "console"
     email_from: str = "Kinetra <no-reply@kinetra.app>"
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
     # Read from KINETRA_SMTP_PASSWORD (environment) only.
     smtp_password: SecretStr = SecretStr("")
-    # brevo: Brevo's HTTPS API, for hosts that block outgoing SMTP (Render free instances, Supabase
-    # Edge Functions). Read from KINETRA_BREVO_API_KEY (environment) only.
-    brevo_api_key: SecretStr = SecretStr("")
+    # resend: Resend's HTTPS API, for hosts that block outgoing SMTP (Render free instances, Supabase
+    # Edge Functions). Read from RESEND_API_KEY (environment, no KINETRA_ prefix) only.
+    resend_api_key: SecretStr = Field(
+        default=SecretStr(""), validation_alias=AliasChoices("RESEND_API_KEY")
+    )
     # One-time codes: lifetime and wrong attempts allowed per code.
     code_minutes: int = 15
     code_max_attempts: int = 5
@@ -111,12 +113,12 @@ class Settings(BaseSettings):
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
         if self.environment == "production":
             email_ready = (self.email_backend == "smtp" and self.smtp_host) or (
-                self.email_backend == "brevo" and self.brevo_api_key.get_secret_value()
+                self.email_backend == "resend" and self.resend_api_key.get_secret_value()
             )
             if not email_ready:
                 raise ValueError(
                     "Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST, "
-                    "or KINETRA_EMAIL_BACKEND=brevo and KINETRA_BREVO_API_KEY"
+                    "or KINETRA_EMAIL_BACKEND=resend and RESEND_API_KEY"
                 )
             if not self.db_allow_local:
                 self._check_production_database()

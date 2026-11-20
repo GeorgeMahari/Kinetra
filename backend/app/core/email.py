@@ -4,16 +4,16 @@
   Never allowed in production.
 - `smtp`: any SMTP relay (provider-agnostic). Host/port/user come from settings; the password only
   from the KINETRA_SMTP_PASSWORD environment variable.
-- `brevo`: Brevo's HTTPS API, for hosts that block outgoing SMTP ports (Render's free instances).
-  The key only from the KINETRA_BREVO_API_KEY environment variable. Same request as the Edge
-  Function (supabase/functions/api/core/email.ts).
+- `resend`: Resend's HTTPS API, for hosts that block outgoing SMTP ports (Render's free
+  instances). The key only from the RESEND_API_KEY environment variable. Same request as the Edge
+  Function (supabase/functions/api/core/email.ts). The sender's domain must be verified in Resend.
 """
 
 import json
 import logging
-import re
 import smtplib
 import ssl
+import urllib.error
 import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -89,36 +89,43 @@ class SmtpEmailSender:
             smtp.send_message(msg)
 
 
-class BrevoEmailSender(SmtpEmailSender):
+class ResendEmailSender(SmtpEmailSender):
     """Same background delivery as SMTP; only the transport differs (HTTPS, port 443)."""
 
-    URL = "https://api.brevo.com/v3/smtp/email"
+    URL = "https://api.resend.com/emails"
+    # Resend refuses requests without a User-Agent (403).
+    USER_AGENT = "kinetra-api/1.0"
 
     def __init__(self, api_key: str, sender: str) -> None:
         super().__init__("", 0, "", "", sender)
         self.api_key = api_key
 
-    @staticmethod
-    def parse_sender(sender: str) -> dict[str, str]:
-        m = re.match(r"^\s*(.*?)\s*<([^>]+)>\s*$", sender)
-        if not m:
-            return {"email": sender.strip()}
-        return {"name": m[1], "email": m[2]} if m[1] else {"email": m[2]}
+    def _deliver_logged(self, message: OutgoingEmail) -> None:
+        # Resend's reason only (e.g. an unverified domain); never the key, recipient or body.
+        try:
+            self._deliver(message)
+        except Exception as exc:
+            logger.error("Email delivery failed subject=%s: %s", message.subject, exc)
 
     def _deliver(self, message: OutgoingEmail) -> None:
-        body = {
-            "sender": self.parse_sender(self.sender),
-            "to": [{"email": message.to}],
-            "subject": message.subject,
-            "textContent": message.body,
-        }
+        body = {"from": self.sender, "to": [message.to], "subject": message.subject, "text": message.body}
         req = urllib.request.Request(self.URL, data=json.dumps(body).encode(), method="POST")  # noqa: S310
-        req.add_header("api-key", self.api_key)
+        req.add_header("Authorization", f"Bearer {self.api_key}")
         req.add_header("Content-Type", "application/json")
-        req.add_header("Accept", "application/json")
-        # urlopen raises on 4xx/5xx; the caller logs the failure (never the key).
-        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 (fixed https URL)
-            resp.read()
+        req.add_header("User-Agent", self.USER_AGENT)
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 (fixed https URL)
+                resp.read()
+        except urllib.error.HTTPError as err:
+            raise RuntimeError(f"Resend responded {err.code} ({_resend_reason(err)})") from None
+
+
+def _resend_reason(err: urllib.error.HTTPError) -> str:
+    try:
+        e = json.loads(err.read())
+        return f"{e.get('name', '')}: {e.get('message', '')}"
+    except Exception:
+        return "no details"
 
 
 @lru_cache
@@ -128,6 +135,6 @@ def get_email_sender() -> EmailSender:
         return SmtpEmailSender(
             s.smtp_host, s.smtp_port, s.smtp_user, s.smtp_password.get_secret_value(), s.email_from
         )
-    if s.email_backend == "brevo":
-        return BrevoEmailSender(s.brevo_api_key.get_secret_value(), s.email_from)
+    if s.email_backend == "resend":
+        return ResendEmailSender(s.resend_api_key.get_secret_value(), s.email_from)
     return ConsoleEmailSender()
