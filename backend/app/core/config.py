@@ -20,7 +20,12 @@ LOCAL_DB_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", "db", "0.0.0.0", ""
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="KINETRA_", extra="ignore", case_sensitive=False
+        env_file=".env",
+        env_prefix="KINETRA_",
+        extra="ignore",
+        case_sensitive=False,
+        # A refused setting must not print the raw input (it holds passwords and keys) into logs.
+        hide_input_in_errors=True,
     )
 
     environment: Literal["development", "test", "production"] = "development"

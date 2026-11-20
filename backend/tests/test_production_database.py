@@ -72,6 +72,18 @@ def test_production_never_uses_the_docker_password(cloud_env: pytest.MonkeyPatch
         Settings()
 
 
+def test_a_refused_setting_never_prints_secrets(cloud_env: pytest.MonkeyPatch) -> None:
+    cloud_env.setenv("KINETRA_BREVO_API_KEY", "xkeysib-must-not-appear")
+    cloud_env.setenv("KINETRA_DB_HOST", "127.0.0.1")
+    with pytest.raises(ValueError) as err:
+        Settings()
+    message = str(err.value)
+    assert "local database host" in message
+    # Pydantic shortens the raw input in the middle, so even a fragment would be a leak.
+    assert "input_value" not in message
+    assert "appear" not in message and "not-a-real" not in message
+
+
 def test_a_local_database_in_production_must_be_explicit(cloud_env: pytest.MonkeyPatch) -> None:
     cloud_env.setenv("KINETRA_DB_HOST", "127.0.0.1")
     cloud_env.setenv("KINETRA_DB_SSLMODE", "")
