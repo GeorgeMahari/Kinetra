@@ -69,6 +69,7 @@ export function getSettings(): Settings {
   if (environment === "production" && (emailBackend !== "brevo" || !env("KINETRA_BREVO_API_KEY"))) {
     throw new Error("Production needs KINETRA_EMAIL_BACKEND=brevo and KINETRA_BREVO_API_KEY");
   }
+  if (environment === "production" && env("KINETRA_DB_ALLOW_LOCAL") !== "true") checkProductionDatabase();
   const cors = env("KINETRA_CORS_ORIGINS", '["http://localhost:8081"]');
   cached = {
     environment,
@@ -102,6 +103,27 @@ export function getSettings(): Settings {
     internalJobSecret: env("KINETRA_INTERNAL_JOB_SECRET"),
   };
   return cached;
+}
+
+/** Hosts that mean "the database on this computer" (backend/app/core/config.py LOCAL_DB_HOSTS). */
+const LOCAL_DB_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "db", "0.0.0.0", ""]);
+
+/**
+ * No silent fallback in production (same rules as the Python API): an explicit, non-local
+ * KINETRA_DB_HOST, TLS, and KINETRA_DB_PASSWORD, never the local POSTGRES_PASSWORD. Messages name
+ * the setting, never a secret.
+ */
+function checkProductionDatabase(): void {
+  const host = env("KINETRA_DB_HOST").trim().toLowerCase();
+  if (LOCAL_DB_HOSTS.has(host)) {
+    throw new Error(
+      `Production refuses the local database host '${host}': set KINETRA_DB_HOST to the Supabase pooler`,
+    );
+  }
+  if (!["require", "verify-ca", "verify-full"].includes(env("KINETRA_DB_SSLMODE"))) {
+    throw new Error("Production needs KINETRA_DB_SSLMODE=require, verify-ca or verify-full");
+  }
+  if (!env("KINETRA_DB_PASSWORD")) throw new Error("Production needs the KINETRA_DB_PASSWORD secret");
 }
 
 /** Tests only: forget the cached settings after changing environment variables. */
