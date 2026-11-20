@@ -8,7 +8,8 @@
 #   SUPABASE_ACCESS_TOKEN    a scoped personal access token for this project
 #                            (supabase.com > Account > Access Tokens; permissions: Edge Functions write,
 #                            Secrets write, on project vrdwcgzcgukzmyzyuedm only)
-#   KINETRA_BREVO_API_KEY    Brevo > SMTP & API > API keys (free plan)
+#   RESEND_API_KEY           Resend > API Keys, permission "Sending access" (free plan). Becomes a
+#                            function secret; it is the only email secret.
 #   KINETRA_JWT_SECRET       the same secret as the Python API, so existing sign-ins stay valid
 #   KINETRA_APP_DB_PASSWORD  the kinetra_app database password (created by apply-security.ps1)
 # Node.js (npx) runs a pinned Supabase CLI; Docker is not needed for a deploy.
@@ -38,6 +39,13 @@ if (-not $EmailFrom) {
     $EmailFrom = (Get-PublicSettings)['KINETRA_EMAIL_FROM']
     if (-not $EmailFrom) { throw 'Pass -EmailFrom or set KINETRA_EMAIL_FROM in infra\public\.env.public' }
 }
+# Resend sends only from a domain verified in its dashboard, and nobody can verify a free mailbox
+# domain. Without this check the deploy would succeed and every email would be refused (403).
+$fromDomain = ([regex]::Match($EmailFrom, '@([^>\s]+)')).Groups[1].Value.ToLower()
+if (-not $fromDomain) { throw "The sender '$EmailFrom' has no domain." }
+if ($fromDomain -in 'gmail.com', 'googlemail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'live.com', 'icloud.com', 'proton.me', 'protonmail.com') {
+    throw "Resend cannot send from $fromDomain. Pass -EmailFrom 'Kinetra <no-reply@your-domain>' with a domain verified in Resend."
+}
 $env:SUPABASE_ACCESS_TOKEN = Get-Secret 'SUPABASE_ACCESS_TOKEN'
 Push-Location $Root
 try {
@@ -51,8 +59,8 @@ try {
             KINETRA_DB_USER                       = "kinetra_app.$ProjectRef"
             KINETRA_DB_PASSWORD                   = Get-Secret 'KINETRA_APP_DB_PASSWORD'
             KINETRA_DB_SSLMODE                    = 'require'
-            KINETRA_EMAIL_BACKEND                 = 'brevo'
-            KINETRA_BREVO_API_KEY                 = Get-Secret 'KINETRA_BREVO_API_KEY'
+            KINETRA_EMAIL_BACKEND                 = 'resend'
+            RESEND_API_KEY                        = Get-Secret 'RESEND_API_KEY'
             KINETRA_EMAIL_FROM                    = $EmailFrom
             KINETRA_PUBLIC_BASE_URL               = "https://$ProjectRef.supabase.co/functions/v1/api"
             KINETRA_CONSENT_PAGE_URL              = $ConsentPageUrl

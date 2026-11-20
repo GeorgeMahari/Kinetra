@@ -35,7 +35,7 @@ services:
         value: "15"
       # Render's free instances block outgoing SMTP (ports 25, 465, 587): email goes over HTTPS.
       - key: KINETRA_EMAIL_BACKEND
-        value: brevo
+        value: resend
       - key: KINETRA_EMAIL_FROM
         sync: false
       - key: KINETRA_PUBLIC_BASE_URL
@@ -44,5 +44,5 @@ services:
         sync: false
       - key: KINETRA_JWT_SECRET
         sync: false
-      - key: KINETRA_BREVO_API_KEY
+      - key: RESEND_API_KEY
         sync: false
