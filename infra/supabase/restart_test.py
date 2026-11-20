@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import smoke_test  # noqa: E402  (same folder: call, check, register, STEPS)
+import smoke_test
 
 READINESS = (
     "heart_condition",
@@ -46,17 +46,26 @@ def save(base: str, state: Path) -> None:
             "training_experience": "one_to_three_years",
             "sports": [{"code": "running", "sessions_per_week": 2}],
         },
-        "follow_ups": {"strength_sessions_per_week": 1, "mobility_practice": "occasional", "sleep_hours": 7},
+        "follow_ups": {
+            "strength_sessions_per_week": 1,
+            "mobility_practice": "occasional",
+            "sleep_hours": 7,
+        },
         "readiness": {k: False for k in READINESS},
     }
     status, _ = smoke_test.call(base, "POST", "/onboarding/complete", token, onboarding)
     smoke_test.check("complete onboarding", status == 200)
     status, result = smoke_test.call(
-        base, "POST", "/assessments/results", token, {"test_code": "plank", "inputs": {"seconds": 75}}
+        base,
+        "POST",
+        "/assessments/results",
+        token,
+        {"test_code": "plank", "inputs": {"seconds": 75}},
     )
     smoke_test.check("save a test result", status == 201)
     state.write_text(
-        json.dumps({"email": email, "password": smoke_test.PASSWORD, "result": result}), encoding="utf-8"
+        json.dumps({"email": email, "password": smoke_test.PASSWORD, "result": result}),
+        encoding="utf-8",
     )
 
 
@@ -65,22 +74,32 @@ def verify(base: str, state: Path) -> None:
     try:
         creds = {"email": saved["email"], "password": saved["password"]}
         status, login = smoke_test.call(base, "POST", "/auth/login", body=creds)
-        if not smoke_test.check("after restart: sign in with the same account", status == 200):
+        if not smoke_test.check(
+            "after restart: sign in with the same account", status == 200
+        ):
             return
         token = login["access_token"]
         result = saved["result"]
-        status, got = smoke_test.call(base, "GET", f"/assessments/results/{result['id']}", token)
-        smoke_test.check("after restart: the result reads back identically", status == 200 and got == result)
+        status, got = smoke_test.call(
+            base, "GET", f"/assessments/results/{result['id']}", token
+        )
+        smoke_test.check(
+            "after restart: the result reads back identically",
+            status == 200 and got == result,
+        )
         status, listed = smoke_test.call(base, "GET", "/assessments/results", token)
         smoke_test.check(
-            "after restart: listed once", status == 200 and [r["id"] for r in listed] == [result["id"]]
+            "after restart: listed once",
+            status == 200 and [r["id"] for r in listed] == [result["id"]],
         )
         status, summary = smoke_test.call(base, "GET", "/onboarding/summary", token)
         smoke_test.check(
             "after restart: onboarding still saved",
             status == 200 and summary["goals"] == ["improve_endurance"],
         )
-        status, _ = smoke_test.call(base, "POST", "/me/delete", token, {"password": saved["password"]})
+        status, _ = smoke_test.call(
+            base, "POST", "/me/delete", token, {"password": saved["password"]}
+        )
         smoke_test.check("cleanup: delete the account", status == 204)
     finally:
         os.remove(state)
