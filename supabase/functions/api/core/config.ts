@@ -5,7 +5,8 @@
  */
 
 export type Environment = "development" | "test" | "production";
-export type EmailBackend = "console" | "resend";
+/** disabled: no provider; flows that need an email answer 503 email_unavailable. */
+export type EmailBackend = "console" | "resend" | "disabled";
 
 export interface Settings {
   environment: Environment;
@@ -66,11 +67,14 @@ export function getSettings(): Settings {
     secret = btoa(String.fromCharCode(...bytes));
   }
   const emailBackend = env("KINETRA_EMAIL_BACKEND", "console") as EmailBackend;
-  if (!["console", "resend"].includes(emailBackend)) {
-    throw new Error("KINETRA_EMAIL_BACKEND must be console or resend");
+  if (!["console", "resend", "disabled"].includes(emailBackend)) {
+    throw new Error("KINETRA_EMAIL_BACKEND must be console, resend or disabled");
   }
-  if (environment === "production" && (emailBackend !== "resend" || !env("RESEND_API_KEY"))) {
-    throw new Error("Production needs KINETRA_EMAIL_BACKEND=resend and the RESEND_API_KEY secret");
+  const emailReady = (emailBackend === "resend" && env("RESEND_API_KEY")) || emailBackend === "disabled";
+  if (environment === "production" && !emailReady) {
+    throw new Error(
+      "Production needs KINETRA_EMAIL_BACKEND=resend with the RESEND_API_KEY secret, or KINETRA_EMAIL_BACKEND=disabled",
+    );
   }
   if (environment === "production" && env("KINETRA_DB_ALLOW_LOCAL") !== "true") checkProductionDatabase();
   const cors = env("KINETRA_CORS_ORIGINS", '["http://localhost:8081"]');

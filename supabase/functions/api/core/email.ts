@@ -6,6 +6,7 @@
  *   from the RESEND_API_KEY secret. The sender's domain must be verified in Resend.
  */
 import { getSettings } from "./config.ts";
+import { AppError } from "./errors.ts";
 
 export interface OutgoingEmail {
   to: string;
@@ -50,9 +51,24 @@ async function deliverResend(message: OutgoingEmail): Promise<void> {
   await resp.body?.cancel();
 }
 
-/** Queues the message; never throws. */
+export function emailAvailable(): boolean {
+  return getSettings().emailBackend !== "disabled";
+}
+
+/** For flows that only work through an email: say so, instead of confirming what can't happen. */
+export function requireEmail(): void {
+  if (!emailAvailable()) {
+    throw new AppError("email_unavailable", "Email is not available right now, so this can't be done.", 503);
+  }
+}
+
+/** Queues the message; never fails the request. Callers check `emailAvailable()` first. */
 export function sendEmail(message: OutgoingEmail): void {
   const s = getSettings();
+  if (s.emailBackend === "disabled") {
+    console.error(`Email is disabled; not sent subject=${message.subject}`);
+    return;
+  }
   if (s.emailBackend === "console") {
     outbox.push(message);
     console.info(`DEV EMAIL to=${message.to} subject=${message.subject}\n${message.body}`);

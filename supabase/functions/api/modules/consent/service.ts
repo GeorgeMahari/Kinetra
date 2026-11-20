@@ -8,7 +8,7 @@
  */
 import { getSettings } from "../../core/config.ts";
 import type { Db } from "../../core/db.ts";
-import { sendEmail } from "../../core/email.ts";
+import { requireEmail, sendEmail } from "../../core/email.ts";
 import { sha256Hex, tokenUrlsafe } from "../../core/security.ts";
 import { AppError } from "../../core/errors.ts";
 import { addSeconds, dbTimestamp, lte, nowUtc, toDb } from "../../core/values.ts";
@@ -151,6 +151,7 @@ export async function getStatus(db: Db, user: User): Promise<ConsentStatus> {
 
 /** A new link replaces the old one. The deadline doesn't move: it counts from registration. */
 export async function resend(db: Db, user: User, now: PyDateTime = nowUtc()): Promise<ConsentStatus> {
+  requireEmail();
   const c = user.parental_consent_status === "pending" ? await pending(db, user) : null;
   if (!c) throw new AppError("consent_not_pending", "No parental consent is pending.", 409);
   if (now.epochMicros() < addSeconds(c.last_sent_at, RESEND_AFTER_SECONDS).epochMicros()) {

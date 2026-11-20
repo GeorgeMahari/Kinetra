@@ -1,4 +1,5 @@
 /** /auth routes (backend/app/modules/auth/router.py and schemas.py). */
+import { emailAvailable, requireEmail } from "../../core/email.ts";
 import { route, validate } from "../../core/http.ts";
 import * as v from "../../core/validation.ts";
 import { currentUser, enforceLimit, userOf } from "./deps.ts";
@@ -38,7 +39,8 @@ route({
     const body = validate((p) => p.body(ctx, RegisterRequest));
     await enforceLimit(ctx.db, `register:${ctx.clientIp}`);
     const user = await service.register(ctx.db, body as service.RegisterRequest);
-    await recovery.requestEmailVerification(ctx.db, user);
+    // Without a provider the account simply stays unverified.
+    if (emailAvailable()) await recovery.requestEmailVerification(ctx.db, user);
     return await service.issueTokens(ctx.db, user.id);
   },
 });
@@ -73,6 +75,7 @@ route({
   method: "POST", path: "/api/v1/auth/email/verify/request", status: 204, deps: [currentUser],
   handler: async (ctx) => {
     const user = userOf(ctx);
+    requireEmail();
     await enforceLimit(ctx.db, `verify-send:${user.id}`);
     await recovery.requestEmailVerification(ctx.db, user);
   },
@@ -83,6 +86,7 @@ route({
   handler: async (ctx) => {
     const body = validate((p) => p.body(ctx, CodeIn));
     const user = userOf(ctx);
+    requireEmail();
     await enforceLimit(ctx.db, `verify-confirm:${user.id}`);
     await recovery.confirmEmail(ctx.db, user, body.code);
   },
@@ -92,6 +96,7 @@ route({
   method: "POST", path: "/api/v1/auth/password/forgot", status: 202,
   handler: async (ctx) => {
     const body = validate((p) => p.body(ctx, ForgotPasswordIn));
+    requireEmail(); // the same answer whether or not the email has an account
     await enforceLimit(ctx.db, `forgot:${body.email}:${ctx.clientIp}`);
     await recovery.forgotPassword(ctx.db, body.email);
   },
@@ -101,6 +106,7 @@ route({
   method: "POST", path: "/api/v1/auth/password/reset", status: 204,
   handler: async (ctx) => {
     const body = validate((p) => p.body(ctx, ResetPasswordIn));
+    requireEmail();
     await enforceLimit(ctx.db, `reset:${body.email}:${ctx.clientIp}`);
     await recovery.resetPassword(ctx.db, body.email, body.code, body.new_password);
   },

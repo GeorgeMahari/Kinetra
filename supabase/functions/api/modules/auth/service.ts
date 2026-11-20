@@ -1,6 +1,7 @@
 /** Registration, sign-in and refresh-token rotation (backend/app/modules/auth/service.py). */
 import { getSettings } from "../../core/config.ts";
 import type { Db } from "../../core/db.ts";
+import { requireEmail } from "../../core/email.ts";
 import { AppError } from "../../core/errors.ts";
 import {
   createAccessToken,
@@ -68,6 +69,9 @@ export async function register(db: Db, data: RegisterRequest, today: PyDate = to
   if (await getUserByEmail(db, data.email)) {
     throw new AppError("email_taken", "An account with this email already exists.", 409);
   }
+  // The parent can only answer through the emailed link: without email the account would stay
+  // locked until deleted, so it is not created at all.
+  if (needsConsent) requireEmail();
   const id = crypto.randomUUID();
   const now = nowUtc();
   try {

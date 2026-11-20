@@ -69,6 +69,12 @@ Deno.test("production needs Resend and its key, and never names the key in the e
   withEnv({}, () => assertEquals(getSettings().emailBackend, "resend"));
 });
 
+Deno.test("production can run with email explicitly disabled, without a key", () => {
+  withEnv({ KINETRA_EMAIL_BACKEND: "disabled", RESEND_API_KEY: undefined }, () => {
+    assertEquals(getSettings().emailBackend, "disabled");
+  });
+});
+
 Deno.test("a local database in production must be asked for explicitly", () => {
   withEnv({ KINETRA_DB_HOST: "127.0.0.1", KINETRA_DB_SSLMODE: undefined, KINETRA_DB_ALLOW_LOCAL: "true" }, () => {
     assertEquals(getSettings().db.host, "127.0.0.1");
