@@ -9,6 +9,8 @@ RUN pip install --no-cache-dir .
 
 COPY alembic.ini ./
 COPY alembic ./alembic
+# Supabase's public root CA, for KINETRA_DB_SSLMODE=verify-full (KINETRA_DB_SSLROOTCERT=/app/certs/...).
+COPY certs ./certs
 
 RUN useradd --create-home kinetra
 USER kinetra

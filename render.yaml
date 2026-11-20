@@ -1,0 +1,48 @@
+# Render Blueprint for the Kinetra API (FastAPI) on Supabase Postgres.
+# Prepared, not active: Render reads this file only when you create a Blueprint from this repository
+# (docs/PRODUCTION_DATABASE_AUDIT.md, "Option B"). Secrets are never in this file: every entry with
+# sync: false is typed once in the Render dashboard.
+services:
+  - type: web
+    name: kinetra-api
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    # The image's default command applies migrations first; production schema changes are applied
+    # by hand after review and a backup, so the API only starts the server here.
+    dockerCommand: sh -c "uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-server-header"
+    region: frankfurt
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/v1/health/ready
+    envVars:
+      - key: KINETRA_ENVIRONMENT
+        value: production
+      - key: KINETRA_DB_HOST
+        value: aws-0-eu-west-1.pooler.supabase.com
+      - key: KINETRA_DB_PORT
+        value: "5432"
+      - key: KINETRA_DB_NAME
+        value: postgres
+      - key: KINETRA_DB_USER
+        value: kinetra_app.vrdwcgzcgukzmyzyuedm
+      - key: KINETRA_DB_SSLMODE
+        value: verify-full
+      - key: KINETRA_DB_SSLROOTCERT
+        value: /app/certs/supabase-root-2021-ca.crt
+      - key: KINETRA_DB_CONNECT_TIMEOUT_SECONDS
+        value: "15"
+      # Render's free instances block outgoing SMTP (ports 25, 465, 587): email goes over HTTPS.
+      - key: KINETRA_EMAIL_BACKEND
+        value: brevo
+      - key: KINETRA_EMAIL_FROM
+        sync: false
+      - key: KINETRA_PUBLIC_BASE_URL
+        sync: false
+      - key: KINETRA_DB_PASSWORD
+        sync: false
+      - key: KINETRA_JWT_SECRET
+        sync: false
+      - key: KINETRA_BREVO_API_KEY
+        sync: false
