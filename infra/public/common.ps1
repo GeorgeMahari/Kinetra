@@ -49,11 +49,14 @@ function Set-DatabaseEnvironment([hashtable]$Settings) {
         $env:KINETRA_DB_SSLMODE = if ($Settings['KINETRA_DB_SSLMODE']) { $Settings['KINETRA_DB_SSLMODE'] } else { 'require' }
         if ($Settings['KINETRA_DB_SSLROOTCERT']) { $env:KINETRA_DB_SSLROOTCERT = $Settings['KINETRA_DB_SSLROOTCERT'] }
         $env:KINETRA_DB_CONNECT_TIMEOUT_SECONDS = '15'
+        Remove-Item Env:KINETRA_DB_ALLOW_LOCAL -ErrorAction SilentlyContinue
         return 'supabase'
     }
     $pw = Get-UserSecret 'POSTGRES_PASSWORD'
     if (-not $pw) { throw 'User environment variable POSTGRES_PASSWORD is not set.' }
     $env:POSTGRES_PASSWORD = $pw
+    # Production refuses a local database unless asked for explicitly (app.core.config).
+    $env:KINETRA_DB_ALLOW_LOCAL = 'true'
     return 'local'
 }
 

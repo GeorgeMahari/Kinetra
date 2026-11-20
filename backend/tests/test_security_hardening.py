@@ -57,6 +57,9 @@ def test_production_hides_docs_and_sends_hsts(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("KINETRA_JWT_SECRET", "x" * 48)
     monkeypatch.setenv("KINETRA_EMAIL_BACKEND", "smtp")
     monkeypatch.setenv("KINETRA_SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("KINETRA_DB_HOST", "db.example.com")
+    monkeypatch.setenv("KINETRA_DB_SSLMODE", "require")
+    monkeypatch.setenv("KINETRA_DB_PASSWORD", "not-a-real-password")
     try:
         assert Settings().environment == "production"
         with TestClient(create_app(background_jobs=False)) as c:

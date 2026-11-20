@@ -5,6 +5,7 @@ environment variable (the same variable docker compose passes to the container),
 connection URL is assembled at runtime.
 """
 
+import os
 import secrets
 from functools import lru_cache
 from typing import Literal
@@ -12,6 +13,9 @@ from typing import Literal
 from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
+
+# Hosts that mean "the database on this computer" (or the docker compose service).
+LOCAL_DB_HOSTS = frozenset({"127.0.0.1", "localhost", "::1", "db", "0.0.0.0", ""})  # noqa: S104 (a list, not a bind)
 
 
 class Settings(BaseSettings):
@@ -42,6 +46,14 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     db_max_overflow: int = 5
     db_connect_timeout_seconds: int = 3
+    # Pooled connections older than this are replaced. Poolers and NAT gateways drop idle TCP
+    # connections; recycling (with pool_pre_ping) avoids handing out a dead one after a quiet spell.
+    db_pool_recycle_seconds: int = 300
+    # Production refuses a database on this computer (127.0.0.1, localhost, the compose service
+    # "db"), plaintext connections and the local POSTGRES_PASSWORD, so a missing setting can never
+    # silently point the public API at Docker. Set to true only to publish the local database on
+    # purpose (infra/public/start-public.ps1 with KINETRA_DB_TARGET=local does).
+    db_allow_local: bool = False
 
     # Origins allowed to call the API from a browser (Expo web dev server).
     cors_origins: list[str] = ["http://localhost:8081"]
@@ -73,13 +85,16 @@ class Settings(BaseSettings):
     login_rate_limit_window_seconds: int = 300
 
     # --- Email (verification and password reset codes)
-    email_backend: Literal["console", "smtp"] = "console"
+    email_backend: Literal["console", "smtp", "brevo"] = "console"
     email_from: str = "Kinetra <no-reply@kinetra.app>"
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
     # Read from KINETRA_SMTP_PASSWORD (environment) only.
     smtp_password: SecretStr = SecretStr("")
+    # brevo: Brevo's HTTPS API, for hosts that block outgoing SMTP (Render free instances, Supabase
+    # Edge Functions). Read from KINETRA_BREVO_API_KEY (environment) only.
+    brevo_api_key: SecretStr = SecretStr("")
     # One-time codes: lifetime and wrong attempts allowed per code.
     code_minutes: int = 15
     code_max_attempts: int = 5
@@ -89,8 +104,35 @@ class Settings(BaseSettings):
             if self.environment == "production":
                 raise ValueError("KINETRA_JWT_SECRET must be set in production")
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
-        if self.environment == "production" and (self.email_backend != "smtp" or not self.smtp_host):
-            raise ValueError("Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST")
+        if self.environment == "production":
+            email_ready = (self.email_backend == "smtp" and self.smtp_host) or (
+                self.email_backend == "brevo" and self.brevo_api_key.get_secret_value()
+            )
+            if not email_ready:
+                raise ValueError(
+                    "Production needs KINETRA_EMAIL_BACKEND=smtp and KINETRA_SMTP_HOST, "
+                    "or KINETRA_EMAIL_BACKEND=brevo and KINETRA_BREVO_API_KEY"
+                )
+            if not self.db_allow_local:
+                self._check_production_database()
+
+    def _check_production_database(self) -> None:
+        """No silent fallback: every database setting the public API needs must be given explicitly."""
+        if self.db_host.strip().lower() in LOCAL_DB_HOSTS:
+            raise ValueError(
+                f"Production refuses the local database host '{self.db_host}': set KINETRA_DB_HOST "
+                "to the managed database (Supabase Session Pooler), or KINETRA_DB_ALLOW_LOCAL=true"
+            )
+        if self.db_sslmode not in ("require", "verify-ca", "verify-full"):
+            raise ValueError("Production needs KINETRA_DB_SSLMODE=require, verify-ca or verify-full")
+        if not os.environ.get("KINETRA_DB_PASSWORD"):
+            # POSTGRES_PASSWORD is the local Docker password; it must never log in to production.
+            raise ValueError("Production needs the KINETRA_DB_PASSWORD environment variable")
+
+    def describe_database(self) -> str:
+        """Where the API connects, for logs: never the password."""
+        tls = self.db_sslmode or "default"
+        return f"{self.db_user}@{self.db_host}:{self.db_port}/{self.db_name} (sslmode={tls})"
 
     def database_url(self, *, test: bool = False) -> URL:
         query: dict[str, str] = {}

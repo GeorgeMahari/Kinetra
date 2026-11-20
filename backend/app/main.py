@@ -1,11 +1,13 @@
 import asyncio
 import contextlib
+import logging
 from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.core.db import check_database
 from app.core.errors import register_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import SecurityMiddleware
@@ -27,12 +29,19 @@ from app.modules.users.router import router as users_router
 
 
 def create_app(background_jobs: bool = True) -> FastAPI:
-    """`background_jobs=False` in tests: the hourly purge must never touch the development database."""
+    """`background_jobs=False` in tests: neither the startup database check nor the hourly purge
+    may touch the development database."""
     settings = get_settings()
     configure_logging(settings.log_level)
 
     @contextlib.asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        if background_jobs and not await asyncio.to_thread(check_database):
+            if settings.environment == "production":
+                # A public API without its database would only answer 503: fail loudly instead,
+                # so the host restarts it or the operator sees the cause.
+                raise RuntimeError(f"Database unreachable at startup: {settings.describe_database()}")
+            logging.getLogger(__name__).warning("Starting without a database; requests fail until it is up")
         task = asyncio.create_task(purge_forever()) if background_jobs else None
         yield
         if task:

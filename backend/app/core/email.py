@@ -4,11 +4,17 @@
   Never allowed in production.
 - `smtp`: any SMTP relay (provider-agnostic). Host/port/user come from settings; the password only
   from the KINETRA_SMTP_PASSWORD environment variable.
+- `brevo`: Brevo's HTTPS API, for hosts that block outgoing SMTP ports (Render's free instances).
+  The key only from the KINETRA_BREVO_API_KEY environment variable. Same request as the Edge
+  Function (supabase/functions/api/core/email.ts).
 """
 
+import json
 import logging
+import re
 import smtplib
 import ssl
+import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from email.message import EmailMessage
@@ -83,6 +89,38 @@ class SmtpEmailSender:
             smtp.send_message(msg)
 
 
+class BrevoEmailSender(SmtpEmailSender):
+    """Same background delivery as SMTP; only the transport differs (HTTPS, port 443)."""
+
+    URL = "https://api.brevo.com/v3/smtp/email"
+
+    def __init__(self, api_key: str, sender: str) -> None:
+        super().__init__("", 0, "", "", sender)
+        self.api_key = api_key
+
+    @staticmethod
+    def parse_sender(sender: str) -> dict[str, str]:
+        m = re.match(r"^\s*(.*?)\s*<([^>]+)>\s*$", sender)
+        if not m:
+            return {"email": sender.strip()}
+        return {"name": m[1], "email": m[2]} if m[1] else {"email": m[2]}
+
+    def _deliver(self, message: OutgoingEmail) -> None:
+        body = {
+            "sender": self.parse_sender(self.sender),
+            "to": [{"email": message.to}],
+            "subject": message.subject,
+            "textContent": message.body,
+        }
+        req = urllib.request.Request(self.URL, data=json.dumps(body).encode(), method="POST")  # noqa: S310
+        req.add_header("api-key", self.api_key)
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Accept", "application/json")
+        # urlopen raises on 4xx/5xx; the caller logs the failure (never the key).
+        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 (fixed https URL)
+            resp.read()
+
+
 @lru_cache
 def get_email_sender() -> EmailSender:
     s = get_settings()
@@ -90,4 +128,6 @@ def get_email_sender() -> EmailSender:
         return SmtpEmailSender(
             s.smtp_host, s.smtp_port, s.smtp_user, s.smtp_password.get_secret_value(), s.email_from
         )
+    if s.email_backend == "brevo":
+        return BrevoEmailSender(s.brevo_api_key.get_secret_value(), s.email_from)
     return ConsoleEmailSender()
