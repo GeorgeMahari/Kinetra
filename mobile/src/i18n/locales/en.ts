@@ -333,6 +333,7 @@ const en = {
     invalid_refresh_token: 'Your session has expired. Please sign in again.',
     invalid_code: 'That code is wrong or has expired. Request a new one if needed.',
     payload_too_large: 'That request was too large.',
+    email_unavailable: 'Kinetra can’t send emails right now, so this can’t be done yet. Everything else in the app still works.',
   },
   home: {
     greeting: 'Hello, {{name}}',

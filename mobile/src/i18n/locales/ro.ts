@@ -334,6 +334,7 @@ const ro: TranslationResources = {
     invalid_refresh_token: 'Sesiunea a expirat. Te rugăm să te autentifici din nou.',
     invalid_code: 'Codul este greșit sau a expirat. Cere unul nou dacă e nevoie.',
     payload_too_large: 'Cererea a fost prea mare.',
+    email_unavailable: 'Kinetra nu poate trimite emailuri momentan, așa că acest pas nu se poate face încă. Restul aplicației funcționează.',
   },
   home: {
     greeting: 'Salut, {{name}}',
