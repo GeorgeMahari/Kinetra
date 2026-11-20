@@ -134,6 +134,11 @@ Rules from Resend's documentation (read 2026-11-21):
   email over quota is not retried. Each sign-up sends one email, so the daily cap is about 100
   sign-ups or resets.
 
+**Without a provider.** Email is optional. With `KINETRA_EMAIL_BACKEND=disabled` (what
+`deploy-function.ps1` sets when `RESEND_API_KEY` is missing), the app works for anyone 16 or older.
+Verification codes, password reset and the parent's email answer 503 `email_unavailable`, and a 14
+or 15 year old is not registered. Nothing pretends an email was sent.
+
 The Python API keeps Gmail SMTP on the PC. Its HTTPS backend for Render moved from `brevo` to
 `resend` too, with the same request.
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-21: The API runs without an email provider
+
+Email is optional, so the function can go live on free services only.
+
+- **`KINETRA_EMAIL_BACKEND=disabled`.** Both backends accept it, in production too, but never
+  silently: it must be chosen. `deploy-function.ps1` chooses it when `RESEND_API_KEY` is not set.
+- **What still works.** Sign-up and sign-in for anyone 16 or older, the profile, onboarding, tests,
+  results, plans, progress, history, export and account deletion. The account stays unverified.
+- **What answers 503 `email_unavailable`.** Asking for or confirming a verification code, "forgot
+  password" and the reset (the same answer whether or not the account exists), and resending the
+  parent's email. A 14 or 15 year old is not registered at all, instead of being left locked.
+- **App.** A clear message for `email_unavailable` in English, Romanian and Russian.
+- **Tests.** `backend/tests/test_email_unavailable.py` (7) runs in-process against Python and over
+  HTTP against the function started with email disabled. Both pass.
+
 ## 2026-11-21: Email through Resend instead of Brevo
 
 Brevo's phone verification could not be completed, so Resend replaces it. Nothing was deployed.
