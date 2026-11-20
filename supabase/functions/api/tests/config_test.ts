@@ -5,8 +5,8 @@ import { getSettings, resetSettingsForTests } from "../core/config.ts";
 const CLOUD: Record<string, string> = {
   KINETRA_ENVIRONMENT: "production",
   KINETRA_JWT_SECRET: "x".repeat(48),
-  KINETRA_EMAIL_BACKEND: "brevo",
-  KINETRA_BREVO_API_KEY: "xkeysib-test",
+  KINETRA_EMAIL_BACKEND: "resend",
+  RESEND_API_KEY: "re_test_key",
   KINETRA_DB_HOST: "aws-0-eu-west-1.pooler.supabase.com",
   KINETRA_DB_PORT: "6543",
   KINETRA_DB_USER: "kinetra_app.projectref",
@@ -54,6 +54,19 @@ Deno.test("production never uses the local Docker password", () => {
     const err = assertThrows(() => getSettings(), Error, "KINETRA_DB_PASSWORD");
     assertEquals(err.message.includes("local-docker"), false);
   });
+});
+
+Deno.test("production needs Resend and its key, and never names the key in the error", () => {
+  for (const overrides of [{ KINETRA_EMAIL_BACKEND: "console" }, { RESEND_API_KEY: undefined }]) {
+    withEnv(overrides, () => {
+      assertThrows(() => getSettings(), Error, "RESEND_API_KEY");
+    });
+  }
+  withEnv({ KINETRA_EMAIL_BACKEND: "brevo" }, () => {
+    const err = assertThrows(() => getSettings(), Error, "KINETRA_EMAIL_BACKEND");
+    assertEquals(err.message.includes("re_test_key"), false);
+  });
+  withEnv({}, () => assertEquals(getSettings().emailBackend, "resend"));
 });
 
 Deno.test("a local database in production must be asked for explicitly", () => {

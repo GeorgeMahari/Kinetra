@@ -5,7 +5,7 @@
  */
 
 export type Environment = "development" | "test" | "production";
-export type EmailBackend = "console" | "brevo";
+export type EmailBackend = "console" | "resend";
 
 export interface Settings {
   environment: Environment;
@@ -24,7 +24,7 @@ export interface Settings {
   loginRateLimitWindowSeconds: number;
   emailBackend: EmailBackend;
   emailFrom: string;
-  brevoApiKey: string;
+  resendApiKey: string;
   codeMinutes: number;
   codeMaxAttempts: number;
   db: {
@@ -66,8 +66,11 @@ export function getSettings(): Settings {
     secret = btoa(String.fromCharCode(...bytes));
   }
   const emailBackend = env("KINETRA_EMAIL_BACKEND", "console") as EmailBackend;
-  if (environment === "production" && (emailBackend !== "brevo" || !env("KINETRA_BREVO_API_KEY"))) {
-    throw new Error("Production needs KINETRA_EMAIL_BACKEND=brevo and KINETRA_BREVO_API_KEY");
+  if (!["console", "resend"].includes(emailBackend)) {
+    throw new Error("KINETRA_EMAIL_BACKEND must be console or resend");
+  }
+  if (environment === "production" && (emailBackend !== "resend" || !env("RESEND_API_KEY"))) {
+    throw new Error("Production needs KINETRA_EMAIL_BACKEND=resend and the RESEND_API_KEY secret");
   }
   if (environment === "production" && env("KINETRA_DB_ALLOW_LOCAL") !== "true") checkProductionDatabase();
   const cors = env("KINETRA_CORS_ORIGINS", '["http://localhost:8081"]');
@@ -88,7 +91,7 @@ export function getSettings(): Settings {
     loginRateLimitWindowSeconds: int("KINETRA_LOGIN_RATE_LIMIT_WINDOW_SECONDS", 300),
     emailBackend,
     emailFrom: env("KINETRA_EMAIL_FROM", "Kinetra <no-reply@kinetra.app>"),
-    brevoApiKey: env("KINETRA_BREVO_API_KEY"),
+    resendApiKey: env("RESEND_API_KEY"),
     codeMinutes: int("KINETRA_CODE_MINUTES", 15),
     codeMaxAttempts: int("KINETRA_CODE_MAX_ATTEMPTS", 5),
     db: {
