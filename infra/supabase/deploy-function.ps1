@@ -8,8 +8,8 @@
 #   SUPABASE_ACCESS_TOKEN    a scoped personal access token for this project
 #                            (supabase.com > Account > Access Tokens; permissions: Edge Functions write,
 #                            Secrets write, on project vrdwcgzcgukzmyzyuedm only)
-#   RESEND_API_KEY           Resend > API Keys, permission "Sending access" (free plan). Becomes a
-#                            function secret; it is the only email secret.
+#   RESEND_API_KEY           optional. Resend > API Keys, "Sending access", with a sender domain
+#                            verified in Resend. Without it, email is disabled (see below).
 #   KINETRA_JWT_SECRET       the same secret as the Python API, so existing sign-ins stay valid
 #   KINETRA_APP_DB_PASSWORD  the kinetra_app database password (created by apply-security.ps1)
 # Node.js (npx) runs a pinned Supabase CLI; Docker is not needed for a deploy.
@@ -34,17 +34,28 @@ function Get-Secret([string]$Name) {
     return $v
 }
 
-if (-not $EmailFrom) {
-    . "$Root\infra\public\common.ps1"
-    $EmailFrom = (Get-PublicSettings)['KINETRA_EMAIL_FROM']
-    if (-not $EmailFrom) { throw 'Pass -EmailFrom or set KINETRA_EMAIL_FROM in infra\public\.env.public' }
-}
-# Resend sends only from a domain verified in its dashboard, and nobody can verify a free mailbox
-# domain. Without this check the deploy would succeed and every email would be refused (403).
-$fromDomain = ([regex]::Match($EmailFrom, '@([^>\s]+)')).Groups[1].Value.ToLower()
-if (-not $fromDomain) { throw "The sender '$EmailFrom' has no domain." }
-if ($fromDomain -in 'gmail.com', 'googlemail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'live.com', 'icloud.com', 'proton.me', 'protonmail.com') {
-    throw "Resend cannot send from $fromDomain. Pass -EmailFrom 'Kinetra <no-reply@your-domain>' with a domain verified in Resend."
+# Email is optional. Without RESEND_API_KEY the function runs with KINETRA_EMAIL_BACKEND=disabled:
+# the app works, and verification codes, password reset and parental consent answer 503
+# email_unavailable. Setting the key later and deploying again turns email on.
+$resendKey = [Environment]::GetEnvironmentVariable('RESEND_API_KEY', 'Process')
+if (-not $resendKey) { $resendKey = [Environment]::GetEnvironmentVariable('RESEND_API_KEY', 'User') }
+if ($resendKey) {
+    if (-not $EmailFrom) {
+        . "$Root\infra\public\common.ps1"
+        $EmailFrom = (Get-PublicSettings)['KINETRA_EMAIL_FROM']
+        if (-not $EmailFrom) { throw 'Pass -EmailFrom or set KINETRA_EMAIL_FROM in infra\public\.env.public' }
+    }
+    # Resend sends only from a domain verified in its dashboard, and nobody can verify a free mailbox
+    # domain. Without this check the deploy would succeed and every email would be refused (403).
+    $fromDomain = ([regex]::Match($EmailFrom, '@([^>\s]+)')).Groups[1].Value.ToLower()
+    if (-not $fromDomain) { throw "The sender '$EmailFrom' has no domain." }
+    if ($fromDomain -in 'gmail.com', 'googlemail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'live.com', 'icloud.com', 'proton.me', 'protonmail.com') {
+        throw "Resend cannot send from $fromDomain. Pass -EmailFrom 'Kinetra <no-reply@your-domain>' with a domain verified in Resend."
+    }
+    $emailSecrets = [ordered]@{ KINETRA_EMAIL_BACKEND = 'resend'; RESEND_API_KEY = $resendKey; KINETRA_EMAIL_FROM = $EmailFrom }
+} else {
+    Write-Host 'RESEND_API_KEY is not set: deploying with email disabled.'
+    $emailSecrets = [ordered]@{ KINETRA_EMAIL_BACKEND = 'disabled' }
 }
 $env:SUPABASE_ACCESS_TOKEN = Get-Secret 'SUPABASE_ACCESS_TOKEN'
 Push-Location $Root
@@ -59,14 +70,12 @@ try {
             KINETRA_DB_USER                       = "kinetra_app.$ProjectRef"
             KINETRA_DB_PASSWORD                   = Get-Secret 'KINETRA_APP_DB_PASSWORD'
             KINETRA_DB_SSLMODE                    = 'require'
-            KINETRA_EMAIL_BACKEND                 = 'resend'
-            RESEND_API_KEY                        = Get-Secret 'RESEND_API_KEY'
-            KINETRA_EMAIL_FROM                    = $EmailFrom
-            KINETRA_PUBLIC_BASE_URL               = "https://$ProjectRef.supabase.co/functions/v1/api"
+            KINETRA_PUBLIC_BASE_URL              = "https://$ProjectRef.supabase.co/functions/v1/api"
             KINETRA_CONSENT_PAGE_URL              = $ConsentPageUrl
             KINETRA_CORS_ORIGINS                  = $CorsOrigins
             KINETRA_CLIENT_IP_HEADER              = $ClientIpHeader
         }
+        foreach ($k in $emailSecrets.Keys) { $secrets[$k] = $emailSecrets[$k] }
         # One call; values go to the CLI as arguments (never to a file) and Supabase stores them encrypted.
         $pairs = foreach ($k in $secrets.Keys) { if ($secrets[$k] -ne '') { "$k=$($secrets[$k])" } }
         npx --yes $Cli secrets set --remote=$ProjectRef --yes @pairs | Out-Null
